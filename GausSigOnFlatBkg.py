@@ -119,7 +119,7 @@ def plotPDF():
     c1 = ROOT.TCanvas()
     frame.Draw()
     c1.SaveAs('plots/modelPlot.pdf')
-    c1.SaveAs('plots/modelPlot.png')
+    c1.SaveAs('plots/images/modelPlot.png')
 
 
 def trainFixed():
@@ -181,15 +181,13 @@ def trainFixed():
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
-    #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
-    #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(b = True, which = 'major', color = 'grey', linestyle = '-', alpha=0.5)
-    plt.suptitle('Support Vector training output as a function of test data input',
+    plt.suptitle('Complete SV training output as a function of test data input',
                fontsize=14, fontweight='bold')
 
     #plt.show()
     plt.savefig('plots/fixedTraining.pdf')
-    plt.savefig('plots/fixedTraining.png')
+    plt.savefig('plots/images/fixedTraining.png')
     plt.clf()
 
     # export training results to fixed.pkl
@@ -212,7 +210,20 @@ def trainParam():
 
     # Training outputs
     outputs = clf.predict(traindata)
+
+    # Plot settings
     plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
+    plt.ylabel('sv_output( training_input )')
+    plt.xlabel('training_input')
+    plt.xlim([-5, 5])
+    plt.ylim([-0.2, 1.2])
+    #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
+    #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
+    plt.grid(b = True, which = 'major', color = 'grey', linestyle = '-', alpha=0.5)
+    plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
+               fontsize=14, fontweight='bold')
+    plt.savefig('plots/paramTraining.pdf')
+    plt.savefig('plots/images/paramTraining.png')
     #plt.show()
     plt.clf()
 
@@ -233,7 +244,7 @@ def scikitlearnFunc(x=0.0, alpha=1.0):
 
 def testSciKitLearnWrapper():
     # need a RooAbsReal to evaluate NN(x,mu)
-    mu = 1.0x
+    mu = 1.0
     ROOT.gSystem.Load('SciKitLearnWrapper/libSciKitLearnWrapper')
     x  = ROOT.RooRealVar('x', 'x', 0.2, -5, 5)
     nn = ROOT.SciKitLearnWrapper('nn', 'nn', x)
@@ -244,7 +255,7 @@ def testSciKitLearnWrapper():
     nn.plotOn(frame)
     frame.Draw()
     c1.SaveAs('plots/paramOutput.pdf')
-    c1.SaveAs('plots/paramOutput.png')
+    c1.SaveAs('plots/images/paramOutput.png')
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
@@ -257,14 +268,14 @@ def testSciKitLearnWrapper():
                fontsize=14, fontweight='bold')
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
     plt.savefig('plots/paramTraining_(mu=%s).pdf' %mu)
-    plt.savefig('plots/paramTraining_(mu=%s).png' %mu)
+    plt.savefig('plots/images/paramTraining_(mu=%s).png' %mu)
     #plt.show()
     plt.clf()
 
 
 if __name__ == '__main__':
     #makeData()
-    #plotPDF()
-    #trainFixed()
-    #trainParam()
+    plotPDF()
+    trainFixed()
+    trainParam()
     testSciKitLearnWrapper()
