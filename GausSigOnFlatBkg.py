@@ -173,6 +173,7 @@ def trainFixed():
         # predict(X) - Performs a regression on samples in X
         outputs = clf.predict(testdata[:, 0].reshape((len(testdata), 1)))
         plt.plot(testdata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' % muPoints[i])
+
         #plt.axvline(x=muPoints[i], label="$\mu=%s$" %muPoints[i], linewidth = 2, color = colorArray[i])
 
     # Plot settings for the fixed training mode
@@ -181,7 +182,7 @@ def trainFixed():
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
-    plt.grid(b = True, which = 'major', color = 'grey', linestyle = '-', alpha=0.5)
+    plt.grid(True)
     plt.suptitle('Complete SV training output as a function of test data input',
                fontsize=14, fontweight='bold')
 
@@ -219,7 +220,7 @@ def trainParam():
     plt.ylim([-0.2, 1.2])
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
-    plt.grid(b = True, which = 'major', color = 'grey', linestyle = '-', alpha=0.5)
+    plt.grid(True)
     plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
                fontsize=14, fontweight='bold')
     plt.savefig('plots/paramTraining.pdf')
@@ -230,7 +231,7 @@ def trainParam():
     joblib.dump(clf, "data/param.pkl")
 
 
-def scikitlearnFunc(x=0.0, alpha=1.0):
+def scikitlearnFunc(x=0.0, alpha=0.0):
     # print "scikitlearnTest"
     clf = joblib.load('data/param.pkl')
     # print "inouttest input was", x
@@ -244,7 +245,7 @@ def scikitlearnFunc(x=0.0, alpha=1.0):
 
 def testSciKitLearnWrapper():
     # need a RooAbsReal to evaluate NN(x,mu)
-    mu = 1.0
+    mu = 0.0
     ROOT.gSystem.Load('SciKitLearnWrapper/libSciKitLearnWrapper')
     x  = ROOT.RooRealVar('x', 'x', 0.2, -5, 5)
     nn = ROOT.SciKitLearnWrapper('nn', 'nn', x)
@@ -263,7 +264,8 @@ def testSciKitLearnWrapper():
     plt.axvline(x=mu, label="$\mu=%s$" %mu, linewidth = 2)
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
-    plt.grid(b = True, which = 'major', color = 'grey', linestyle = '-', alpha=0.5)
+    plt.grid(True)
+    plt.fill(True)
     plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
                fontsize=14, fontweight='bold')
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
