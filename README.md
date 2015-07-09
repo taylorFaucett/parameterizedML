@@ -5,7 +5,7 @@ This script utilizes [SciKit-Learn](http://scikit-learn.org/stable/) to create a
 ## Outputs
 
 ### Fixed Training
-Under fixed training, signal data is generated according to a gaussian distribution with background data generated according to a uniform/flat distribution. 
+Under fixed training, signal data is generated according to a gaussian distribution with background data generated according to a uniform/flat distribution.
 
 ![Distribution Map](/plots/images/modelPlot.png)
 
@@ -28,3 +28,6 @@ Changing the input to be parameterized in terms of a variable (alpha) such that 
 #### Untrained Regions
 ![Parameterized Training at mu=-0.5](/plots/images/paramTraining_(mu=-0.5).png)
 ![Parameterized Training at mu=+0.5](/plots/images/paramTraining_(mu=0.5).png)
+
+#### Parameterized Training (Complete Set)
+![Parameterized Training (Complete Set)](/plots/images/paramTraining_complete.png)
