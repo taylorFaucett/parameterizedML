@@ -119,6 +119,7 @@ def plotPDF():
     c1 = ROOT.TCanvas()
     frame.Draw()
     c1.SaveAs('plots/modelPlot.pdf')
+    c1.SaveAs('plots/modelPlot.png')
 
 
 def trainFixed():
@@ -188,6 +189,7 @@ def trainFixed():
 
     #plt.show()
     plt.savefig('plots/fixedTraining.pdf')
+    plt.savefig('plots/fixedTraining.png')
     plt.clf()
 
     # export training results to fixed.pkl
@@ -231,7 +233,7 @@ def scikitlearnFunc(x=0.0, alpha=1.0):
 
 def testSciKitLearnWrapper():
     # need a RooAbsReal to evaluate NN(x,mu)
-    mu = 1.0
+    mu = 1.0x
     ROOT.gSystem.Load('SciKitLearnWrapper/libSciKitLearnWrapper')
     x  = ROOT.RooRealVar('x', 'x', 0.2, -5, 5)
     nn = ROOT.SciKitLearnWrapper('nn', 'nn', x)
@@ -242,6 +244,7 @@ def testSciKitLearnWrapper():
     nn.plotOn(frame)
     frame.Draw()
     c1.SaveAs('plots/paramOutput.pdf')
+    c1.SaveAs('plots/paramOutput.png')
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
@@ -254,6 +257,7 @@ def testSciKitLearnWrapper():
                fontsize=14, fontweight='bold')
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
     plt.savefig('plots/paramTraining_(mu=%s).pdf' %mu)
+    plt.savefig('plots/paramTraining_(mu=%s).png' %mu)
     #plt.show()
     plt.clf()
 
@@ -262,5 +266,5 @@ if __name__ == '__main__':
     #makeData()
     #plotPDF()
     #trainFixed()
-    trainParam()
+    #trainParam()
     testSciKitLearnWrapper()
