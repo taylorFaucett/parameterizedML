@@ -231,7 +231,7 @@ def trainParam():
     joblib.dump(clf, "data/param.pkl")
 
 
-def scikitlearnFunc(x=0.0, alpha=0.0):
+def scikitlearnFunc(x=0.0, alpha=0.5):
     # print "scikitlearnTest"
     clf = joblib.load('data/param.pkl')
     # print "inouttest input was", x
@@ -245,7 +245,7 @@ def scikitlearnFunc(x=0.0, alpha=0.0):
 
 def testSciKitLearnWrapper():
     # need a RooAbsReal to evaluate NN(x,mu)
-    mu = 0.0
+    mu = 0.5
     ROOT.gSystem.Load('SciKitLearnWrapper/libSciKitLearnWrapper')
     x  = ROOT.RooRealVar('x', 'x', 0.2, -5, 5)
     nn = ROOT.SciKitLearnWrapper('nn', 'nn', x)
@@ -277,7 +277,7 @@ def testSciKitLearnWrapper():
 
 if __name__ == '__main__':
     #makeData()
-    plotPDF()
-    trainFixed()
-    trainParam()
+    #plotPDF()
+    #trainFixed()
+    #trainParam()
     testSciKitLearnWrapper()
