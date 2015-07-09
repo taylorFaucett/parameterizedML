@@ -23,7 +23,7 @@ Changing the input to be parameterized in terms of a variable (alpha) such that 
 #### Trained Regions
 ![Parameterized Training at mu=-1.0](/plots/images/paramTraining_(mu=-1.0).png)
 ![Parameterized Training at mu=0.0](/plots/images/paramTraining_(mu=0.0).png)
-![Parameterized Training at mu=+1.0](/plots/images/paramTraining_(mu=+1.0).png)
+![Parameterized Training at mu=+1.0](/plots/images/paramTraining_(mu=1.0).png)
 
 #### Untrained Regions
 ![Parameterized Training at mu=-0.5](/plots/images/paramTraining_(mu=-0.5).png)
