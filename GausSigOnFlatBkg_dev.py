@@ -4,7 +4,7 @@ author Taylor Faucett <tfaucett@uci.edu>
 This script utilizes SciKit-Learn to create a fixed and parameterized
 machine learning scheme. Datasets are generated for multiple gaussian shaped
 signals and a uniform (i.e. flat) background. trainFixed uses SciKit's
-Support Vector Machines (NuSVR) to learn for n gaussians at fixed means (mu)
+Support Vector Machines (NuSVC) to learn for n gaussians at fixed means (mu)
 which can map a 1D array to signal/background values of 1 or 0. trainParam
 trains for all n gaussians simultaneously and then uses the provided
 SciKitLearnWrapper to train for these gaussian signals with parameterized by
@@ -147,8 +147,8 @@ def trainFixed():
     shift      = len(traindata) / 2
 
     # Initialize SciKitLearns Nu-Support Vector Regression
-    print "SciKit Learn initialized using Nu-Support Vector Regression (NuSVR)"
-    clf = svm.NuSVR(nu=1.)
+    print "SciKit Learn initialized using Nu-Support Vector Regression (NuSVC)"
+    clf = svm.NuSVC()
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -206,7 +206,7 @@ def trainParam():
     targetdata     = trainAndTarget[:, 2]
 
     # Training based on the complete data set provided from makeData
-    clf = svm.NuSVR(nu=1)
+    clf = svm.NuSVC()
     clf.fit(traindata, targetdata)
 
     # Training outputs
@@ -231,29 +231,7 @@ def trainParam():
     joblib.dump(clf, "data/param.pkl")
 
 
-def scikitlearnFunc1(x=0.0, alpha=-1.0):
-    # print "scikitlearnTest"
-    clf = joblib.load('data/param.pkl')
-    # print "inouttest input was", x
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-
-    #print 'x,alpha,output =', x, alpha, outputs[0]
-    plt.plot(x, outputs[0], 'bo', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc2(x=0.0, alpha=-0.5):
-    # print "scikitlearnTest"
-    clf = joblib.load('data/param.pkl')
-    # print "inouttest input was", x
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-
-    #print 'x,alpha,output =', x, alpha, outputs[0]
-    plt.plot(x, outputs[0], 'go', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc3(x=0.0, alpha=0.0):
+def scikitlearnFunc(x=0.0, alpha=0.5):
     # print "scikitlearnTest"
     clf = joblib.load('data/param.pkl')
     # print "inouttest input was", x
@@ -264,27 +242,42 @@ def scikitlearnFunc3(x=0.0, alpha=0.0):
     plt.plot(x, outputs[0], 'ro', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc4(x=0.0, alpha=0.5):
-    # print "scikitlearnTest"
+
+def scikitlearnFunc1(x=0.0, alpha=-1.0):
     clf = joblib.load('data/param.pkl')
-    # print "inouttest input was", x
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
+    plt.plot(x, outputs[0], 'bo', alpha=0.5)
+    return outputs[0]
 
-    #print 'x,alpha,output =', x, alpha, outputs[0]
+def scikitlearnFunc2(x=0.0, alpha=-0.5):
+    clf = joblib.load('data/param.pkl')
+    traindata = np.array((x, alpha))
+    outputs   = clf.predict(traindata)
+    plt.plot(x, outputs[0], 'go', alpha=0.5)
+    return outputs[0]
+
+def scikitlearnFunc3(x=0.0, alpha=0.0):
+    clf = joblib.load('data/param.pkl')
+    traindata = np.array((x, alpha))
+    outputs   = clf.predict(traindata)
+    plt.plot(x, outputs[0], 'ro', alpha=0.5)
+    return outputs[0]
+
+def scikitlearnFunc4(x=0.0, alpha=0.5):
+    clf = joblib.load('data/param.pkl')
+    traindata = np.array((x, alpha))
+    outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'co', alpha=0.5)
     return outputs[0]
 
 def scikitlearnFunc5(x=0.0, alpha=1.0):
-    # print "scikitlearnTest"
     clf = joblib.load('data/param.pkl')
-    # print "inouttest input was", x
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
-
-    #print 'x,alpha,output =', x, alpha, outputs[0]
     plt.plot(x, outputs[0], 'mo', alpha=0.5)
     return outputs[0]
+
 
 def testSciKitLearnWrapper():
     # need a RooAbsReal to evaluate NN(x,mu)
@@ -342,7 +335,7 @@ def testSciKitLearnWrapper():
 
 if __name__ == '__main__':
     #makeData()
-    #plotPDF()
-    #trainFixed()
-    #trainParam()
+    plotPDF()
+    trainFixed()
+    trainParam()
     testSciKitLearnWrapper()

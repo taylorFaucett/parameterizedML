@@ -148,7 +148,7 @@ def trainFixed():
 
     # Initialize SciKitLearns Nu-Support Vector Regression
     print "SciKit Learn initialized using Nu-Support Vector Regression (NuSVR)"
-    clf = svm.NuSVR(nu=1.)
+    clf = svm.NuSVC()
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
