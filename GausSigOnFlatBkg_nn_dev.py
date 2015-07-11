@@ -18,6 +18,7 @@ from sklearn import svm, linear_model, gaussian_process, cross_validation, datas
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.externals import joblib
+from sknn.mlp import Classifier, Layer
 
 import matplotlib.pyplot as plt
 
@@ -148,7 +149,7 @@ def trainFixed():
 
     # Initialize SciKitLearns Nu-Support Vector Regression
     print "SciKit Learn initialized using Nu-Support Vector Regression (SVC)"
-    clf = svm.SVR()
+    clf = Classifier(layers=[Layer("Maxout", units=100, pieces=2),Layer("Softmax")],learning_rate=0.001,n_iter=25)
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -206,7 +207,7 @@ def trainParam():
     targetdata     = trainAndTarget[:, 2]
 
     # Training based on the complete data set provided from makeData
-    clf = svm.SVR()
+    clf = Classifier(layers=[Layer("Maxout", units=100, pieces=1),Layer("Softmax")],learning_rate=0.001,n_iter=25)
     clf.fit(traindata, targetdata)
 
     # Training outputs
@@ -238,44 +239,8 @@ def scikitlearnFunc(x=0.0, alpha=0.5):
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
 
-    #print 'x,alpha,output =', x, alpha, outputs[0]
+    print 'x,alpha,output =', x, alpha, outputs[0]
     plt.plot(x, outputs[0], 'ro', alpha=0.5)
-    return outputs[0]
-
-
-def scikitlearnFunc1(x=0.0, alpha=-1.0):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'bo', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc2(x=0.0, alpha=-0.5):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'go', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc3(x=0.0, alpha=0.0):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'ro', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc4(x=0.0, alpha=0.5):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'co', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc5(x=0.0, alpha=1.0):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'mo', alpha=0.5)
     return outputs[0]
 
 
@@ -284,30 +249,12 @@ def testSciKitLearnWrapper():
     mu = 0.5
     ROOT.gSystem.Load('SciKitLearnWrapper/libSciKitLearnWrapper')
     x  = ROOT.RooRealVar('x', 'x', 0.2, -5, 5)
-
-    nn1 = ROOT.SciKitLearnWrapper('nn1', 'nn1', x)
-    nn1.RegisterCallBack(scikitlearnFunc1)
-
-    nn2 = ROOT.SciKitLearnWrapper('nn2', 'nn2', x)
-    nn2.RegisterCallBack(scikitlearnFunc2)
-
-    nn3 = ROOT.SciKitLearnWrapper('nn3', 'nn3', x)
-    nn3.RegisterCallBack(scikitlearnFunc3)
-
-    nn4 = ROOT.SciKitLearnWrapper('nn4', 'nn4', x)
-    nn4.RegisterCallBack(scikitlearnFunc4)
-
-    nn5 = ROOT.SciKitLearnWrapper('nn5', 'nn5', x)
-    nn5.RegisterCallBack(scikitlearnFunc5)
+    nn = ROOT.SciKitLearnWrapper('nn', 'nn', x)
+    nn.RegisterCallBack(scikitlearnFunc)
 
     c1    = ROOT.TCanvas('c1')
     frame = x.frame()
-    nn1.plotOn(frame)
-    nn2.plotOn(frame)
-    nn3.plotOn(frame)
-    nn4.plotOn(frame)
-    nn5.plotOn(frame)
-
+    nn.plotOn(frame)
     frame.Draw()
     c1.SaveAs('plots/paramOutput.pdf')
     c1.SaveAs('plots/images/paramOutput.png')
@@ -315,22 +262,18 @@ def testSciKitLearnWrapper():
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
-    plt.plot(-6,6,"bo", label="$\mu=-1.0$" )
-    plt.plot(-6,6,"go", label="$\mu=-0.5$" )
-    plt.plot(-6,6,"ro", label="$\mu=0.0$" )
-    plt.plot(-6,6,"co", label="$\mu=0.5$" )
-    plt.plot(-6,6,"mo", label="$\mu=1.0$" )
-    #plt.axvline(x=mu, label="$\mu=%s$" %mu, linewidth = 2)
+    plt.axvline(x=mu, label="$\mu=%s$" %mu, linewidth = 2)
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
-    #plt.fill(True)
+    plt.fill(True)
     plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
                fontsize=14, fontweight='bold')
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
-    plt.savefig('plots/paramTraining_complete.pdf')
-    plt.savefig('plots/images/paramTraining_complete.png')
+    plt.savefig('plots/paramTraining_(mu=%s).pdf' %mu)
+    plt.savefig('plots/images/paramTraining_(mu=%s).png' %mu)
     #plt.show()
+    plt.clf()
 
 
 if __name__ == '__main__':

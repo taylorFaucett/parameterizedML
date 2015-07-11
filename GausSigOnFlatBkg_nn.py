@@ -33,7 +33,7 @@ def makeData():
 
     # Generate Gaussian signals
     print "Generating Gaussians PDFs"
-    w.factory('Gaussian::g(x[-5,5],mu[0,-3,3],sigma[0.25, 0, 2])')
+    w.factory('Gaussian::g(x[0,1],mu[0.5,0,1],sigma[0.1, 0, 1])')
 
     # Generate a flat background signal
     print "Generating a flat background PDF"
@@ -62,7 +62,7 @@ def makeData():
     testdata1  = np.zeros((numTest * musteps, 2))
 
     # Fill traindata, testdata and testdata1
-    for mustep, muval in enumerate(np.linspace(-1, 1, musteps)):
+    for mustep, muval in enumerate(np.linspace(0.2, 0.8, musteps)):
         mu.setVal(muval)
         sigdata = sigpdf.generate(ROOT.RooArgSet(x), numTrain)
         bkgdata = bkgpdf.generate(ROOT.RooArgSet(x), numTrain)
@@ -180,7 +180,7 @@ def trainFixed():
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-5, 5])
+    plt.xlim([0, 1])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
     plt.suptitle('Complete SV training output as a function of test data input',
@@ -216,7 +216,7 @@ def trainParam():
     plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-5, 5])
+    plt.xlim([0, 1])
     plt.ylim([-0.2, 1.2])
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
@@ -243,28 +243,28 @@ def scikitlearnFunc(x=0.0, alpha=0.5):
     return outputs[0]
 
 
-def scikitlearnFunc1(x=0.0, alpha=-1.0):
+def scikitlearnFunc1(x=0.0, alpha=0.0):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'bo', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc2(x=0.0, alpha=-0.5):
+def scikitlearnFunc2(x=0.0, alpha=0.25):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'go', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc3(x=0.0, alpha=0.0):
+def scikitlearnFunc3(x=0.0, alpha=0.5):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'ro', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc4(x=0.0, alpha=0.5):
+def scikitlearnFunc4(x=0.0, alpha=0.75):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
@@ -315,11 +315,13 @@ def testSciKitLearnWrapper():
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
-    plt.plot(-6,6,"bo", label="$\mu=-1.0$" )
-    plt.plot(-6,6,"go", label="$\mu=-0.5$" )
-    plt.plot(-6,6,"ro", label="$\mu=0.0$" )
-    plt.plot(-6,6,"co", label="$\mu=0.5$" )
-    plt.plot(-6,6,"mo", label="$\mu=1.0$" )
+    plt.plot(0,0,"bo", label="$\mu=0.0$" )
+    plt.plot(0,0,"go", label="$\mu=0.25$" )
+    plt.plot(0,0,"ro", label="$\mu=0.5$" )
+    plt.plot(0,0,"co", label="$\mu=0.75$" )
+    plt.plot(0,0,"mo", label="$\mu=1.0$" )
+    plt.xlim([0, 1])
+    plt.ylim([-0.2, 1.2])
     #plt.axvline(x=mu, label="$\mu=%s$" %mu, linewidth = 2)
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)

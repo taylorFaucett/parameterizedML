@@ -4,7 +4,7 @@ author Taylor Faucett <tfaucett@uci.edu>
 This script utilizes SciKit-Learn to create a fixed and parameterized
 machine learning scheme. Datasets are generated for multiple gaussian shaped
 signals and a uniform (i.e. flat) background. trainFixed uses SciKit's
-Support Vector Machines (NuSVR) to learn for n gaussians at fixed means (mu)
+Support Vector Machines (SVC) to learn for n gaussians at fixed means (mu)
 which can map a 1D array to signal/background values of 1 or 0. trainParam
 trains for all n gaussians simultaneously and then uses the provided
 SciKitLearnWrapper to train for these gaussian signals with parameterized by
@@ -147,8 +147,8 @@ def trainFixed():
     shift      = len(traindata) / 2
 
     # Initialize SciKitLearns Nu-Support Vector Regression
-    print "SciKit Learn initialized using Nu-Support Vector Regression (NuSVR)"
-    clf = svm.NuSVC()
+    print "SciKit Learn initialized using Nu-Support Vector Regression (SVC)"
+    clf = svm.SVR()
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -206,7 +206,7 @@ def trainParam():
     targetdata     = trainAndTarget[:, 2]
 
     # Training based on the complete data set provided from makeData
-    clf = svm.NuSVR(nu=1)
+    clf = svm.SVR(nu=1)
     clf.fit(traindata, targetdata)
 
     # Training outputs
