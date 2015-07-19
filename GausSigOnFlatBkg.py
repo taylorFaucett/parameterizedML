@@ -284,8 +284,8 @@ def testSciKitLearnWrapper():
     plt.suptitle('Theano NN regression output for parameterized gaussians',
                fontsize=12, fontweight='bold')
 
-    plt.savefig('plots/fixedTraining_5val.pdf')
-    plt.savefig('plots/images/fixedTraining_5val.png')
+    plt.savefig('plots/paramTraining_complete.pdf')
+    plt.savefig('plots/images/paramTraining_complete.png')
     plt.show()
 
 
