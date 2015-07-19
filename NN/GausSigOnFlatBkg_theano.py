@@ -1,38 +1,37 @@
 '''
 author Taylor Faucett <tfaucett@uci.edu>
 
-This script utilizes SciKit-Learn to create a fixed and parameterized
-machine learning scheme. Datasets are generated for multiple gaussian shaped
-signals and a uniform (i.e. flat) background. trainFixed uses SciKit's
-Support Vector Machines (SVC) to learn for n gaussians at fixed means (mu)
-which can map a 1D array to signal/background values of 1 or 0. trainParam
-trains for all n gaussians simultaneously and then uses the provided
-SciKitLearnWrapper to train for these gaussian signals with parameterized by
-a secondary input (alpha).
+This script will use a NN method from Theano
 '''
 
 
 import ROOT
 import numpy as np
-from sklearn import svm, linear_model, gaussian_process, cross_validation, datasets
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.externals import joblib
-
 import matplotlib.pyplot as plt
-
+import theano
+import theano.tensor as T
 
 def makeData():
     print "Entering makeData"
-    musteps  = 3
-    numTrain = 500
-    numTest  = numTrain
+    muList = [-2, -1, 0, +1, +2]
+    N = 500
 
-    # Initialize ROOTs RooWorkspace
+    np.savetxt('data/muData.dat', muList, fmt='%f')
+    for i in range(len(muList)):
+        print 'Generating Gaussians for mu=%s' %muList[i]
+    print 'Generating %s samples per gaussian' %N
+    print 'Generating %s total data points' %N*len(muList)
+
+    # create training, testing data
+    # np.zeros((rows, columns))
+    trainData  = np.zeros((2*N,2))
+
+    #print trainData
+    #print targetData
+
     w = ROOT.RooWorkspace('w')
 
-    # Generate Gaussian signals
-    print "Generating Gaussians PDFs"
+    print 'Processing mu = %s' %muList[i]
     w.factory('Gaussian::g(x[-5,5],mu[0,-3,3],sigma[0.25, 0, 2])')
 
     # Generate a flat background signal
@@ -47,47 +46,24 @@ def makeData():
     w.Print()
     w.writeToFile('data/workspace_GausSigOnFlatBkg.root')
 
-    # Define variables
-    x      = w.var('x')
-    mu     = w.var('mu')
-    pdf    = w.pdf('model')
-    sigpdf = w.pdf('g')
-    bkgpdf = w.pdf('e')
+    x       = w.var('x')
+    mu      = w.var('mu')
+    pdf     = w.pdf('model')
+    sigpdf  = w.pdf('g')
+    bkgpdf  = w.pdf('e')
 
-    # create training, testing data
-    # np.zeros((rows, columns))
-    traindata  = np.zeros((2 * numTrain * musteps, 2))
-    targetdata = np.zeros(2 * numTrain * musteps)
-    testdata   = np.zeros((numTest * musteps, 2))
-    testdata1  = np.zeros((numTest * musteps, 2))
-
-    # Fill traindata, testdata and testdata1
-    for mustep, muval in enumerate(np.linspace(-1, 1, musteps)):
-        mu.setVal(muval)
-        sigdata = sigpdf.generate(ROOT.RooArgSet(x), numTrain)
-        bkgdata = bkgpdf.generate(ROOT.RooArgSet(x), numTrain)
-        alldata = pdf.generate(ROOT.RooArgSet(x), numTest)
-
-        for i in range(numTrain):
-            traindata[i + mustep * numTrain, 0] = sigdata.get(i).getRealValue('x')
-            traindata[i + mustep * numTrain, 1] = muval
-            targetdata[i + mustep * numTrain] = 1
-        for i in range(numTrain):
-            traindata[i + mustep * numTrain + musteps * numTrain,
-                    0] = bkgdata.get(i).getRealValue('x')
-            traindata[i + mustep * numTrain + musteps * numTrain, 1] = muval
-            targetdata[i + mustep * numTrain + musteps * numTrain] = 0
-        for i in range(numTest):
-            testdata[i + mustep * numTest, 0] = alldata.get(i).getRealValue('x')
-            testdata[i + mustep * numTest, 1] = 0.
-        for i in range(numTest):
-            testdata1[i + mustep * numTest, 0] = alldata.get(i).getRealValue('x')
-            testdata1[i + mustep * numTest, 1] = 1  # optionally 2*(i%2)-1.
-
-    np.savetxt("data/traindata.dat", np.column_stack((traindata, targetdata)), fmt='%f')
-    np.savetxt("data/testdata.dat", testdata, fmt='%f')
-    np.savetxt("data/testdata1.dat", testdata1, fmt='%f')
-
+    for i in range(len(muList)):
+        mu.setVal(muList[i])
+        sigdata = sigpdf.generate(ROOT.RooArgSet(x), N)
+        bkgdata = bkgpdf.generate(ROOT.RooArgSet(x), N)
+        alldata = pdf.generate(ROOT.RooArgSet(x), N)
+        for j in range(N):
+            trainData[j, 0] = sigdata.get(j).getRealValue('x')
+            trainData[j, 1] = 1
+        for j in range(N):
+            trainData[N+j, 0] = bkgdata.get(j).getRealValue('x')
+            trainData[N+j, 1] = 0
+        np.savetxt("data/traindata_mu_(%s).dat" %muList[i], trainData, fmt='%f')
 
 def plotPDF():
     print "Entering plotPDF"
@@ -135,20 +111,12 @@ def trainFixed():
     traindata cuts traindata.dat to include a 1D histogram and counting
     column. Targetdata cuts just the signal/background indicator.
     '''
-    trainAndTarget = np.loadtxt('data/traindata.dat')
-    testdata       = np.loadtxt('data/testdata.dat')
-    traindata      = trainAndTarget[:, 0:2]
-    targetdata     = trainAndTarget[:, 2]
 
-    # muPoints is a list of the gaussian averages generated (e.g. [-1, 0, 1])
-    # chunk is the size of each piece of data that corresponds to one of the muPoints
-    muPoints = np.unique(traindata[:, 1])
-    chunk      = len(traindata) / len(muPoints) / 2
-    shift      = len(traindata) / 2
+    targetdata     = np.loadtxt('data/muData.dat')
 
     # Initialize SciKitLearns Nu-Support Vector Regression
     print "SciKit Learn initialized using Nu-Support Vector Regression (SVC)"
-    clf = svm.NuSVR(nu=1)
+    clf = svm.SVR()
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -180,11 +148,11 @@ def trainFixed():
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-5, 5])
+    plt.xlim([0, 1])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
     plt.suptitle('Complete SV training output as a function of test data input',
-               fontsize=12, fontweight='bold')
+               fontsize=14, fontweight='bold')
 
     #plt.show()
     plt.savefig('plots/fixedTraining.pdf')
@@ -206,7 +174,7 @@ def trainParam():
     targetdata     = trainAndTarget[:, 2]
 
     # Training based on the complete data set provided from makeData
-    clf = svm.NuSVR(nu=1)
+    clf = svm.SVR()
     clf.fit(traindata, targetdata)
 
     # Training outputs
@@ -216,13 +184,13 @@ def trainParam():
     plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-5, 5])
+    plt.xlim([0, 1])
     plt.ylim([-0.2, 1.2])
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
     plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
-               fontsize=12, fontweight='bold')
+               fontsize=14, fontweight='bold')
     plt.savefig('plots/paramTraining.pdf')
     plt.savefig('plots/images/paramTraining.png')
     #plt.show()
@@ -243,35 +211,35 @@ def scikitlearnFunc(x=0.0, alpha=0.5):
     return outputs[0]
 
 
-def scikitlearnFunc1(x=-1.0, alpha=-1.0):
+def scikitlearnFunc1(x=0.0, alpha=0.0):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'bo', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc2(x=-1./3, alpha=-0.5):
+def scikitlearnFunc2(x=0.0, alpha=0.25):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'go', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc3(x=0.0, alpha=0.0):
+def scikitlearnFunc3(x=0.0, alpha=0.5):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'ro', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc4(x=+1./3, alpha=0.5):
+def scikitlearnFunc4(x=0.0, alpha=0.75):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'co', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc5(x=+1, alpha=1.0):
+def scikitlearnFunc5(x=0.0, alpha=1.0):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
@@ -315,19 +283,21 @@ def testSciKitLearnWrapper():
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
-    plt.plot(-6,6,"bo", label="$\mu=-1.0$, $\mu_b=-1.0$" )
-    plt.plot(-6,6,"go", label="$\mu=-0.5$, $\mu_b=-1/3$" )
-    plt.plot(-6,6,"ro", label="$\mu=0.0$, $\mu_b=0$" )
-    plt.plot(-6,6,"co", label="$\mu=+0.5$, $\mu_b=+1/3$" )
-    plt.plot(-6,6,"mo", label="$\mu=+1.0$, $\mu_b=+1$" )
+    plt.plot(0,0,"bo", label="$\mu=0.0$" )
+    plt.plot(0,0,"go", label="$\mu=0.25$" )
+    plt.plot(0,0,"ro", label="$\mu=0.5$" )
+    plt.plot(0,0,"co", label="$\mu=0.75$" )
+    plt.plot(0,0,"mo", label="$\mu=1.0$" )
+    plt.xlim([0, 1])
+    plt.ylim([-0.2, 1.2])
     #plt.axvline(x=mu, label="$\mu=%s$" %mu, linewidth = 2)
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
     #plt.fill(True)
     plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
-               fontsize=12, fontweight='bold')
-    plt.legend(bbox_to_anchor=(0.02, 0.6), loc=2, borderaxespad=0)
+               fontsize=14, fontweight='bold')
+    plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
     plt.savefig('plots/paramTraining_complete.pdf')
     plt.savefig('plots/images/paramTraining_complete.png')
     #plt.show()
@@ -336,6 +306,6 @@ def testSciKitLearnWrapper():
 if __name__ == '__main__':
     makeData()
     plotPDF()
-    trainFixed()
-    trainParam()
-    testSciKitLearnWrapper()
+    #trainFixed()
+    #trainParam()
+    #testSciKitLearnWrapper()

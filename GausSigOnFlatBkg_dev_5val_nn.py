@@ -1,14 +1,5 @@
 '''
 author Taylor Faucett <tfaucett@uci.edu>
-
-This script utilizes SciKit-Learn to create a fixed and parameterized
-machine learning scheme. Datasets are generated for multiple gaussian shaped
-signals and a uniform (i.e. flat) background. trainFixed uses SciKit's
-Support Vector Machines (SVC) to learn for n gaussians at fixed means (mu)
-which can map a 1D array to signal/background values of 1 or 0. trainParam
-trains for all n gaussians simultaneously and then uses the provided
-SciKitLearnWrapper to train for these gaussian signals with parameterized by
-a secondary input (alpha).
 '''
 
 
@@ -18,13 +9,23 @@ from sklearn import svm, linear_model, gaussian_process, cross_validation, datas
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.externals import joblib
+from sknn.mlp import Regressor, Classifier, Layer
+import pickle
+
+import sys
+import logging
+
+#logging.basicConfig(
+#            format="%(message)s",
+#            level=logging.DEBUG,
+#            stream=sys.stdout)
 
 import matplotlib.pyplot as plt
 
 
 def makeData():
     print "Entering makeData"
-    musteps  = 3
+    musteps  = 5
     numTrain = 500
     numTest  = numTrain
 
@@ -62,7 +63,7 @@ def makeData():
     testdata1  = np.zeros((numTest * musteps, 2))
 
     # Fill traindata, testdata and testdata1
-    for mustep, muval in enumerate(np.linspace(-1, 1, musteps)):
+    for mustep, muval in enumerate(np.linspace(-2, 2, musteps)):
         mu.setVal(muval)
         sigdata = sigpdf.generate(ROOT.RooArgSet(x), numTrain)
         bkgdata = bkgpdf.generate(ROOT.RooArgSet(x), numTrain)
@@ -118,8 +119,8 @@ def plotPDF():
     pdf.plotOn(frame, ROOT.RooFit.Components('e'), ROOT.RooFit.LineColor(ROOT.kGreen))
     c1 = ROOT.TCanvas()
     frame.Draw()
-    c1.SaveAs('plots/modelPlot.pdf')
-    c1.SaveAs('plots/images/modelPlot.png')
+    c1.SaveAs('plots/modelPlot_5val.pdf')
+    c1.SaveAs('plots/images/modelPlot_5val.png')
 
 
 def trainFixed():
@@ -146,9 +147,10 @@ def trainFixed():
     chunk      = len(traindata) / len(muPoints) / 2
     shift      = len(traindata) / 2
 
-    # Initialize SciKitLearns Nu-Support Vector Regression
-    print "SciKit Learn initialized using Nu-Support Vector Regression (SVC)"
-    clf = svm.NuSVR(nu=1)
+    nn = svm.NuSVR(nu=1)
+    #nn = Regressor(layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],learning_rate=0.02,n_iter=100)
+    #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
+
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -165,36 +167,35 @@ def trainFixed():
         reducedtarget = np.concatenate((targetdata[lowChunk * chunk: highChunk * chunk],
                                         targetdata[lowChunk * chunk + shift: highChunk * chunk + shift]))
 
-        # SciKitLearns Nu-Support Vector Regression fit function followed
         # fit(Training Vectors, Target Values)
         # reducedtrain.reshape((NUM OF VALUES, feature))
-        clf.fit(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
+        nn.fit(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
 
         # predict(X) - Performs a regression on samples in X
-        outputs = clf.predict(testdata[:, 0].reshape((len(testdata), 1)))
+        outputs = nn.predict(testdata[:, 0].reshape((len(testdata), 1)))
         plt.plot(testdata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' % muPoints[i])
 
         #plt.axvline(x=muPoints[i], label="$\mu=%s$" %muPoints[i], linewidth = 2, color = colorArray[i])
 
     # Plot settings for the fixed training mode
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
-    plt.ylabel('sv_output( training_input )')
+    plt.ylabel('NN_output( training_input )')
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
-    plt.suptitle('Complete SV training output as a function of test data input',
+    plt.suptitle('Theano NN classification output for fixed gaussians',
                fontsize=12, fontweight='bold')
 
     #plt.show()
-    plt.savefig('plots/fixedTraining.pdf')
-    plt.savefig('plots/images/fixedTraining.png')
+    plt.savefig('plots/fixedTraining_5val.pdf')
+    plt.savefig('plots/images/fixedTraining_5val.png')
     plt.clf()
 
     # export training results to fixed.pkl
     # joblib.dump is a numpy method which will "pickle" the training method
     # resulting in multiple npy files.
-    joblib.dump(clf, "data/fixed.pkl")
+    pickle.dump(nn, open('data/fixed.pkl', 'wb'))
 
 
 def trainParam():
@@ -206,136 +207,76 @@ def trainParam():
     targetdata     = trainAndTarget[:, 2]
 
     # Training based on the complete data set provided from makeData
-    clf = svm.NuSVR(nu=1)
-    clf.fit(traindata, targetdata)
+    nn = svm.NuSVR(nu=1)
+    nn = Regressor(layers =[Layer("Sigmoid", units=100),Layer("Sigmoid", units=100)],learning_rate=0.02,n_iter=100)
+    #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
+    nn.fit(traindata, targetdata)
 
     # Training outputs
-    outputs = clf.predict(traindata)
+    outputs = nn.predict(traindata)
 
     # Plot settings
     plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
-    plt.ylabel('sv_output( training_input )')
+    plt.ylabel('NN_output( training_input )')
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
-    plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
+    plt.suptitle('Parametrized NN Mapping (NN Output vs Data Input)',
                fontsize=12, fontweight='bold')
-    plt.savefig('plots/paramTraining.pdf')
-    plt.savefig('plots/images/paramTraining.png')
+    plt.savefig('plots/paramTraining_5val.pdf')
+    plt.savefig('plots/images/paramTraining_5val.png')
     #plt.show()
     plt.clf()
 
-    joblib.dump(clf, "data/param.pkl")
+ 
+    #pickle.dump(nn, open('data/param.pkl', 'wb'))
+    joblib.dump(nn, "data/param.pkl")
 
 
-def scikitlearnFunc(x=0.0, alpha=0.5):
-    # print "scikitlearnTest"
-    clf = joblib.load('data/param.pkl')
-    # print "inouttest input was", x
+def scikitlearnFunc(x, alpha):
+    #print "scikitlearnTest"
+    #nn = pickle.load(open('data/param.pkl','rb'))
+    nn = joblib.load('data/param.pkl')
+    #print "inouttest input was", x
     traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
+    outputs   = nn.predict(traindata)
 
-    #print 'x,alpha,output =', x, alpha, outputs[0]
-    plt.plot(x, outputs[0], 'ro', alpha=0.5)
-    return outputs[0]
-
-
-def scikitlearnFunc1(x=-1.0, alpha=-1.0):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'bo', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc2(x=-1./3, alpha=-0.5):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'go', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc3(x=0.0, alpha=0.0):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'ro', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc4(x=+1./3, alpha=0.5):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'co', alpha=0.5)
-    return outputs[0]
-
-def scikitlearnFunc5(x=+1, alpha=1.0):
-    clf = joblib.load('data/param.pkl')
-    traindata = np.array((x, alpha))
-    outputs   = clf.predict(traindata)
-    plt.plot(x, outputs[0], 'mo', alpha=0.5)
-    return outputs[0]
-
-
-def testSciKitLearnWrapper():
-    # need a RooAbsReal to evaluate NN(x,mu)
-    mu = 0.5
-    ROOT.gSystem.Load('SciKitLearnWrapper/libSciKitLearnWrapper')
-    x  = ROOT.RooRealVar('x', 'x', 0.2, -5, 5)
-
-    nn1 = ROOT.SciKitLearnWrapper('nn1', 'nn1', x)
-    nn1.RegisterCallBack(scikitlearnFunc1)
-
-    nn2 = ROOT.SciKitLearnWrapper('nn2', 'nn2', x)
-    nn2.RegisterCallBack(scikitlearnFunc2)
-
-    nn3 = ROOT.SciKitLearnWrapper('nn3', 'nn3', x)
-    nn3.RegisterCallBack(scikitlearnFunc3)
-
-    nn4 = ROOT.SciKitLearnWrapper('nn4', 'nn4', x)
-    nn4.RegisterCallBack(scikitlearnFunc4)
-
-    nn5 = ROOT.SciKitLearnWrapper('nn5', 'nn5', x)
-    nn5.RegisterCallBack(scikitlearnFunc5)
-
-    c1    = ROOT.TCanvas('c1')
-    frame = x.frame()
-    nn1.plotOn(frame)
-    nn2.plotOn(frame)
-    nn3.plotOn(frame)
-    nn4.plotOn(frame)
-    nn5.plotOn(frame)
-
-    frame.Draw()
-    c1.SaveAs('plots/paramOutput.pdf')
-    c1.SaveAs('plots/images/paramOutput.png')
-    plt.ylabel('sv_output( training_input )')
-    plt.xlabel('training_input')
-    plt.xlim([-5, 5])
-    plt.ylim([-0.2, 1.2])
-    plt.plot(-6,6,"bo", label="$\mu=-1.0$, $\mu_b=-1.0$" )
-    plt.plot(-6,6,"go", label="$\mu=-0.5$, $\mu_b=-1/3$" )
-    plt.plot(-6,6,"ro", label="$\mu=0.0$, $\mu_b=0$" )
-    plt.plot(-6,6,"co", label="$\mu=+0.5$, $\mu_b=+1/3$" )
-    plt.plot(-6,6,"mo", label="$\mu=+1.0$, $\mu_b=+1$" )
-    #plt.axvline(x=mu, label="$\mu=%s$" %mu, linewidth = 2)
-    #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
-    #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
-    plt.grid(True)
-    #plt.fill(True)
-    plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
-               fontsize=12, fontweight='bold')
-    plt.legend(bbox_to_anchor=(0.02, 0.6), loc=2, borderaxespad=0)
-    plt.savefig('plots/paramTraining_complete.pdf')
-    plt.savefig('plots/images/paramTraining_complete.png')
+    print 'x,alpha,output =', x, alpha, outputs[0]
+    plt.plot(x, outputs, 'ro', alpha=0.5)
     #plt.show()
 
 
+def testSciKitLearnWrapper():
+    alpha = 0.5
+    step = 100
+    for x in range(-500, 500, 1):
+        scikitlearnFunc(x/100., alpha)
+    #plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
+    plt.ylabel('NN_output( training_input )')
+    plt.xlabel('training_input')
+    plt.xlim([-5, 5])
+    plt.ylim([-0.2, 1.2])
+    plt.grid(True)
+    plt.suptitle('Theano NN regression output for parameterized gaussians',
+               fontsize=12, fontweight='bold')
+
+    plt.savefig('plots/fixedTraining_5val.pdf')
+    plt.savefig('plots/images/fixedTraining_5val.png')
+    plt.show()
+    #c1 = ROOT.TCanvas('c1')
+    #frame = x.frame()
+    #nn.plotOn(frame)
+    #frame.Draw()
+    #c1.SaveAs('plots/testWrapper.pdf')
+
+
+
 if __name__ == '__main__':
-    makeData()
-    plotPDF()
-    trainFixed()
-    trainParam()
+    #makeData()
+    #plotPDF()
+    #trainFixed()
+    #trainParam()
     testSciKitLearnWrapper()

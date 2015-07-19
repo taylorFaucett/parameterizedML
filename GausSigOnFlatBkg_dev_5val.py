@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 def makeData():
     print "Entering makeData"
-    musteps  = 3
+    musteps  = 5
     numTrain = 500
     numTest  = numTrain
 
@@ -62,7 +62,7 @@ def makeData():
     testdata1  = np.zeros((numTest * musteps, 2))
 
     # Fill traindata, testdata and testdata1
-    for mustep, muval in enumerate(np.linspace(-1, 1, musteps)):
+    for mustep, muval in enumerate(np.linspace(-2, 2, musteps)):
         mu.setVal(muval)
         sigdata = sigpdf.generate(ROOT.RooArgSet(x), numTrain)
         bkgdata = bkgpdf.generate(ROOT.RooArgSet(x), numTrain)
@@ -118,8 +118,8 @@ def plotPDF():
     pdf.plotOn(frame, ROOT.RooFit.Components('e'), ROOT.RooFit.LineColor(ROOT.kGreen))
     c1 = ROOT.TCanvas()
     frame.Draw()
-    c1.SaveAs('plots/modelPlot.pdf')
-    c1.SaveAs('plots/images/modelPlot.png')
+    c1.SaveAs('plots/modelPlot_5val.pdf')
+    c1.SaveAs('plots/images/modelPlot_5val.png')
 
 
 def trainFixed():
@@ -187,8 +187,8 @@ def trainFixed():
                fontsize=12, fontweight='bold')
 
     #plt.show()
-    plt.savefig('plots/fixedTraining.pdf')
-    plt.savefig('plots/images/fixedTraining.png')
+    plt.savefig('plots/fixedTraining_5val.pdf')
+    plt.savefig('plots/images/fixedTraining_5val.png')
     plt.clf()
 
     # export training results to fixed.pkl
@@ -223,8 +223,8 @@ def trainParam():
     plt.grid(True)
     plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
                fontsize=12, fontweight='bold')
-    plt.savefig('plots/paramTraining.pdf')
-    plt.savefig('plots/images/paramTraining.png')
+    plt.savefig('plots/paramTraining_5val.pdf')
+    plt.savefig('plots/images/paramTraining_5val.png')
     #plt.show()
     plt.clf()
 
@@ -243,14 +243,14 @@ def scikitlearnFunc(x=0.0, alpha=0.5):
     return outputs[0]
 
 
-def scikitlearnFunc1(x=-1.0, alpha=-1.0):
+def scikitlearnFunc1(x=0.0, alpha=-1.0):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'bo', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc2(x=-1./3, alpha=-0.5):
+def scikitlearnFunc2(x=0.0, alpha=-0.5):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
@@ -264,20 +264,47 @@ def scikitlearnFunc3(x=0.0, alpha=0.0):
     plt.plot(x, outputs[0], 'ro', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc4(x=+1./3, alpha=0.5):
+def scikitlearnFunc4(x=0.0, alpha=0.5):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'co', alpha=0.5)
     return outputs[0]
 
-def scikitlearnFunc5(x=+1, alpha=1.0):
+def scikitlearnFunc5(x=0.0, alpha=1.0):
     clf = joblib.load('data/param.pkl')
     traindata = np.array((x, alpha))
     outputs   = clf.predict(traindata)
     plt.plot(x, outputs[0], 'mo', alpha=0.5)
     return outputs[0]
 
+def scikitlearnFunc6(x=0.0, alpha=1.5):
+    clf = joblib.load('data/param.pkl')
+    traindata = np.array((x, alpha))
+    outputs   = clf.predict(traindata)
+    plt.plot(x, outputs[0], 'mo', alpha=0.5)
+    return outputs[0]
+
+def scikitlearnFunc7(x=0.0, alpha=2.0):
+    clf = joblib.load('data/param.pkl')
+    traindata = np.array((x, alpha))
+    outputs   = clf.predict(traindata)
+    plt.plot(x, outputs[0], 'mo', alpha=0.5)
+    return outputs[0]
+
+def scikitlearnFunc8(x=0.0, alpha=-1.5):
+    clf = joblib.load('data/param.pkl')
+    traindata = np.array((x, alpha))
+    outputs   = clf.predict(traindata)
+    plt.plot(x, outputs[0], 'mo', alpha=0.5)
+    return outputs[0]
+
+def scikitlearnFunc9(x=0.0, alpha=-2.0):
+    clf = joblib.load('data/param.pkl')
+    traindata = np.array((x, alpha))
+    outputs   = clf.predict(traindata)
+    plt.plot(x, outputs[0], 'mo', alpha=0.5)
+    return outputs[0]
 
 def testSciKitLearnWrapper():
     # need a RooAbsReal to evaluate NN(x,mu)
@@ -300,6 +327,18 @@ def testSciKitLearnWrapper():
     nn5 = ROOT.SciKitLearnWrapper('nn5', 'nn5', x)
     nn5.RegisterCallBack(scikitlearnFunc5)
 
+    nn6 = ROOT.SciKitLearnWrapper('nn6', 'nn7', x)
+    nn6.RegisterCallBack(scikitlearnFunc6)
+
+    nn7 = ROOT.SciKitLearnWrapper('nn7', 'nn7', x)
+    nn7.RegisterCallBack(scikitlearnFunc7)
+
+    nn8 = ROOT.SciKitLearnWrapper('nn8', 'nn8', x)
+    nn8.RegisterCallBack(scikitlearnFunc8)
+
+    nn9 = ROOT.SciKitLearnWrapper('nn9', 'nn9', x)
+    nn9.RegisterCallBack(scikitlearnFunc9)
+
     c1    = ROOT.TCanvas('c1')
     frame = x.frame()
     nn1.plotOn(frame)
@@ -307,35 +346,43 @@ def testSciKitLearnWrapper():
     nn3.plotOn(frame)
     nn4.plotOn(frame)
     nn5.plotOn(frame)
+    nn6.plotOn(frame)
+    nn7.plotOn(frame)
+    nn8.plotOn(frame)
+    nn9.plotOn(frame)
 
     frame.Draw()
-    c1.SaveAs('plots/paramOutput.pdf')
-    c1.SaveAs('plots/images/paramOutput.png')
+    c1.SaveAs('plots/paramOutput_5val.pdf')
+    c1.SaveAs('plots/images/paramOutput_5val.png')
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
     plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
-    plt.plot(-6,6,"bo", label="$\mu=-1.0$, $\mu_b=-1.0$" )
-    plt.plot(-6,6,"go", label="$\mu=-0.5$, $\mu_b=-1/3$" )
-    plt.plot(-6,6,"ro", label="$\mu=0.0$, $\mu_b=0$" )
-    plt.plot(-6,6,"co", label="$\mu=+0.5$, $\mu_b=+1/3$" )
-    plt.plot(-6,6,"mo", label="$\mu=+1.0$, $\mu_b=+1$" )
+    plt.plot(-6,6,"bo", label="$\mu=-1.0$" )
+    plt.plot(-6,6,"go", label="$\mu=-0.5$" )
+    plt.plot(-6,6,"ro", label="$\mu=0.0$" )
+    plt.plot(-6,6,"co", label="$\mu=+0.5$" )
+    plt.plot(-6,6,"mo", label="$\mu=+1.0$" )
+    plt.plot(-6,6,"bo", label="$\mu=+1.5$" )
+    plt.plot(-6,6,"bo", label="$\mu=+2.0$" )
+    plt.plot(-6,6,"bo", label="$\mu=-1.5$" )
+    plt.plot(-6,6,"bo", label="$\mu=-2.0$" )
     #plt.axvline(x=mu, label="$\mu=%s$" %mu, linewidth = 2)
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
     #plt.fill(True)
-    plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
+    plt.suptitle('Parametrized SV Mapping using (SV Output vs Data Input) - 5 fixed values',
                fontsize=12, fontweight='bold')
     plt.legend(bbox_to_anchor=(0.02, 0.6), loc=2, borderaxespad=0)
-    plt.savefig('plots/paramTraining_complete.pdf')
-    plt.savefig('plots/images/paramTraining_complete.png')
+    plt.savefig('plots/paramTraining_complete_5val.pdf')
+    plt.savefig('plots/images/paramTraining_complete_5val.png')
     #plt.show()
 
 
 if __name__ == '__main__':
-    makeData()
-    plotPDF()
-    trainFixed()
+    #makeData()
+    #plotPDF()
+    #trainFixed()
     trainParam()
     testSciKitLearnWrapper()

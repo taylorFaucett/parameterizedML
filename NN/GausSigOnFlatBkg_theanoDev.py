@@ -14,13 +14,13 @@ a secondary input (alpha).
 
 import ROOT
 import numpy as np
-from sklearn import svm, linear_model, gaussian_process, cross_validation, datasets
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.externals import joblib
+from sklearn_theano.feature_extraction import OverfeatClassifier
 
 import matplotlib.pyplot as plt
+import theano
+import theano.tensor as T
 
+rng = np.random
 
 def makeData():
     print "Entering makeData"
@@ -146,9 +146,14 @@ def trainFixed():
     chunk      = len(traindata) / len(muPoints) / 2
     shift      = len(traindata) / 2
 
+    N = 400
+    feats = 784
+    D = (rng.randn(N, feats).astype(theano.config.floatX),
+    rng.randint(size=N,low=0, high=2).astype(theano.config.floatX))
+    training_steps = 10000
     # Initialize SciKitLearns Nu-Support Vector Regression
     print "SciKit Learn initialized using Nu-Support Vector Regression (SVC)"
-    clf = svm.NuSVR(nu=1)
+
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -165,14 +170,54 @@ def trainFixed():
         reducedtarget = np.concatenate((targetdata[lowChunk * chunk: highChunk * chunk],
                                         targetdata[lowChunk * chunk + shift: highChunk * chunk + shift]))
 
+
+
         # SciKitLearns Nu-Support Vector Regression fit function followed
         # fit(Training Vectors, Target Values)
         # reducedtrain.reshape((NUM OF VALUES, feature))
-        clf.fit(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
+        x = T.matrix("x")
+        y = T.vector("y")
+        w = theano.shared(rng.randn(feats).astype(theano.config.floatX), name="w")
+        b = theano.shared(np.asarray(0., dtype=theano.config.floatX), name="b")
+        x.tag.test_value = D[0]
+        y.tag.test_value = D[1]
+        p_1 = 1 / (1 + T.exp(-T.dot(x, w)-b)) # Probability of having a one
+        prediction = p_1 > 0.5 # The prediction that is done: 0 or 1
+        xent = -y*T.log(p_1) - (1-y)*T.log(1-p_1) # Cross-entropy
+        cost = xent.mean() + 0.01*(w**2).sum() # The cost to optimize
+        gw,gb = T.grad(cost, [w,b])
+
+        train = theano.function(
+                inputs = [reducedtrain.reshape((len(reducedtrain), 1)),reducedtarget],
+                outputs = [prediction],
+                updates={w:w-0.01*gw, b:b-0.01*gb},
+                name = "train")
+        #clf.fit(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
 
         # predict(X) - Performs a regression on samples in X
-        outputs = clf.predict(testdata[:, 0].reshape((len(testdata), 1)))
-        plt.plot(testdata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' % muPoints[i])
+        #outputs = clf.predict(testdata[:, 0].reshape((len(testdata), 1)))
+        predict = theano.function(inputs=[reducedtrain.reshape((len(reducedtrain), 1))], outputs = prediction, name = "predict")
+
+        if any([x.op.__class__.__name__ in ['Gemv', 'CGemv', 'Gemm', 'CGemm'] for x in
+                train.maker.fgraph.toposort()]):
+            print 'Used the cpu'
+        elif any([x.op.__class__.__name__ in ['GpuGemm', 'GpuGemv'] for x in
+                  train.maker.fgraph.toposort()]):
+            print 'Used the gpu'
+        else:
+            print 'ERROR, not able to tell if theano used the cpu or the gpu'
+            print train.maker.fgraph.toposort()
+
+        for i in range(training_steps):
+            pred, err = train(D[0], D[1])
+        #print "Final model:"
+        #print w.get_value(), b.get_value()
+
+        print "target values for D"
+        print D[1]
+
+        print "prediction on D"
+        print predict(D[0])
 
         #plt.axvline(x=muPoints[i], label="$\mu=%s$" %muPoints[i], linewidth = 2, color = colorArray[i])
 
@@ -206,7 +251,7 @@ def trainParam():
     targetdata     = trainAndTarget[:, 2]
 
     # Training based on the complete data set provided from makeData
-    clf = svm.NuSVR(nu=1)
+    clf = OverfeatClassifier()
     clf.fit(traindata, targetdata)
 
     # Training outputs
@@ -337,5 +382,5 @@ if __name__ == '__main__':
     makeData()
     plotPDF()
     trainFixed()
-    trainParam()
-    testSciKitLearnWrapper()
+    #trainParam()
+    #testSciKitLearnWrapper()
