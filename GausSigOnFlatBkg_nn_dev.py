@@ -14,24 +14,18 @@ a secondary input (alpha).
 
 import ROOT
 import numpy as np
-from sklearn import svm
+from sklearn import svm, linear_model, gaussian_process, cross_validation, datasets
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.externals import joblib
-from sknn.mlp import Regressor, Classifier, Layer
-import pickle
-
+from sknn.mlp import Classifier, Layer
 
 import matplotlib.pyplot as plt
 
-import sys
-import logging
-import time
-
-
-plt_color=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
 
 def makeData():
     print "Entering makeData"
-    musteps  = 5
+    musteps  = 3
     numTrain = 500
     numTest  = numTrain
 
@@ -69,7 +63,7 @@ def makeData():
     testdata1  = np.zeros((numTest * musteps, 2))
 
     # Fill traindata, testdata and testdata1
-    for mustep, muval in enumerate(np.linspace(-2, 2, musteps)):
+    for mustep, muval in enumerate(np.linspace(-1, 1, musteps)):
         mu.setVal(muval)
         sigdata = sigpdf.generate(ROOT.RooArgSet(x), numTrain)
         bkgdata = bkgpdf.generate(ROOT.RooArgSet(x), numTrain)
@@ -155,13 +149,7 @@ def trainFixed():
 
     # Initialize SciKitLearns Nu-Support Vector Regression
     print "SciKit Learn initialized using Nu-Support Vector Regression (SVC)"
-<<<<<<< HEAD
-    #nn = svm.NuSVR(nu=1)
-    nn = Regressor(layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],learning_rate=0.02,n_iter=100)
-    #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
-=======
-    clf = svm.SVR()
->>>>>>> origin/master
+    clf = Classifier(layers=[Layer("Maxout", units=100, pieces=2),Layer("Softmax")],learning_rate=0.001,n_iter=25)
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -181,23 +169,23 @@ def trainFixed():
         # SciKitLearns Nu-Support Vector Regression fit function followed
         # fit(Training Vectors, Target Values)
         # reducedtrain.reshape((NUM OF VALUES, feature))
-        nn.fit(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
+        clf.fit(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
 
         # predict(X) - Performs a regression on samples in X
-        outputs = nn.predict(testdata[:, 0].reshape((len(testdata), 1)))
+        outputs = clf.predict(testdata[:, 0].reshape((len(testdata), 1)))
         plt.plot(testdata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' % muPoints[i])
 
         #plt.axvline(x=muPoints[i], label="$\mu=%s$" %muPoints[i], linewidth = 2, color = colorArray[i])
 
     # Plot settings for the fixed training mode
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
-    plt.ylabel('NN_output( training_input )')
+    plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-3, 3])
+    plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
-    plt.suptitle('Theano NN classification output for fixed gaussians',
-               fontsize=12, fontweight='bold')
+    plt.suptitle('Complete SV training output as a function of test data input',
+               fontsize=14, fontweight='bold')
 
     #plt.show()
     plt.savefig('plots/fixedTraining.pdf')
@@ -207,7 +195,8 @@ def trainFixed():
     # export training results to fixed.pkl
     # joblib.dump is a numpy method which will "pickle" the training method
     # resulting in multiple npy files.
-    pickle.dump(nn, open('data/fixed.pkl', 'wb'))
+    joblib.dump(clf, "data/fixed.pkl")
+
 
 def trainParam():
     print "Entering trainParam"
@@ -217,25 +206,18 @@ def trainParam():
     traindata      = trainAndTarget[:, 0:2]
     targetdata     = trainAndTarget[:, 2]
 
-<<<<<<< HEAD
-    #nn = svm.NuSVR(nu=1)
-    nn = Regressor(layers =[Layer("Sigmoid", units=100),Layer("Sigmoid")],learning_rate=0.02,n_iter=100)
-    #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
-    nn.fit(traindata, targetdata)
-=======
     # Training based on the complete data set provided from makeData
-    clf = svm.SVR(nu=1)
+    clf = Classifier(layers=[Layer("Maxout", units=100, pieces=1),Layer("Softmax")],learning_rate=0.001,n_iter=25)
     clf.fit(traindata, targetdata)
->>>>>>> origin/master
 
     # Training outputs
-    outputs = nn.predict(traindata)
+    outputs = clf.predict(traindata)
 
     # Plot settings
     plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-3, 3])
+    plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
@@ -247,46 +229,51 @@ def trainParam():
     #plt.show()
     plt.clf()
 
-    pickle.dump(nn, open('data/param.pkl', 'wb'))
+    joblib.dump(clf, "data/param.pkl")
 
 
-def scikitlearnFunc(x, alpha):
-    #print "scikitlearnTest"
-    nn = pickle.load(open('data/param.pkl','rb'))
-    #print "inouttest input was", x
-    traindata = np.array((x, alpha), ndmin=2)
-    outputs   = nn.predict(traindata)
-    #print outputs
+def scikitlearnFunc(x=0.0, alpha=0.5):
+    # print "scikitlearnTest"
+    clf = joblib.load('data/param.pkl')
+    # print "inouttest input was", x
+    traindata = np.array((x, alpha))
+    outputs   = clf.predict(traindata)
 
-    #print 'x,alpha,output =', x, alpha, outputs[0]
-    #plt.plot(x, outputs, 'ro', alpha=0.5)
-    #plt.show()
-    return outputs[[0]]
+    print 'x,alpha,output =', x, alpha, outputs[0]
+    plt.plot(x, outputs[0], 'ro', alpha=0.5)
+    return outputs[0]
 
 
 def testSciKitLearnWrapper():
-    alpha = [-1.5, -1, -0.5, 0.0, +0.5, +1.0, +1.5]
-    step = 100
+    # need a RooAbsReal to evaluate NN(x,mu)
+    mu = 0.5
+    ROOT.gSystem.Load('SciKitLearnWrapper/libSciKitLearnWrapper')
+    x  = ROOT.RooRealVar('x', 'x', 0.2, -5, 5)
+    nn = ROOT.SciKitLearnWrapper('nn', 'nn', x)
+    nn.RegisterCallBack(scikitlearnFunc)
 
-    for a in range(len(alpha)):
-        print 'working on alpha=%s' %alpha[a]
-        for x in range(-500, 500, 1):
-            outputs = scikitlearnFunc(x/100., alpha[a])
-            plt.plot(x/100., outputs[0], plt_color[a], alpha=0.5)
-    for i in range(len(alpha)):
-        plt.plot(-4,0, plt_color[i], alpha=0.5, label="$\mu=$%s" %alpha[i])
-    plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
-    plt.ylabel('NN_output( training_input )')
+    c1    = ROOT.TCanvas('c1')
+    frame = x.frame()
+    nn.plotOn(frame)
+    frame.Draw()
+    c1.SaveAs('plots/paramOutput.pdf')
+    c1.SaveAs('plots/images/paramOutput.png')
+    plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-3, 3])
+    plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
+    plt.axvline(x=mu, label="$\mu=%s$" %mu, linewidth = 2)
+    #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
+    #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
-    plt.suptitle('Theano NN regression output for parameterized gaussians',
-               fontsize=12, fontweight='bold')
-
-    plt.savefig('plots/fixedTraining_5val.pdf')
-    plt.savefig('plots/images/fixedTraining_5val.png')
-    plt.show()
+    plt.fill(True)
+    plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
+               fontsize=14, fontweight='bold')
+    plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
+    plt.savefig('plots/paramTraining_(mu=%s).pdf' %mu)
+    plt.savefig('plots/images/paramTraining_(mu=%s).png' %mu)
+    #plt.show()
+    plt.clf()
 
 
 if __name__ == '__main__':
