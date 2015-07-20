@@ -1,14 +1,12 @@
 '''
 author Taylor Faucett <tfaucett@uci.edu>
 
-This script utilizes SciKit-Learn to create a fixed and parameterized
+This script utilizes Theano/Pylearn2 and SKLearn-NeuralNetwork to create a fixed and parameterized
 machine learning scheme. Datasets are generated for multiple gaussian shaped
-signals and a uniform (i.e. flat) background. trainFixed uses SciKit's
-Support Vector Machines (SVC) to learn for n gaussians at fixed means (mu)
-which can map a 1D array to signal/background values of 1 or 0. trainParam
-trains for all n gaussians simultaneously and then uses the provided
-SciKitLearnWrapper to train for these gaussian signals with parameterized by
-a secondary input (alpha).
+signals and a uniform (i.e. flat) background. trainFixed uses a regression NN
+to learn for n gaussians at fixed means (mu) which can map a 1D array to signal/background 
+values of 1 or 0. trainParam trains for all n gaussians simultaneously and then trains for 
+these gaussian signals with a parameter by a secondary input (alpha).
 '''
 
 
@@ -153,15 +151,11 @@ def trainFixed():
     chunk      = len(traindata) / len(muPoints) / 2
     shift      = len(traindata) / 2
 
-    # Initialize SciKitLearns Nu-Support Vector Regression
-    print "SciKit Learn initialized using Nu-Support Vector Regression (SVC)"
-<<<<<<< HEAD
+    # Initialize ML method (SVM or NN)
+    print "Machine Learning method initialized"
     #nn = svm.NuSVR(nu=1)
     nn = Regressor(layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],learning_rate=0.02,n_iter=100)
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
-=======
-    clf = svm.SVR()
->>>>>>> origin/master
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -178,7 +172,7 @@ def trainFixed():
         reducedtarget = np.concatenate((targetdata[lowChunk * chunk: highChunk * chunk],
                                         targetdata[lowChunk * chunk + shift: highChunk * chunk + shift]))
 
-        # SciKitLearns Nu-Support Vector Regression fit function followed
+        # ML fit function
         # fit(Training Vectors, Target Values)
         # reducedtrain.reshape((NUM OF VALUES, feature))
         nn.fit(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
@@ -217,16 +211,13 @@ def trainParam():
     traindata      = trainAndTarget[:, 0:2]
     targetdata     = trainAndTarget[:, 2]
 
-<<<<<<< HEAD
+    # Initialize ML method (SVM or NN)
+    print "Machine Learning method initialized"
+
     #nn = svm.NuSVR(nu=1)
     nn = Regressor(layers =[Layer("Sigmoid", units=100),Layer("Sigmoid")],learning_rate=0.02,n_iter=100)
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
     nn.fit(traindata, targetdata)
-=======
-    # Training based on the complete data set provided from makeData
-    clf = svm.SVR(nu=1)
-    clf.fit(traindata, targetdata)
->>>>>>> origin/master
 
     # Training outputs
     outputs = nn.predict(traindata)
@@ -251,7 +242,6 @@ def trainParam():
 
 
 def scikitlearnFunc(x, alpha):
-    #print "scikitlearnTest"
     nn = pickle.load(open('data/param.pkl','rb'))
     #print "inouttest input was", x
     traindata = np.array((x, alpha), ndmin=2)
@@ -264,7 +254,7 @@ def scikitlearnFunc(x, alpha):
     return outputs[[0]]
 
 
-def testSciKitLearnWrapper():
+def parameterizedRunner():
     alpha = [-1.5, -1, -0.5, 0.0, +0.5, +1.0, +1.5]
     step = 100
 
@@ -286,7 +276,7 @@ def testSciKitLearnWrapper():
 
     plt.savefig('plots/paramTraining_complete.pdf')
     plt.savefig('plots/images/paramTraining_complete.png')
-    plt.show()
+    #plt.show()
 
 
 if __name__ == '__main__':
@@ -294,4 +284,4 @@ if __name__ == '__main__':
     plotPDF()
     trainFixed()
     trainParam()
-    testSciKitLearnWrapper()
+    parameterizedRunner()

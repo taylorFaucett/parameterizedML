@@ -63,14 +63,6 @@
 	},
 	"buffers":
 	[
-		{
-			"file": "GausSigOnFlatBkg_dev_5val_nn.py",
-			"settings":
-			{
-				"buffer_size": 9867,
-				"line_ending": "Unix"
-			}
-		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -122,15 +114,17 @@
 	"expanded_folders":
 	[
 		"/Users/taylor/Documents/parameterizedML",
-		"/Users/taylor/Documents/parameterizedML/scikitneuralnetwork/docs"
+		"/Users/taylor/Documents/parameterizedML/plots"
 	],
 	"file_history":
 	[
+		"/Users/taylor/Documents/parameterizedML/GausSigOnFlatBkg.py",
+		"/Users/taylor/Documents/parameterizedML/README.md",
+		"/Users/taylor/Documents/parameterizedML/GausSigOnFlatBkg_dev_5val_nn.py",
 		"/Users/taylor/Documents/parameterizedML/SciKitLearnWrapper/SciKitLearnWrapper.cxx",
 		"/Users/taylor/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
 		"/Users/taylor/Documents/parametrized-learning/GausSigOnExpBkg.py",
 		"/Users/taylor/Documents/parameterizedML/data/traindata.dat",
-		"/Users/taylor/Documents/parameterizedML/README.md",
 		"/Users/taylor/Documents/paramNN_old/GausSigOnFlatBkg_dev.py",
 		"/Users/taylor/Documents/paramNN/GausSigOnFlatBkg_dev.py",
 		"/Users/taylor/Documents/paramNN/GausSigOnFlatBkg.py",
@@ -170,6 +164,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"pdf",
 			"nparray",
 			"clf",
 			"clfnn",
@@ -296,8 +291,7 @@
 			"SciKitLearnWrapperNd",
 			"alpha=",
 			"sigmorph",
-			"template",
-			"black"
+			"template"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -325,39 +319,8 @@
 	"groups":
 	[
 		{
-			"selected": 0,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "GausSigOnFlatBkg_dev_5val_nn.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9867,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9825,
-								9825
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				}
 			]
 		}
 	],
