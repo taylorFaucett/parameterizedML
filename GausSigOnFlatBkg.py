@@ -22,8 +22,13 @@ import matplotlib.pyplot as plt
 
 import sys
 import logging
-import time
 
+'''
+logging.basicConfig(
+            format="%(message)s",
+            level=logging.DEBUG,
+            stream=sys.stdout)
+'''
 
 plt_color=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
 
@@ -154,7 +159,7 @@ def trainFixed():
     # Initialize ML method (SVM or NN)
     print "Machine Learning method initialized"
     #nn = svm.NuSVR(nu=1)
-    nn = Regressor(layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],learning_rate=0.02,n_iter=100)
+    nn = Regressor(layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],learning_rate=0.02,n_iter=10)
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
 
     for i in range(len(muPoints)):
@@ -176,7 +181,8 @@ def trainFixed():
         # fit(Training Vectors, Target Values)
         # reducedtrain.reshape((NUM OF VALUES, feature))
         nn.fit(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
-
+        fit_score = nn.score(reducedtrain.reshape((len(reducedtrain), 1)), reducedtarget)
+        print 'score = %s' %fit_score
         # predict(X) - Performs a regression on samples in X
         outputs = nn.predict(testdata[:, 0].reshape((len(testdata), 1)))
         plt.plot(testdata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' % muPoints[i])
@@ -215,10 +221,12 @@ def trainParam():
     print "Machine Learning method initialized"
 
     #nn = svm.NuSVR(nu=1)
-    nn = Regressor(layers =[Layer("Sigmoid", units=100),Layer("Sigmoid")],learning_rate=0.02,n_iter=100)
+    nn = Regressor(layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],learning_rate=0.02,n_iter=10)
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
     nn.fit(traindata, targetdata)
-
+    
+    fit_score = nn.score(traindata, targetdata)
+    print 'score = %s' %fit_score
     # Training outputs
     outputs = nn.predict(traindata)
 
