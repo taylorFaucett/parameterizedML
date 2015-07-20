@@ -14,7 +14,7 @@ import ROOT
 import numpy as np
 from sklearn import svm
 from sklearn.externals import joblib
-from sknn.mlp import Regressor, Classifier, Layer
+from sknn.mlp import Regressor, Classifier, Layer, Convolution
 import pickle
 
 
@@ -159,7 +159,18 @@ def trainFixed():
     # Initialize ML method (SVM or NN)
     print "Machine Learning method initialized"
     #nn = svm.NuSVR(nu=1)
-    nn = Regressor(layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],learning_rate=0.02,n_iter=10)
+    nn = Regressor(
+        layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],
+        learning_rate=0.01,
+        n_iter=100, 
+        #learning_momentum=0.1,
+        #batch_size=5,
+        #learning_rule="nesterov",  
+        #valid_size=0.05,
+        #verbose=True,
+        #debug=True
+        )
+    print nn
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
 
     for i in range(len(muPoints)):
@@ -168,7 +179,6 @@ def trainFixed():
         lowChunk      = i
         highChunk     = i + 1
 
-        #colorArray    = ["blue", "green", "red"]
         # reducedtrain and reducedtarget cut the full dataset down into pieces
         # consisting of just a single "chunk" of data corresponding to a specific
         # mu value
@@ -193,10 +203,10 @@ def trainFixed():
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
     plt.ylabel('NN_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-3, 3])
+    plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
-    plt.suptitle('Theano NN classification output for fixed gaussians',
+    plt.suptitle('Theano NN regression output for fixed gaussians',
                fontsize=12, fontweight='bold')
 
     #plt.show()
@@ -221,7 +231,19 @@ def trainParam():
     print "Machine Learning method initialized"
 
     #nn = svm.NuSVR(nu=1)
-    nn = Regressor(layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],learning_rate=0.02,n_iter=10)
+    nn = Regressor(
+        layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],
+        learning_rate=0.01,
+        n_iter=100, 
+        #learning_momentum=0.1,
+        #batch_size=5,
+        #learning_rule="nesterov",  
+        #valid_size=0.05,
+        #verbose=True,
+        #debug=True
+        )
+    print nn
+
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
     nn.fit(traindata, targetdata)
     
@@ -234,7 +256,7 @@ def trainParam():
     plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-3, 3])
+    plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
@@ -288,8 +310,8 @@ def parameterizedRunner():
 
 
 if __name__ == '__main__':
-    makeData()
-    plotPDF()
+    #makeData()
+    #plotPDF()
     trainFixed()
-    trainParam()
-    parameterizedRunner()
+    #trainParam()
+    #parameterizedRunner()
