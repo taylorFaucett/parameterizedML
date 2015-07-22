@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 
 import sys
 import logging
+import time
 
 '''
 logging.basicConfig(
@@ -318,6 +319,42 @@ def parameterizedRunner():
     plt.savefig('plots/images/paramTraining_complete.png')
     #plt.show()
 
+
+
+def mwwbb_importer():
+    mwwbb_400 = 'data/1d_poi/xttbar_14tev_mx400_jes1.0.root'
+    mwwbb_500 = 'data/1d_poi/xttbar_14tev_mx500_jes1.0.root'
+    mwwbb_600 = 'data/1d_poi/xttbar_14tev_mx600_jes1.0.root'
+    mwwbb_700 = 'data/1d_poi/xttbar_14tev_mx700_jes1.0.root'
+    mwwbb_800 = 'data/1d_poi/xttbar_14tev_mx800_jes1.0.root'
+    mwwbb_900 = 'data/1d_poi/xttbar_14tev_mx900_jes1.0.root'
+    mwwbb_1000 = 'data/1d_poi/xttbar_14tev_mx1000_jes1.0.root'
+    mwwbb_1100 = 'data/1d_poi/xttbar_14tev_mx1100_jes1.0.root'
+    mwwbb_1200 = 'data/1d_poi/xttbar_14tev_mx1200_jes1.0.root'
+    mwwbb_1300 = 'data/1d_poi/xttbar_14tev_mx1300_jes1.0.root'
+    mwwbb_1400 = 'data/1d_poi/xttbar_14tev_mx1400_jes1.0.root'
+    mwwbb_1500 = 'data/1d_poi/xttbar_14tev_mx1500_jes1.0.root'
+
+    mwwbb_list = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100,
+        mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    for i in range(1):
+        f = ROOT.TFile(mwwbb_list[i])
+        t = f.Get('xtt')
+        t.Print()
+        t.Draw('mwwbb')
+        array = []
+        for n in range(100):
+            a = t.Scan('mwwbb','mwwbb','',1,n)
+            aa = a.GetValue(a)
+            array.append(aa)
+        print array
+    #print f.ls()
+    #t = f.Get('xtt')
+    #t.Print()
+    #mwwbb_array= np.zeros((2*1334, 3))
+    #print t
+
+
 def mwwbb_histogram():
     mwwbb_400 = np.loadtxt('data/mwwbb/mwwbb_400.dat')
     mwwbb_500 = np.loadtxt('data/mwwbb/mwwbb_500.dat')
@@ -391,11 +428,14 @@ def mwwbb_fixed():
     #plt.xlim([-5, 5])
     plt.ylim([-0.2, 1.2])    
     plt.show()
+
+
 if __name__ == '__main__':
+    mwwbb_importer()
     #mwwbb_histogram()
     #mwwbb_fixed()
     #makeData()
     #plotPDF()
     #trainFixed()
     #trainParam()
-    parameterizedRunner()
+    #parameterizedRunner()
