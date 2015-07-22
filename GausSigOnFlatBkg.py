@@ -12,10 +12,14 @@ these gaussian signals with a parameter by a secondary input (alpha).
 
 import ROOT
 import numpy as np
+import pylab as P
 from sklearn import svm
 from sklearn.externals import joblib
 from sknn.mlp import Regressor, Classifier, Layer, Convolution
 import pickle
+
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler
 
 
 import matplotlib.pyplot as plt
@@ -30,7 +34,7 @@ logging.basicConfig(
             stream=sys.stdout)
 '''
 
-plt_color=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
+plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
 
 def makeData():
     print "Entering makeData"
@@ -72,7 +76,7 @@ def makeData():
     testdata1  = np.zeros((numTest * musteps, 2))
 
     # Fill traindata, testdata and testdata1
-    for mustep, muval in enumerate(np.linspace(-2, 2, musteps)):
+    for mustep, muval in enumerate(np.linspace(-1, 1, musteps)):
         mu.setVal(muval)
         sigdata = sigpdf.generate(ROOT.RooArgSet(x), numTrain)
         bkgdata = bkgpdf.generate(ROOT.RooArgSet(x), numTrain)
@@ -132,6 +136,7 @@ def plotPDF():
     c1.SaveAs('plots/images/modelPlot.png')
 
 
+
 def trainFixed():
     '''
     train a machine learner based on data from some fixed parameter point.
@@ -159,17 +164,20 @@ def trainFixed():
     # Initialize ML method (SVM or NN)
     print "Machine Learning method initialized"
     #nn = svm.NuSVR(nu=1)
-    nn = Regressor(
-        layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],
-        learning_rate=0.01,
-        n_iter=100, 
-        #learning_momentum=0.1,
-        #batch_size=5,
-        #learning_rule="nesterov",  
-        #valid_size=0.05,
-        #verbose=True,
-        #debug=True
-        )
+    nn = Pipeline([
+        ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
+        ('neural network', 
+            Regressor(
+                layers =[Layer("Sigmoid", units=10),Layer("Sigmoid")],
+                learning_rate=0.01,
+                n_iter=100, 
+                #learning_momentum=0.1,
+                #batch_size=5,
+                learning_rule="nesterov",  
+                #valid_size=0.05,
+                #verbose=True,
+                #debug=True
+                ))])
     print nn
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
 
@@ -208,7 +216,6 @@ def trainFixed():
     plt.grid(True)
     plt.suptitle('Theano NN regression output for fixed gaussians',
                fontsize=12, fontweight='bold')
-
     #plt.show()
     plt.savefig('plots/fixedTraining.pdf')
     plt.savefig('plots/images/fixedTraining.png')
@@ -231,17 +238,20 @@ def trainParam():
     print "Machine Learning method initialized"
 
     #nn = svm.NuSVR(nu=1)
-    nn = Regressor(
-        layers =[Layer("Sigmoid", units=2),Layer("Sigmoid")],
-        learning_rate=0.01,
-        n_iter=100, 
-        #learning_momentum=0.1,
-        #batch_size=5,
-        #learning_rule="nesterov",  
-        #valid_size=0.05,
-        #verbose=True,
-        #debug=True
-        )
+    nn = Pipeline([
+        ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
+        ('neural network', 
+            Regressor(
+                layers =[Layer("Sigmoid", units=10),Layer("Sigmoid")],
+                learning_rate=0.01,
+                n_iter=100, 
+                #learning_momentum=0.1,
+                #batch_size=5,
+                learning_rule="nesterov",  
+                #valid_size=0.05,
+                #verbose=True,
+                #debug=True
+                ))])
     print nn
 
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
@@ -285,20 +295,20 @@ def scikitlearnFunc(x, alpha):
 
 
 def parameterizedRunner():
-    alpha = [-1.5, -1, -0.5, 0.0, +0.5, +1.0, +1.5]
+    alpha = [-1, -0.5, 0.0, +0.5, +1.0]
     step = 100
-
+    print "Running on %s alpha values: %s" %(len(alpha), alpha)
     for a in range(len(alpha)):
         print 'working on alpha=%s' %alpha[a]
         for x in range(-500, 500, 1):
             outputs = scikitlearnFunc(x/100., alpha[a])
-            plt.plot(x/100., outputs[0], plt_color[a], alpha=0.5)
+            plt.plot(x/100., outputs[0], plt_marker[a], alpha=0.5)
     for i in range(len(alpha)):
-        plt.plot(-4,0, plt_color[i], alpha=0.5, label="$\mu=$%s" %alpha[i])
+        plt.plot(-4,0, plt_marker[i], alpha=0.5, label="$\mu=$%s" %alpha[i])
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
     plt.ylabel('NN_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-3, 3])
+    plt.xlim([alpha[0]-1, alpha[-1]+1])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
     plt.suptitle('Theano NN regression output for parameterized gaussians',
@@ -308,10 +318,84 @@ def parameterizedRunner():
     plt.savefig('plots/images/paramTraining_complete.png')
     #plt.show()
 
+def mwwbb_histogram():
+    mwwbb_400 = np.loadtxt('data/mwwbb/mwwbb_400.dat')
+    mwwbb_500 = np.loadtxt('data/mwwbb/mwwbb_500.dat')
+    mwwbb_600 = np.loadtxt('data/mwwbb/mwwbb_600.dat')
+    mwwbb_700 = np.loadtxt('data/mwwbb/mwwbb_700.dat')
+    mwwbb_800 = np.loadtxt('data/mwwbb/mwwbb_800.dat')
+    mwwbb_900 = np.loadtxt('data/mwwbb/mwwbb_900.dat')
+    mwwbb_1000 = np.loadtxt('data/mwwbb/mwwbb_1000.dat')
+    mwwbb_1100 = np.loadtxt('data/mwwbb/mwwbb_1100.dat')
+    mwwbb_1200 = np.loadtxt('data/mwwbb/mwwbb_1200.dat')
+    mwwbb_1300 = np.loadtxt('data/mwwbb/mwwbb_1300.dat')
+    mwwbb_1400 = np.loadtxt('data/mwwbb/mwwbb_1400.dat')
+    mwwbb_1500 = np.loadtxt('data/mwwbb/mwwbb_1500.dat')
 
+    mwwbb_list = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100,
+        mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    mwwbb_file = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
+    for i in range(12):
+        n, bins, patches = P.hist(mwwbb_list[i][:,0], 50, histtype='stepfilled')
+        P.setp(patches)
+        P.savefig('plots/mwwbb/histo_%s.pdf'%mwwbb_file[i])
+        P.clf()
+
+def mwwbb_fixed():
+    mwwbb_400 = np.loadtxt('data/mwwbb/mwwbb_400.dat')
+    mwwbb_500 = np.loadtxt('data/mwwbb/mwwbb_500.dat')
+    mwwbb_600 = np.loadtxt('data/mwwbb/mwwbb_600.dat')
+    mwwbb_700 = np.loadtxt('data/mwwbb/mwwbb_700.dat')
+    mwwbb_800 = np.loadtxt('data/mwwbb/mwwbb_800.dat')
+    mwwbb_900 = np.loadtxt('data/mwwbb/mwwbb_900.dat')
+    mwwbb_1000 = np.loadtxt('data/mwwbb/mwwbb_1000.dat')
+    mwwbb_1100 = np.loadtxt('data/mwwbb/mwwbb_1100.dat')
+    mwwbb_1200 = np.loadtxt('data/mwwbb/mwwbb_1200.dat')
+    mwwbb_1300 = np.loadtxt('data/mwwbb/mwwbb_1300.dat')
+    mwwbb_1400 = np.loadtxt('data/mwwbb/mwwbb_1400.dat')
+    mwwbb_1500 = np.loadtxt('data/mwwbb/mwwbb_1500.dat')
+    mwwbb_list = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100,
+        mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    mwwbb_file = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
+
+    traindata = mwwbb_400[:, 0:2]
+    targetdata = mwwbb_400[:, 2]
+    print traindata
+    print targetdata
+
+    nn = Pipeline([
+        ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
+        ('neural network', 
+            Regressor(
+                layers =[Layer("Sigmoid", units=10),Layer("Sigmoid")],
+                learning_rate=0.01,
+                n_iter=100, 
+                #learning_momentum=0.1,
+                #batch_size=5,
+                learning_rule="nesterov",  
+                #valid_size=0.05,
+                #verbose=True,
+                #debug=True
+                ))])
+
+
+
+    nn.fit(traindata, targetdata)
+    
+    fit_score = nn.score(traindata, targetdata)
+    print 'score = %s' %fit_score
+    # Training outputs
+    outputs = nn.predict(traindata)
+
+    plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=400$')
+    #plt.xlim([-5, 5])
+    plt.ylim([-0.2, 1.2])    
+    plt.show()
 if __name__ == '__main__':
+    #mwwbb_histogram()
+    #mwwbb_fixed()
     #makeData()
     #plotPDF()
-    trainFixed()
+    #trainFixed()
     #trainParam()
-    #parameterizedRunner()
+    parameterizedRunner()
