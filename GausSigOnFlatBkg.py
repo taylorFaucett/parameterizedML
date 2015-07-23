@@ -283,7 +283,7 @@ def trainParam():
 
 
 def scikitlearnFunc(x, alpha):
-    nn = pickle.load(open('data/param.pkl','rb'))
+    nn = pickle.load(open('data/mwwbb_param.pkl','rb'))
     #print "inouttest input was", x
     traindata = np.array((x, alpha), ndmin=2)
     outputs   = nn.predict(traindata)
@@ -318,6 +318,78 @@ def parameterizedRunner():
     plt.savefig('plots/paramTraining_complete.pdf')
     plt.savefig('plots/images/paramTraining_complete.png')
     #plt.show()
+
+
+def data_backg_merge():
+    numTrain = 1500
+    mwwbb_400 = np.loadtxt('data/mwwbb/mwwbb_400.dat')
+    mwwbb_500 = np.loadtxt('data/mwwbb/mwwbb_500.dat')
+    mwwbb_600 = np.loadtxt('data/mwwbb/mwwbb_600.dat')
+    mwwbb_700 = np.loadtxt('data/mwwbb/mwwbb_700.dat')
+    mwwbb_800 = np.loadtxt('data/mwwbb/mwwbb_800.dat')
+    mwwbb_900 = np.loadtxt('data/mwwbb/mwwbb_900.dat')
+    mwwbb_1000 = np.loadtxt('data/mwwbb/mwwbb_1000.dat')
+    mwwbb_1100 = np.loadtxt('data/mwwbb/mwwbb_1100.dat')
+    mwwbb_1200 = np.loadtxt('data/mwwbb/mwwbb_1200.dat')
+    mwwbb_1300 = np.loadtxt('data/mwwbb/mwwbb_1300.dat')
+    mwwbb_1400 = np.loadtxt('data/mwwbb/mwwbb_1400.dat')
+    mwwbb_1500 = np.loadtxt('data/mwwbb/mwwbb_1500.dat')
+
+    mwwbb_list = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100,
+        mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    mwwbb_file = [400., 500., 600., 700., 800., 900., 1000., 1100., 1200., 1300., 1400., 1500.]
+
+    num_files = len(mwwbb_list)
+
+    # Initialize ROOTs RooWorkspace
+    w = ROOT.RooWorkspace('w')
+    # Generate a flat background signal
+    #print "Generating a flat background PDF"
+    w.factory('Uniform::e(x[0,7000])')
+
+    # Define variables
+    x      = w.var('x')
+    bkgpdf = w.pdf('e')
+
+    # create training, testing data
+    # np.zeros((rows, columns))
+
+    # Fill traindata, testdata and testdata1
+    print 'Generating background data and concatenting with signal data'
+    bkg_values = bkgpdf.generate(ROOT.RooArgSet(x), numTrain*12)
+    for j in range(len(mwwbb_list)):
+        bkgdata = np.zeros((numTrain, 3))
+        for i in range(numTrain):
+            bkgdata[i, 0] = bkg_values.get(i).getRealValue('x')
+            bkgdata[i, 1] = mwwbb_file[j]
+            bkgdata[i, 2] = 0
+        conc = np.concatenate((mwwbb_list[j],bkgdata))
+        np.savetxt('data/dat_merge/conc_data_%s.dat' %j, conc, fmt='%f')
+
+
+def data_backg_merge_param():
+    numTrain = 20000
+    mwwbb_complete = np.loadtxt('data/mwwbb/mwwbb_complete.dat')
+
+    # Initialize ROOTs RooWorkspace
+    w = ROOT.RooWorkspace('w')
+    # Generate a flat background signal
+    #print "Generating a flat background PDF"
+    w.factory('Uniform::e(x[-500,2000])')
+
+    # Define variables
+    x      = w.var('x')
+    bkgpdf = w.pdf('e')
+
+    print 'Generating background data and concatenting with signal data'
+    bkg_values = bkgpdf.generate(ROOT.RooArgSet(x), numTrain)
+    bkgdata = np.zeros((numTrain, 3))
+    for i in range(numTrain):
+        bkgdata[i, 0] = bkg_values.get(i).getRealValue('x')
+        bkgdata[i, 1] = 0
+        bkgdata[i, 2] = 0
+    conc = np.concatenate((mwwbb_complete,bkgdata))
+    np.savetxt('data/dat_merge/conc_data_complete.dat', conc, fmt='%f')
 
 
 
@@ -379,44 +451,92 @@ def mwwbb_histogram():
         P.clf()
 
 def mwwbb_fixed():
-    mwwbb_400 = np.loadtxt('data/mwwbb/mwwbb_400.dat')
-    mwwbb_500 = np.loadtxt('data/mwwbb/mwwbb_500.dat')
-    mwwbb_600 = np.loadtxt('data/mwwbb/mwwbb_600.dat')
-    mwwbb_700 = np.loadtxt('data/mwwbb/mwwbb_700.dat')
-    mwwbb_800 = np.loadtxt('data/mwwbb/mwwbb_800.dat')
-    mwwbb_900 = np.loadtxt('data/mwwbb/mwwbb_900.dat')
-    mwwbb_1000 = np.loadtxt('data/mwwbb/mwwbb_1000.dat')
-    mwwbb_1100 = np.loadtxt('data/mwwbb/mwwbb_1100.dat')
-    mwwbb_1200 = np.loadtxt('data/mwwbb/mwwbb_1200.dat')
-    mwwbb_1300 = np.loadtxt('data/mwwbb/mwwbb_1300.dat')
-    mwwbb_1400 = np.loadtxt('data/mwwbb/mwwbb_1400.dat')
-    mwwbb_1500 = np.loadtxt('data/mwwbb/mwwbb_1500.dat')
-    mwwbb_list = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100,
-        mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    mwwbb_400 = np.loadtxt('data/dat_merge/conc_data_0.dat')
+    mwwbb_500 = np.loadtxt('data/dat_merge/conc_data_1.dat')
+    mwwbb_600 = np.loadtxt('data/dat_merge/conc_data_2.dat')
+    mwwbb_700 = np.loadtxt('data/dat_merge/conc_data_3.dat')
+    mwwbb_800 = np.loadtxt('data/dat_merge/conc_data_4.dat')
+    mwwbb_900 = np.loadtxt('data/dat_merge/conc_data_5.dat')
+    mwwbb_1000 = np.loadtxt('data/dat_merge/conc_data_6.dat')
+    mwwbb_1100 = np.loadtxt('data/dat_merge/conc_data_7.dat')
+    mwwbb_1200 = np.loadtxt('data/dat_merge/conc_data_8.dat')
+    mwwbb_1300 = np.loadtxt('data/dat_merge/conc_data_9.dat')
+    mwwbb_1400 = np.loadtxt('data/dat_merge/conc_data_10.dat')
+    mwwbb_1500 = np.loadtxt('data/dat_merge/conc_data_11.dat')
+    mwwbb_train = [mwwbb_400[:,0:2], mwwbb_500[:,0:2], mwwbb_600[:,0:2], mwwbb_700[:,0:2],
+        mwwbb_800[:,0:2], mwwbb_900[:,0:2], mwwbb_1000[:,0:2], mwwbb_1100[:,0:2],
+        mwwbb_1200[:,0:2], mwwbb_1300[:,0:2], mwwbb_1400[:,0:2], mwwbb_1500[:,0:2]]
+    mwwbb_target = [mwwbb_400[:,2], mwwbb_500[:,2], mwwbb_600[:,2], mwwbb_700[:,2],
+        mwwbb_800[:,2], mwwbb_900[:,2], mwwbb_1000[:,2], mwwbb_1100[:,2],
+        mwwbb_1200[:,2], mwwbb_1300[:,2], mwwbb_1400[:,2], mwwbb_1500[:,2]]
     mwwbb_file = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
+    mwwbb_text = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
 
-    traindata = mwwbb_400[:, 0:2]
-    targetdata = mwwbb_400[:, 2]
+
+    for i in range(len(mwwbb_train)):
+        print 'Working on mu=%s' %mwwbb_text[i]
+        traindata = mwwbb_train[i]
+        targetdata = mwwbb_target[i]
+        nn = Pipeline([
+            ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
+            ('neural network', 
+                Regressor(
+                    layers =[Layer("Sigmoid", units=10),Layer("Sigmoid")],
+                    learning_rate=0.01,
+                    n_iter=500, 
+                    #learning_momentum=0.1,
+                    #batch_size=5,
+                    learning_rule="nesterov",  
+                    #valid_size=0.05,
+                    #verbose=True,
+                    #debug=True
+                    ))])
+
+
+
+        nn.fit(traindata, targetdata)
+        
+        fit_score = nn.score(traindata, targetdata)
+        print 'score = %s' %fit_score
+        # Training outputs
+        outputs = nn.predict(traindata)
+
+        plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' %mwwbb_text[i])
+    plt.xlim([0, 3000])
+    plt.ylim([-0.2, 1.2])    
+    plt.legend(bbox_to_anchor=(0.85, 1.05), loc=2, borderaxespad=0)    
+    #plt.show()
+    plt.savefig('plots/mwwbb_fixed.pdf')
+    plt.savefig('plots/images/mwwbb_fixed.png')
+
+def mwwbb_parameterized():
+    mwwbb_complete = np.loadtxt('data/dat_merge/conc_data_complete.dat')
+
+    traindata      = mwwbb_complete[:,0:2]
+    targetdata      = mwwbb_complete[:,2]
     print traindata
     print targetdata
+    # Initialize ML method (SVM or NN)
+    print "Machine Learning method initialized"
 
+    #nn = svm.NuSVR(nu=1)
     nn = Pipeline([
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
         ('neural network', 
             Regressor(
-                layers =[Layer("Sigmoid", units=10),Layer("Sigmoid")],
+                layers =[Layer("Sigmoid", units=100),Layer("Sigmoid")],
                 learning_rate=0.01,
-                n_iter=100, 
+                n_iter=30, 
                 #learning_momentum=0.1,
                 #batch_size=5,
                 learning_rule="nesterov",  
                 #valid_size=0.05,
-                #verbose=True,
+                verbose=True,
                 #debug=True
                 ))])
+    print nn
 
-
-
+    #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
     nn.fit(traindata, targetdata)
     
     fit_score = nn.score(traindata, targetdata)
@@ -424,18 +544,58 @@ def mwwbb_fixed():
     # Training outputs
     outputs = nn.predict(traindata)
 
-    plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=400$')
+    # Plot settings
+    plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
+    plt.ylabel('sv_output( training_input )')
+    plt.xlabel('training_input')
     #plt.xlim([-5, 5])
-    plt.ylim([-0.2, 1.2])    
-    plt.show()
+    plt.ylim([-0.2, 1.2])
+    #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
+    #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
+    plt.grid(True)
+    plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
+               fontsize=14, fontweight='bold')
+    plt.savefig('plots/mwwbbParamTraining.pdf')
+    plt.savefig('plots/images/mwwbbParamTraining.png')
+    #plt.show()
+    plt.clf()
 
+    pickle.dump(nn, open('data/mwwbb_param.pkl', 'wb'))
 
-if __name__ == '__main__':
-    mwwbb_importer()
+def mwwbbParameterizedRunner():
+    alpha = [400, 450, 500, 550, 600]
+    step = 100
+    print "Running on %s alpha values: %s" %(len(alpha), alpha)
+    for a in range(len(alpha)):
+        print 'working on alpha=%s' %alpha[a]
+        for x in range(0,2000, 1):
+            outputs = scikitlearnFunc(x, alpha[a])
+            plt.plot(x, outputs[0], plt_marker[a], alpha=0.5)
+    for i in range(len(alpha)):
+        plt.plot(-4,0, plt_marker[i], alpha=0.5, label="$\mu=$%s" %alpha[i])
+    plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
+    plt.ylabel('NN_output( training_input )')
+    plt.xlabel('training_input')
+    plt.xlim([alpha[0]-100, alpha[-1]+100])
+    plt.ylim([-0.2, 1.2])
+    plt.grid(True)
+    plt.suptitle('Theano NN regression output for parameterized gaussians',
+               fontsize=12, fontweight='bold')
+
+    plt.savefig('plots/mwwbbParamTraining_complete.pdf')
+    plt.savefig('plots/images/mwwbbParamTraining_complete.png')
+    #plt.show()
+
+if __name__ == '__main__':   
+    data_backg_merge()
+    #mwwbb_importer()
     #mwwbb_histogram()
-    #mwwbb_fixed()
+    mwwbb_fixed()
     #makeData()
     #plotPDF()
     #trainFixed()
     #trainParam()
     #parameterizedRunner()
+    #data_backg_merge_param()
+    #mwwbb_parameterized()
+    #mwwbbParameterizedRunner()
