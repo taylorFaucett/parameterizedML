@@ -30,10 +30,28 @@ Running the same analysis on real world data
 
 for 12 energy samples
 
-| ![Histogram 400](/mwwbb/plots/images/histograms/histo_400.png) | ![Histogram 500](/mwwbb/plots/images/histograms/histo_500.png) | ![Histogram 600](/mwwbb/plots/images/histograms/histo_600.png) |
-| ![Histogram 700](/mwwbb/plots/images/histograms/histo_700.png) | ![Histogram 800](/mwwbb/plots/images/histograms/histo_800.png) | ![Histogram 900](/mwwbb/plots/images/histograms/histo_900.png) |
-| ![Histogram 1000](/mwwbb/plots/images/histograms/histo_1000.png) | ![Histogram 1100](/mwwbb/plots/images/histograms/histo_1100.png) | ![Histogram 1200](/mwwbb/plots/images/histograms/histo_1200.png) |
-| ![Histogram 1300](/mwwbb/plots/images/histograms/histo_1300.png) | ![Histogram 1400](/mwwbb/plots/images/histograms/histo_1400.png) | ![Histogram 1500](/mwwbb/plots/images/histograms/histo_1500.png) |
+<table style="width:100%">
+  <tr>
+    <td><img src="mwwbb/plots/images/histograms/histo_400.png" alt="Histogram 400"></td>
+    <td><img src="mwwbb/plots/images/histograms/histo_500.png" alt="Histogram 500"></td>		
+    <td><img src="mwwbb/plots/images/histograms/histo_600.png" alt="Histogram 600"></td>
+  </tr>
+  <tr>
+    <td><img src="mwwbb/plots/images/histograms/histo_700.png" alt="Histogram 700"></td>
+    <td><img src="mwwbb/plots/images/histograms/histo_800.png" alt="Histogram 800"></td>		
+    <td><img src="mwwbb/plots/images/histograms/histo_900.png" alt="Histogram 900"></td>
+  </tr>
+  <tr>
+    <td><img src="mwwbb/plots/images/histograms/histo_1000.png" alt="Histogram 1000"></td>
+    <td><img src="mwwbb/plots/images/histograms/histo_1100.png" alt="Histogram 1100"></td>		
+    <td><img src="mwwbb/plots/images/histograms/histo_1200.png" alt="Histogram 1200"></td>
+  </tr>
+  <tr>
+    <td><img src="mwwbb/plots/images/histograms/histo_1300.png" alt="Histogram 1300"></td>
+    <td><img src="mwwbb/plots/images/histograms/histo_1400.png" alt="Histogram 1400"></td>		
+    <td><img src="mwwbb/plots/images/histograms/histo_1500.png" alt="Histogram 1500"></td>
+  </tr>
+</table>
 
 ### Fixed Training
 
