@@ -16,11 +16,11 @@ Theano/Pylearn2's NN learns from these inputs and maps testdata to signal/backgr
 ### Parameterized Training
 using those same sets of training gaussians
 
-![Complete Gaussian Set](/plots/images/paramTraining.png)
+![Complete Gaussian Set](/gaussian/plots/images/paramTraining.png)
 
 Changing the input to be parameterized in terms of a variable (alpha) such that input = (x, alpha), the NN can now train across the parameterized input such that output for untrainined mu values (e.g. mu=-1.5, -0.5, 0.5, 1.5) can interpolate from trained gaussians in those untrained regions.
 
-![Parameterized Training (Complete Set)](/plots/images/paramTraining_complete.png)
+![Parameterized Training (Complete Set)](/gaussian/plots/images/paramTraining_complete.png)
 
 ## X->ttbar data
 
