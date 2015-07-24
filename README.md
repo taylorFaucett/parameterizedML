@@ -55,10 +55,10 @@ for 12 energy samples
 
 ### Fixed Training
 
-![X->ttbar](/mwwbb/plots/images/fixedTraining.png)
+![mwwbb Fixed Training](/mwwbb/plots/images/fixedTraining.png)
 
 ### Parameterized Training
 For fixed training at mu=500, 1000, 1500 
-![X->ttbar](/mwwbb/plots/images/paramTraining.png)
+![mwwbb Parameterized Training](/mwwbb/plots/images/paramTraining.png)
 we can interpolate at energies not trained for (i.e. mu=750, 1250)
-![X->ttbar](/mwwbb/plots/images/paramTraining_complete.png)
+![mwwbb Parameterized Training Complete](/mwwbb/plots/images/paramTraining_complete.png)

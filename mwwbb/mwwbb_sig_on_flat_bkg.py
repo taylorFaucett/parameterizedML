@@ -114,7 +114,7 @@ def plt_histogram():
     mx_text = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
 
     for i in range(12):
-        n, bins, patches = plt.hist(mwwbb_raw[i][:,0], 50, histtype='stepfilled')
+        n, bins, patches = plt.hist(mwwbb_raw[i][:,0], 50, histtype='stepfilled', alpha=0.75)
         plt.setp(patches)
         plt.title('mx = %s' %mx_values[i])
         plt.grid(True)
@@ -168,7 +168,7 @@ def mwwbb_fixed(iterations):
     mwwbb_text = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
 
 
-    for i in range(1):
+    for i in range(len(mwwbb_train)):
         print 'Working on mu=%s' %mwwbb_text[i]
         traindata = mwwbb_train[i]
         targetdata = mwwbb_target[i]
@@ -293,9 +293,9 @@ def mwwbbParameterizedRunner():
     #plt.show()
 
 if __name__ == '__main__':   
-    bkg_merge()
-    param_merge()
+    #bkg_merge()
+    #param_merge()
     plt_histogram()
-    mwwbb_fixed(250)
-    mwwbb_parameterized(250)
-    mwwbbParameterizedRunner()
+    #mwwbb_fixed(250)
+    #mwwbb_parameterized(250)
+    #mwwbbParameterizedRunner()
