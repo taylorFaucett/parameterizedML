@@ -30,7 +30,7 @@ Running the same analysis on real world data
 
 ![Histogram 400](/mwwbb/plots/images/histograms/histo_400.png)
 
-for 12 energy samples
+for 12 energy samples:
 
 <table style="width:100%">
   <tr>
