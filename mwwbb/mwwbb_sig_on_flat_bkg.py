@@ -96,6 +96,7 @@ def param_merge():
     np.savetxt('data/mwwbb/mwwbb_complete.dat', data_complete, fmt='%f')
 
 def plt_histogram():
+    bin_size = 50
     mwwbb_400 = np.loadtxt('data/mwwbb_raw/mwwbb_400.dat')
     mwwbb_500 = np.loadtxt('data/mwwbb_raw/mwwbb_500.dat')
     mwwbb_600 = np.loadtxt('data/mwwbb_raw/mwwbb_600.dat')
@@ -114,12 +115,14 @@ def plt_histogram():
     mx_text = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
 
     for i in range(12):
-        n, bins, patches = plt.hist(mwwbb_raw[i][:,0], 50, histtype='stepfilled', alpha=0.75)
+        n, bins, patches = plt.hist(mwwbb_raw[i][:,0], bins=range(0,4000, bin_size), histtype='stepfilled', alpha=0.75)
         plt.setp(patches)
-        plt.title('mx = %s' %mx_values[i])
+        plt.title('m$_{WWbb} =$ %s GeV/c$^2$' %mx_values[i])
+        plt.ylabel('Number of events$/%s$ GeV/c$^2$' %bin_size)
+        plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
         plt.grid(True)
         plt.xlim([0, 4000])
-        plt.ylim([0, 500])
+        plt.ylim([0, 350])
         plt.savefig('plots/histograms/histo_%s.pdf'%mx_text[i])
         plt.savefig('plots/images/histograms/histo_%s.png'%mx_text[i])
         plt.clf()
@@ -195,8 +198,10 @@ def mwwbb_fixed(iterations):
         print 'score = %s' %fit_score
         outputs = nn.predict(traindata)
         plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' %mwwbb_text[i])
-    
-    plt.xlim([0, 3000])
+
+    plt.ylabel('NN_output( m$_{WWbb}$ )')
+    plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]') 
+    plt.xlim([0, 4000])
     plt.ylim([-0.2, 1.2])    
     plt.legend(bbox_to_anchor=(0.85, 1.05), loc=2, borderaxespad=0)
     plt.grid(True)
@@ -242,8 +247,8 @@ def mwwbb_parameterized(iterations):
 
     # Plot settings
     plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
-    plt.ylabel('NN_output ( training_input )')
-    plt.xlabel('training_input')
+    plt.ylabel('NN_output( m$_{WWbb}$ )')
+    plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
     plt.xlim([0, 4000])
     plt.ylim([-0.2, 1.2])
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
@@ -280,8 +285,8 @@ def mwwbbParameterizedRunner():
     for i in range(len(alpha)):
         plt.plot(-4,0, plt_marker[i], alpha=0.5, label="$\mu=$%s" %alpha[i])
     plt.legend(bbox_to_anchor=(0.735, 0.98), loc=2, borderaxespad=0)
-    plt.ylabel('NN_output( training_input )')
-    plt.xlabel('training_input')
+    plt.ylabel('NN_output( m$_{WWbb}$ )')
+    plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
     plt.xlim([0, 4000])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
@@ -296,6 +301,6 @@ if __name__ == '__main__':
     #bkg_merge()
     #param_merge()
     plt_histogram()
-    #mwwbb_fixed(250)
-    #mwwbb_parameterized(250)
-    #mwwbbParameterizedRunner()
+    mwwbb_fixed(500)
+    mwwbb_parameterized(250)
+    mwwbbParameterizedRunner()

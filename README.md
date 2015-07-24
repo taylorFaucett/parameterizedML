@@ -22,6 +22,8 @@ Changing the input to be parameterized in terms of a variable (alpha) such that 
 
 ![Parameterized Training (Complete Set)](/gaussian/plots/images/paramTraining_complete.png)
 
+---
+
 ## X->ttbar data
 
 Running the same analysis on real world data

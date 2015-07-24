@@ -171,14 +171,14 @@ def trainFixed(iterations):
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
         ('neural network', 
             Regressor(
-                layers =[Layer("Sigmoid", units=10),Layer("Sigmoid")],
+                layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                 learning_rate=0.01,
                 n_iter=iterations, 
                 #learning_momentum=0.1,
                 #batch_size=5,
                 learning_rule="nesterov",  
                 #valid_size=0.05,
-                #verbose=True,
+                verbose=True,
                 #debug=True
                 ))])
     print nn
@@ -214,7 +214,7 @@ def trainFixed(iterations):
     plt.legend(bbox_to_anchor=(0.02, 0.98), loc=2, borderaxespad=0)
     plt.ylabel('NN_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-5, 5])
+    plt.xlim([-3, 3])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
     plt.suptitle('Theano NN regression output for fixed gaussians',
@@ -245,14 +245,14 @@ def trainParam(iterations):
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
         ('neural network', 
             Regressor(
-                layers =[Layer("Sigmoid", units=10),Layer("Sigmoid")],
+                layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                 learning_rate=0.01,
                 n_iter=iterations, 
                 #learning_momentum=0.1,
                 #batch_size=5,
                 learning_rule="nesterov",  
                 #valid_size=0.05,
-                #verbose=True,
+                verbose=True,
                 #debug=True
                 ))])
     print nn
@@ -269,12 +269,12 @@ def trainParam(iterations):
     plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5)
     plt.ylabel('sv_output( training_input )')
     plt.xlabel('training_input')
-    plt.xlim([-5, 5])
+    plt.xlim([-3, 3])
     plt.ylim([-0.2, 1.2])
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
-    plt.suptitle('Parametrized SV Mapping (SV Output vs Data Input)',
+    plt.suptitle('Theano NN training of fixed gaussians',
                fontsize=14, fontweight='bold')
     plt.savefig('plots/paramTraining.pdf')
     plt.savefig('plots/images/paramTraining.png')
@@ -325,6 +325,6 @@ def parameterizedRunner():
 if __name__ == '__main__':   
     makeData()
     plotPDF()
-    trainFixed(100)
-    trainParam(100)
+    trainFixed(250)
+    trainParam(250)
     parameterizedRunner()
