@@ -1,3 +1,0 @@
-tv__tree = (TTree *)0x7fecce8fad50;
-tv__tree_list->Add(tv__tree);
-tv__tree->Scan("mx","","", 1335, 0);
