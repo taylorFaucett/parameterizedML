@@ -197,7 +197,7 @@ def mwwbb_fixed(iterations):
         fit_score = nn.score(traindata, targetdata)
         print 'score = %s' %fit_score
         outputs = nn.predict(traindata)
-        plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' %mwwbb_text[i])
+        plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s GeV/c$^2$' %mwwbb_text[i])
 
     plt.ylabel('NN_output( m$_{WWbb}$ )')
     plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]') 
@@ -205,7 +205,7 @@ def mwwbb_fixed(iterations):
     plt.ylim([-0.2, 1.2])    
     plt.legend(bbox_to_anchor=(0.85, 1.05), loc=2, borderaxespad=0)
     plt.grid(True)
-    plt.suptitle('Theano NN fixed training for mwwbb input', fontsize=14, fontweight='bold')    
+    plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', fontsize=14, fontweight='bold')    
     #plt.show()
     plt.savefig('plots/fixedTraining.pdf')
     plt.savefig('plots/images/fixedTraining.png')
@@ -254,7 +254,7 @@ def mwwbb_parameterized(iterations):
     #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
     #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
-    plt.suptitle('Theano NN fixed training for mwwbb input', fontsize=14, fontweight='bold')
+    plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', fontsize=14, fontweight='bold')
     plt.savefig('plots/paramTraining.pdf')
     plt.savefig('plots/images/paramTraining.png')
     #plt.show()
@@ -283,14 +283,14 @@ def mwwbbParameterizedRunner():
             outputs = scikitlearnFunc(x/1., alpha[a])
             plt.plot(x/1., outputs[0], plt_marker[a], alpha=0.5)
     for i in range(len(alpha)):
-        plt.plot(-4,0, plt_marker[i], alpha=0.5, label="$\mu=$%s" %alpha[i])
+        plt.plot(-4,0, plt_marker[i], alpha=0.5, label="$\mu=$%s GeV/c$^2$" %alpha[i])
     plt.legend(bbox_to_anchor=(0.735, 0.98), loc=2, borderaxespad=0)
     plt.ylabel('NN_output( m$_{WWbb}$ )')
     plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
     plt.xlim([0, 4000])
     plt.ylim([-0.2, 1.2])
     plt.grid(True)
-    plt.suptitle('Theano NN regression output for parameterized mwwbb input',
+    plt.suptitle('Theano NN regression output for parameterized m$_{WWbb}$ input',
                fontsize=12, fontweight='bold')
 
     plt.savefig('plots/paramTraining_complete.pdf')
@@ -301,6 +301,6 @@ if __name__ == '__main__':
     #bkg_merge()
     #param_merge()
     plt_histogram()
-    mwwbb_fixed(500)
+    #mwwbb_fixed(500)
     mwwbb_parameterized(250)
     mwwbbParameterizedRunner()
