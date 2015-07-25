@@ -4,8 +4,8 @@ author Taylor Faucett <tfaucett@uci.edu>
 This script utilizes Theano/Pylearn2 and SKLearn-NeuralNetwork to create a fixed and parameterized
 machine learning scheme. Data taken from an X->ttbar selection is imported as
 signal and a uniform (i.e. flat) background is generated and appended. mwwbb_fixed uses a regression NN
-to learn for n signals at fixed means (mx) which can map a 1D array to signal/background 
-values of 1 or 0. trainParam trains for all n signals simultaneously and then trains for 
+to learn for n signals at fixed means (mx) which can map a 1D array to signal/background
+values of 1 or 0. trainParam trains for all n signals simultaneously and then trains for
 these signals with a parameter by a secondary input (alpha).
 '''
 
@@ -22,13 +22,13 @@ from sknn.mlp import Regressor, Classifier, Layer
 plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
 
 def bkg_merge():
-    bkgNum = 2000
-    mwwbb_400 = np.loadtxt('data/mwwbb_raw/mwwbb_400.dat')
-    mwwbb_500 = np.loadtxt('data/mwwbb_raw/mwwbb_500.dat')
-    mwwbb_600 = np.loadtxt('data/mwwbb_raw/mwwbb_600.dat')
-    mwwbb_700 = np.loadtxt('data/mwwbb_raw/mwwbb_700.dat')
-    mwwbb_800 = np.loadtxt('data/mwwbb_raw/mwwbb_800.dat')
-    mwwbb_900 = np.loadtxt('data/mwwbb_raw/mwwbb_900.dat')
+    bkgNum     = 2000
+    mwwbb_400  = np.loadtxt('data/mwwbb_raw/mwwbb_400.dat')
+    mwwbb_500  = np.loadtxt('data/mwwbb_raw/mwwbb_500.dat')
+    mwwbb_600  = np.loadtxt('data/mwwbb_raw/mwwbb_600.dat')
+    mwwbb_700  = np.loadtxt('data/mwwbb_raw/mwwbb_700.dat')
+    mwwbb_800  = np.loadtxt('data/mwwbb_raw/mwwbb_800.dat')
+    mwwbb_900  = np.loadtxt('data/mwwbb_raw/mwwbb_900.dat')
     mwwbb_1000 = np.loadtxt('data/mwwbb_raw/mwwbb_1000.dat')
     mwwbb_1100 = np.loadtxt('data/mwwbb_raw/mwwbb_1100.dat')
     mwwbb_1200 = np.loadtxt('data/mwwbb_raw/mwwbb_1200.dat')
@@ -36,11 +36,11 @@ def bkg_merge():
     mwwbb_1400 = np.loadtxt('data/mwwbb_raw/mwwbb_1400.dat')
     mwwbb_1500 = np.loadtxt('data/mwwbb_raw/mwwbb_1500.dat')
 
-    mwwbb_raw = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100, mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
-    mx_values = [400.000000, 500.000000, 600.000000, 700.000000, 800.000000, 900.000000, 1000.000000, 1100.000000, 1200.000000, 1300.000000, 1400.000000, 1500.000000]
-    mx_text = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
+    mwwbb_raw  = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100, mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    mx_values  = [400.000000, 500.000000, 600.000000, 700.000000, 800.000000, 900.000000, 1000.000000, 1100.000000, 1200.000000, 1300.000000, 1400.000000, 1500.000000]
+    mx_text    = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
 
-    w = ROOT.RooWorkspace('w')
+    w          = ROOT.RooWorkspace('w')
     w.factory('Uniform::e(x[0,7000])')
 
     # Define variables
@@ -61,12 +61,12 @@ def bkg_merge():
 
 
 def param_merge():
-    mwwbb_400 = np.loadtxt('data/mwwbb/mwwbb_400.dat')
-    mwwbb_500 = np.loadtxt('data/mwwbb/mwwbb_500.dat')
-    mwwbb_600 = np.loadtxt('data/mwwbb/mwwbb_600.dat')
-    mwwbb_700 = np.loadtxt('data/mwwbb/mwwbb_700.dat')
-    mwwbb_800 = np.loadtxt('data/mwwbb/mwwbb_800.dat')
-    mwwbb_900 = np.loadtxt('data/mwwbb/mwwbb_900.dat')
+    mwwbb_400  = np.loadtxt('data/mwwbb/mwwbb_400.dat')
+    mwwbb_500  = np.loadtxt('data/mwwbb/mwwbb_500.dat')
+    mwwbb_600  = np.loadtxt('data/mwwbb/mwwbb_600.dat')
+    mwwbb_700  = np.loadtxt('data/mwwbb/mwwbb_700.dat')
+    mwwbb_800  = np.loadtxt('data/mwwbb/mwwbb_800.dat')
+    mwwbb_900  = np.loadtxt('data/mwwbb/mwwbb_900.dat')
     mwwbb_1000 = np.loadtxt('data/mwwbb/mwwbb_1000.dat')
     mwwbb_1100 = np.loadtxt('data/mwwbb/mwwbb_1100.dat')
     mwwbb_1200 = np.loadtxt('data/mwwbb/mwwbb_1200.dat')
@@ -74,13 +74,13 @@ def param_merge():
     mwwbb_1400 = np.loadtxt('data/mwwbb/mwwbb_1400.dat')
     mwwbb_1500 = np.loadtxt('data/mwwbb/mwwbb_1500.dat')
 
-    mwwbb_raw = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100, mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
-    mx_values = [400.000000, 500.000000, 600.000000, 700.000000, 800.000000, 900.000000, 1000.000000, 1100.000000, 1200.000000, 1300.000000, 1400.000000, 1500.000000]
-    mx_text = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
+    mwwbb_raw  = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100, mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    mx_values  = [400.000000, 500.000000, 600.000000, 700.000000, 800.000000, 900.000000, 1000.000000, 1100.000000, 1200.000000, 1300.000000, 1400.000000, 1500.000000]
+    mx_text    = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
 
     data_complete = np.concatenate((
-                        #mwwbb_400, 
-                        mwwbb_500, 
+                        #mwwbb_400,
+                        mwwbb_500,
                         #mwwbb_600,
                         #mwwbb_700,
                         #mwwbb_800,
@@ -90,19 +90,19 @@ def param_merge():
                         #mwwbb_1200,
                         #mwwbb_1300,
                         #mwwbb_1400,
-                        mwwbb_1500), 
+                        mwwbb_1500),
                         axis=0)
     #print data_complete
     np.savetxt('data/mwwbb/mwwbb_complete.dat', data_complete, fmt='%f')
 
 def plt_histogram():
-    bin_size = 50
-    mwwbb_400 = np.loadtxt('data/mwwbb_raw/mwwbb_400.dat')
-    mwwbb_500 = np.loadtxt('data/mwwbb_raw/mwwbb_500.dat')
-    mwwbb_600 = np.loadtxt('data/mwwbb_raw/mwwbb_600.dat')
-    mwwbb_700 = np.loadtxt('data/mwwbb_raw/mwwbb_700.dat')
-    mwwbb_800 = np.loadtxt('data/mwwbb_raw/mwwbb_800.dat')
-    mwwbb_900 = np.loadtxt('data/mwwbb_raw/mwwbb_900.dat')
+    bin_size   = 50
+    mwwbb_400  = np.loadtxt('data/mwwbb_raw/mwwbb_400.dat')
+    mwwbb_500  = np.loadtxt('data/mwwbb_raw/mwwbb_500.dat')
+    mwwbb_600  = np.loadtxt('data/mwwbb_raw/mwwbb_600.dat')
+    mwwbb_700  = np.loadtxt('data/mwwbb_raw/mwwbb_700.dat')
+    mwwbb_800  = np.loadtxt('data/mwwbb_raw/mwwbb_800.dat')
+    mwwbb_900  = np.loadtxt('data/mwwbb_raw/mwwbb_900.dat')
     mwwbb_1000 = np.loadtxt('data/mwwbb_raw/mwwbb_1000.dat')
     mwwbb_1100 = np.loadtxt('data/mwwbb_raw/mwwbb_1100.dat')
     mwwbb_1200 = np.loadtxt('data/mwwbb_raw/mwwbb_1200.dat')
@@ -110,9 +110,9 @@ def plt_histogram():
     mwwbb_1400 = np.loadtxt('data/mwwbb_raw/mwwbb_1400.dat')
     mwwbb_1500 = np.loadtxt('data/mwwbb_raw/mwwbb_1500.dat')
 
-    mwwbb_raw = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100, mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
-    mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
-    mx_text = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
+    mwwbb_raw  = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700, mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100, mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    mx_values  = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
+    mx_text    = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
 
     for i in range(12):
         n, bins, patches = plt.hist(mwwbb_raw[i][:,0], bins=range(0,4000, bin_size), histtype='stepfilled', alpha=0.75)
@@ -128,45 +128,45 @@ def plt_histogram():
         plt.clf()
 
 def mwwbb_fixed(iterations):
-    mwwbb_400 = np.loadtxt('data/mwwbb/mwwbb_400.dat')
-    mwwbb_500 = np.loadtxt('data/mwwbb/mwwbb_500.dat')
-    mwwbb_600 = np.loadtxt('data/mwwbb/mwwbb_600.dat')
-    mwwbb_700 = np.loadtxt('data/mwwbb/mwwbb_700.dat')
-    mwwbb_800 = np.loadtxt('data/mwwbb/mwwbb_800.dat')
-    mwwbb_900 = np.loadtxt('data/mwwbb/mwwbb_900.dat')
+    mwwbb_400  = np.loadtxt('data/mwwbb/mwwbb_400.dat')
+    mwwbb_500  = np.loadtxt('data/mwwbb/mwwbb_500.dat')
+    mwwbb_600  = np.loadtxt('data/mwwbb/mwwbb_600.dat')
+    mwwbb_700  = np.loadtxt('data/mwwbb/mwwbb_700.dat')
+    mwwbb_800  = np.loadtxt('data/mwwbb/mwwbb_800.dat')
+    mwwbb_900  = np.loadtxt('data/mwwbb/mwwbb_900.dat')
     mwwbb_1000 = np.loadtxt('data/mwwbb/mwwbb_1000.dat')
     mwwbb_1100 = np.loadtxt('data/mwwbb/mwwbb_1100.dat')
     mwwbb_1200 = np.loadtxt('data/mwwbb/mwwbb_1200.dat')
     mwwbb_1300 = np.loadtxt('data/mwwbb/mwwbb_1300.dat')
     mwwbb_1400 = np.loadtxt('data/mwwbb/mwwbb_1400.dat')
     mwwbb_1500 = np.loadtxt('data/mwwbb/mwwbb_1500.dat')
-    
-    mwwbb_train = [mwwbb_400[:,0:2], 
-                    mwwbb_500[:,0:2], 
-                    mwwbb_600[:,0:2], 
+
+    mwwbb_train = [mwwbb_400[:,0:2],
+                    mwwbb_500[:,0:2],
+                    mwwbb_600[:,0:2],
                     mwwbb_700[:,0:2],
-                    mwwbb_800[:,0:2], 
-                    mwwbb_900[:,0:2], 
-                    mwwbb_1000[:,0:2], 
+                    mwwbb_800[:,0:2],
+                    mwwbb_900[:,0:2],
+                    mwwbb_1000[:,0:2],
                     mwwbb_1100[:,0:2],
-                    mwwbb_1200[:,0:2], 
-                    mwwbb_1300[:,0:2], 
-                    mwwbb_1400[:,0:2], 
+                    mwwbb_1200[:,0:2],
+                    mwwbb_1300[:,0:2],
+                    mwwbb_1400[:,0:2],
                     mwwbb_1500[:,0:2]]
-    
-    mwwbb_target = [mwwbb_400[:,2], 
-                    mwwbb_500[:,2], 
-                    mwwbb_600[:,2], 
+
+    mwwbb_target = [mwwbb_400[:,2],
+                    mwwbb_500[:,2],
+                    mwwbb_600[:,2],
                     mwwbb_700[:,2],
-                    mwwbb_800[:,2], 
-                    mwwbb_900[:,2], 
-                    mwwbb_1000[:,2], 
+                    mwwbb_800[:,2],
+                    mwwbb_900[:,2],
+                    mwwbb_1000[:,2],
                     mwwbb_1100[:,2],
-                    mwwbb_1200[:,2], 
-                    mwwbb_1300[:,2], 
-                    mwwbb_1400[:,2], 
+                    mwwbb_1200[:,2],
+                    mwwbb_1300[:,2],
+                    mwwbb_1400[:,2],
                     mwwbb_1500[:,2]]
-    
+
     mwwbb_file = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
     mwwbb_text = ['400', '500', '600', '700', '800', '900', '1000', '1100', '1200', '1300', '1400', '1500']
 
@@ -177,14 +177,14 @@ def mwwbb_fixed(iterations):
         targetdata = mwwbb_target[i]
         nn = Pipeline([
             ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
-            ('neural network', 
+            ('neural network',
                 Regressor(
                     layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                     learning_rate=0.01,
-                    n_iter=iterations, 
+                    n_iter=iterations,
                     #learning_momentum=0.1,
                     #batch_size=5,
-                    learning_rule="nesterov",  
+                    learning_rule="nesterov",
                     #valid_size=0.05,
                     #verbose=True,
                     #debug=True
@@ -193,19 +193,19 @@ def mwwbb_fixed(iterations):
 
 
         nn.fit(traindata, targetdata)
-        
+
         fit_score = nn.score(traindata, targetdata)
         print 'score = %s' %fit_score
         outputs = nn.predict(traindata)
         plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s GeV/c$^2$' %mwwbb_text[i])
 
     plt.ylabel('NN_output( m$_{WWbb}$ )')
-    plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]') 
+    plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
     plt.xlim([0, 4000])
-    plt.ylim([-0.2, 1.2])    
+    plt.ylim([-0.2, 1.2])
     plt.legend(bbox_to_anchor=(0.85, 1.05), loc=2, borderaxespad=0)
     plt.grid(True)
-    plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', fontsize=14, fontweight='bold')    
+    plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', fontsize=14, fontweight='bold')
     #plt.show()
     plt.savefig('plots/fixedTraining.pdf')
     plt.savefig('plots/images/fixedTraining.png')
@@ -218,20 +218,20 @@ def mwwbb_parameterized(iterations):
     mwwbb_complete = np.loadtxt('data/mwwbb/mwwbb_complete.dat')
 
     traindata      = mwwbb_complete[:,0:2]
-    targetdata      = mwwbb_complete[:,2]
+    targetdata     = mwwbb_complete[:,2]
     print traindata
     print targetdata
 
     nn = Pipeline([
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
-        ('neural network', 
+        ('neural network',
             Regressor(
                 layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                 learning_rate=0.01,
-                n_iter=iterations, 
+                n_iter=iterations,
                 #learning_momentum=0.1,
                 #batch_size=5,
-                learning_rule="nesterov",  
+                learning_rule="nesterov",
                 #valid_size=0.05,
                 #verbose=True,
                 #debug=True
@@ -239,7 +239,7 @@ def mwwbb_parameterized(iterations):
     print nn
 
     nn.fit(traindata, targetdata)
-    
+
     fit_score = nn.score(traindata, targetdata)
     print 'score = %s' %fit_score
 
@@ -297,7 +297,7 @@ def mwwbbParameterizedRunner():
     plt.savefig('plots/images/paramTraining_complete.png')
     #plt.show()
 
-if __name__ == '__main__':   
+if __name__ == '__main__':
     #bkg_merge()
     #param_merge()
     plt_histogram()

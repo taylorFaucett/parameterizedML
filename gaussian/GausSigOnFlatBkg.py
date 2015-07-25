@@ -1,12 +1,13 @@
 '''
 author Taylor Faucett <tfaucett@uci.edu>
 
-This script utilizes Theano/Pylearn2 and SKLearn-NeuralNetwork to create a fixed and parameterized
-machine learning scheme. Datasets are generated for multiple gaussian shaped
-signals and a uniform (i.e. flat) background. trainFixed uses a regression NN
-to learn for n gaussians at fixed means (mu) which can map a 1D array to signal/background 
-values of 1 or 0. trainParam trains for all n gaussians simultaneously and then trains for 
-these gaussian signals with a parameter by a secondary input (alpha).
+This script utilizes Theano/Pylearn2 and SKLearn-NeuralNetwork to create a fixed
+and parameterized machine learning scheme. Datasets are generated for multiple
+gaussian shaped signals and a uniform (i.e. flat) background. trainFixed uses a
+regression NN to learn for n gaussians at fixed means (mu) which can map a 1D
+array to signal/background values of 1 or 0. trainParam trains for all n
+gaussians simultaneously and then trains for these gaussian signals with a
+parameter by a secondary input (alpha).
 '''
 
 
@@ -161,22 +162,22 @@ def trainFixed(iterations):
     # muPoints is a list of the gaussian averages generated (e.g. [-1, 0, 1])
     # chunk is the size of each piece of data that corresponds to one of the muPoints
     muPoints = np.unique(traindata[:, 1])
-    chunk      = len(traindata) / len(muPoints) / 2
-    shift      = len(traindata) / 2
+    chunk    = len(traindata) / len(muPoints) / 2
+    shift    = len(traindata) / 2
 
     # Initialize ML method (SVM or NN)
     print "Machine Learning method initialized"
     #nn = svm.NuSVR(nu=1)
     nn = Pipeline([
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
-        ('neural network', 
+        ('neural network',
             Regressor(
                 layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                 learning_rate=0.01,
-                n_iter=iterations, 
+                n_iter=iterations,
                 #learning_momentum=0.1,
                 #batch_size=5,
-                learning_rule="nesterov",  
+                learning_rule="nesterov",
                 #valid_size=0.05,
                 verbose=True,
                 #debug=True
@@ -243,14 +244,14 @@ def trainParam(iterations):
     #nn = svm.NuSVR(nu=1)
     nn = Pipeline([
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
-        ('neural network', 
+        ('neural network',
             Regressor(
                 layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                 learning_rate=0.01,
-                n_iter=iterations, 
+                n_iter=iterations,
                 #learning_momentum=0.1,
                 #batch_size=5,
-                learning_rule="nesterov",  
+                learning_rule="nesterov",
                 #valid_size=0.05,
                 verbose=True,
                 #debug=True
@@ -259,7 +260,7 @@ def trainParam(iterations):
 
     #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
     nn.fit(traindata, targetdata)
-    
+
     fit_score = nn.score(traindata, targetdata)
     print 'score = %s' %fit_score
     # Training outputs
@@ -299,7 +300,7 @@ def scikitlearnFunc(x, alpha):
 
 def parameterizedRunner():
     alpha = [-1, -0.5, 0.0, +0.5, +1.0]
-    step = 100
+    step  = 100
     print "Running on %s alpha values: %s" %(len(alpha), alpha)
     for a in range(len(alpha)):
         print 'working on alpha=%s' %alpha[a]
@@ -322,7 +323,7 @@ def parameterizedRunner():
     #plt.show()
 
 
-if __name__ == '__main__':   
+if __name__ == '__main__':
     makeData()
     plotPDF()
     trainFixed(250)
