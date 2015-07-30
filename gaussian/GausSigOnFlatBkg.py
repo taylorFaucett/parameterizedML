@@ -30,15 +30,7 @@ import sys
 import logging
 import time
 
-'''
-logging.basicConfig(
-            format="%(message)s",
-            level=logging.DEBUG,
-            stream=sys.stdout)
-'''
-
 plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
-
 
 def makeData():
     print "Entering makeData"
@@ -183,7 +175,6 @@ def trainFixed(iterations):
                 #debug=True
                 ))])
     print nn
-    #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
 
     for i in range(len(muPoints)):
         # lowChunk and highChunk define the lower and upper bands of each
@@ -258,7 +249,6 @@ def trainParam(iterations):
                 ))])
     print nn
 
-    #nn = Classifier(layers =[Layer("Maxout", units=100, pieces=2), Layer("Softmax")],learning_rate=0.02,n_iter=10)
     nn.fit(traindata, targetdata)
 
     fit_score = nn.score(traindata, targetdata)

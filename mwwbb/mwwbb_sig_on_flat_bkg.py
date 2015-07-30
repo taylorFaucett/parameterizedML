@@ -13,6 +13,8 @@ parameter by a secondary input (alpha).
 import ROOT
 import numpy as np
 import pickle
+import os
+import glob
 import matplotlib.pyplot as plt
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_curve, auc
@@ -20,208 +22,123 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.externals import joblib
 from sknn.mlp import Regressor, Classifier, Layer
 
+
 # Plot marks (color circles - i.e. bo = blue circle, go = green circle)
 plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
 
-def flat_bkg_merge():
-    bkgNum     = 2000
-    mwwbb_400  = np.loadtxt('data/mwwbb_raw/mwwbb_400.dat')
-    mwwbb_500  = np.loadtxt('data/mwwbb_raw/mwwbb_500.dat')
-    mwwbb_600  = np.loadtxt('data/mwwbb_raw/mwwbb_600.dat')
-    mwwbb_700  = np.loadtxt('data/mwwbb_raw/mwwbb_700.dat')
-    mwwbb_800  = np.loadtxt('data/mwwbb_raw/mwwbb_800.dat')
-    mwwbb_900  = np.loadtxt('data/mwwbb_raw/mwwbb_900.dat')
-    mwwbb_1000 = np.loadtxt('data/mwwbb_raw/mwwbb_1000.dat')
-    mwwbb_1100 = np.loadtxt('data/mwwbb_raw/mwwbb_1100.dat')
-    mwwbb_1200 = np.loadtxt('data/mwwbb_raw/mwwbb_1200.dat')
-    mwwbb_1300 = np.loadtxt('data/mwwbb_raw/mwwbb_1300.dat')
-    mwwbb_1400 = np.loadtxt('data/mwwbb_raw/mwwbb_1400.dat')
-    mwwbb_1500 = np.loadtxt('data/mwwbb_raw/mwwbb_1500.dat')
+mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
 
-    mwwbb_raw  = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700,
-                    mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100,
-                    mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+def file_runner():
+    root_files = glob.iglob('data/root_files/*.root')
+    for data in root_files:
+        file_generate(data)
+    for data in root_files:
+        file_generate(data)
 
-    mx_values  = [400.000000, 500.000000, 600.000000, 700.000000,
-                    800.000000, 900.000000, 1000.000000, 1100.000000,
-                    1200.000000, 1300.000000, 1400.000000, 1500.000000]
-
-    mx_text    = ['400', '500', '600', '700',
-                    '800', '900', '1000', '1100',
-                    '1200', '1300', '1400', '1500']
-
+def flat_bkg(bkgNum, low, high):
     w = ROOT.RooWorkspace('w')
-    w.factory('Uniform::e(x[0,7000])')
+
+    w.factory('Uniform::f(x[%s,%s])' %(low, high))
 
     # Define variables
     x      = w.var('x')
-    bkgpdf = w.pdf('e')
+    bkgpdf = w.pdf('f')
 
     # Fill traindata, testdata and testdata1
-    print 'Generating background data and concatenting with signal data'
-    bkg_values = bkgpdf.generate(ROOT.RooArgSet(x), bkgNum*12)
-    for j in range(len(mwwbb_raw)):
-        bkgdata = np.zeros((bkgNum, 3))
+    print 'Generating background data'
+    bkg_values = bkgpdf.generate(ROOT.RooArgSet(x), bkgNum)
+    bkg_data = np.zeros((bkgNum, 3))
+    for j in range(len(mx_values)):
         for i in range(bkgNum):
-            bkgdata[i, 0] = bkg_values.get(i).getRealValue('x')
-            bkgdata[i, 1] = mx_values[j]
-            bkgdata[i, 2] = 0
-        conc = np.concatenate((mwwbb_raw[j],bkgdata))
-        np.savetxt('data/mwwbb_flat/mwwbb_%s.dat' %mx_text[j], conc, fmt='%f')
+            bkg_data[i, 0] = bkg_values.get(i).getRealValue('x')
+            bkg_data[i, 1] = mx_values[j]
+            bkg_data[i, 2] = 0.000000
 
+        np.savetxt('data/flat_bkg/bkg_mx_%s.dat' %mx_values[j], bkg_data, fmt='%f')
 
+def root_export(root_file, tree, leaf):
+    f = ROOT.TFile(root_file)
+    t = f.Get(tree)
+    l = t.GetLeaf(leaf)
+    size = t.GetEntriesFast()
+    entries = []
+    for n in range(size):
+        t.Scan(leaf,'','',1,n)
+        val = l.GetValue(0)
+        entries.append(val)
+    return entries
 
-def param_merge():
-    file = 'mwwbb'
-    mwwbb_400  = np.loadtxt('data/%s/mwwbb_400.dat' %file)
-    mwwbb_500  = np.loadtxt('data/%s/mwwbb_500.dat' %file)
-    mwwbb_600  = np.loadtxt('data/%s/mwwbb_600.dat' %file)
-    mwwbb_700  = np.loadtxt('data/%s/mwwbb_700.dat' %file)
-    mwwbb_800  = np.loadtxt('data/%s/mwwbb_800.dat' %file)
-    mwwbb_900  = np.loadtxt('data/%s/mwwbb_900.dat' %file)
-    mwwbb_1000 = np.loadtxt('data/%s/mwwbb_1000.dat' %file)
-    mwwbb_1100 = np.loadtxt('data/%s/mwwbb_1100.dat' %file)
-    mwwbb_1200 = np.loadtxt('data/%s/mwwbb_1200.dat' %file)
-    mwwbb_1300 = np.loadtxt('data/%s/mwwbb_1300.dat' %file)
-    mwwbb_1400 = np.loadtxt('data/%s/mwwbb_1400.dat' %file)
-    mwwbb_1500 = np.loadtxt('data/%s/mwwbb_1500.dat' %file)
+def file_generate(root_file):
+    signal = root_export(root_file,'xtt','mwwbb')
+    mx = root_export(root_file,'xtt','mx')
+    target = root_export(root_file,'xtt','target')
 
-    mwwbb_raw  = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700,
-                    mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100,
-                    mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
+    size = len(signal)
+    data = np.zeros((size, 3))
+    if target[0]<0.5:
+        label = 'bkg'
+    elif target[0]>0.5:
+        label = 'sig'
+    for i in range(size):
+        data[i, 0] = signal[i]
+        data[i, 1] = mx[i]
+        data[i, 2] = target[i]
+    np.savetxt('data/root_export/%s_mx_%0.0f.dat' %(label, mx[0]), data, fmt='%f')
 
-    mx_values  = [400.000000, 500.000000, 600.000000, 700.000000,
-                    800.000000, 900.000000, 1000.000000, 1100.000000,
-                    1200.000000, 1300.000000, 1400.000000, 1500.000000]
-
-    mx_text    = ['400', '500', '600', '700',
-                    '800', '900', '1000', '1100',
-                    '1200', '1300', '1400', '1500']
-
-    data_complete = np.concatenate((
-                        #mwwbb_400,
-                        mwwbb_500,
-                        #mwwbb_600,
-                        #mwwbb_700,
-                        #mwwbb_800,
-                        #mwwbb_900,
-                        mwwbb_1000,
-                        #mwwbb_1100,
-                        #mwwbb_1200,
-                        #mwwbb_1300,
-                        #mwwbb_1400,
-                        mwwbb_1500),
-                        axis=0)
-    #print data_complete
-    np.savetxt('data/mwwbb/mwwbb_complete.dat', data_complete, fmt='%f')
+def file_concatenater():
+    sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
+    bkg_dat = glob.iglob('data/root_export/bkg_mx_*.dat')
+    flt_dat = glob.iglob('data/flat_bkg/*.dat')
+    for signal, background, flat in zip(sig_dat, bkg_dat, flt_dat):
+        sig = np.loadtxt(signal)
+        bkg = np.loadtxt(background)
+        flt = np.loadtxt(flat)
+        data_complete = np.concatenate((sig, bkg), axis=0)
+        np.savetxt('data/concatenated/ttbar_mx_%0.0f.dat' %sig[0,1], data_complete, fmt='%f')
+        data_complete = np.concatenate((sig, flt), axis=0)
+        np.savetxt('data/concatenated/flat_mx_%0.0f.dat' %sig[0,1], data_complete, fmt='%f')
 
 def plt_histogram():
     bin_size   = 50
-    mwwbb_400  = np.loadtxt('data/mwwbb/mwwbb_400.dat')
-    mwwbb_500  = np.loadtxt('data/mwwbb/mwwbb_500.dat')
-    mwwbb_600  = np.loadtxt('data/mwwbb/mwwbb_600.dat')
-    mwwbb_700  = np.loadtxt('data/mwwbb/mwwbb_700.dat')
-    mwwbb_800  = np.loadtxt('data/mwwbb/mwwbb_800.dat')
-    mwwbb_900  = np.loadtxt('data/mwwbb/mwwbb_900.dat')
-    mwwbb_1000 = np.loadtxt('data/mwwbb/mwwbb_1000.dat')
-    mwwbb_1100 = np.loadtxt('data/mwwbb/mwwbb_1100.dat')
-    mwwbb_1200 = np.loadtxt('data/mwwbb/mwwbb_1200.dat')
-    mwwbb_1300 = np.loadtxt('data/mwwbb/mwwbb_1300.dat')
-    mwwbb_1400 = np.loadtxt('data/mwwbb/mwwbb_1400.dat')
-    mwwbb_1500 = np.loadtxt('data/mwwbb/mwwbb_1500.dat')
-    background = np.loadtxt('data/mwwbb_raw/background.dat')
-    #background = np.loadtxt('data/mwwbb_flat/background.dat')
-
-    mwwbb_raw  = [mwwbb_400, mwwbb_500, mwwbb_600, mwwbb_700,
-                    mwwbb_800, mwwbb_900, mwwbb_1000, mwwbb_1100,
-                    mwwbb_1200, mwwbb_1300, mwwbb_1400, mwwbb_1500]
-
-    mx_values  = [400, 500, 600, 700,
-                    800, 900, 1000, 1100,
-                    1200, 1300, 1400, 1500]
-
-    mx_text    = ['400', '500', '600', '700',
-                    '800', '900', '1000', '1100',
-                    '1200', '1300', '1400', '1500']
-
-    for i in range(12):
-        n, bins, patches = plt.hist([mwwbb_raw[i][:,0], background ],
+    sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
+    bkg_dat = glob.iglob('data/root_export/bkg_mx_*.dat')
+    for signal, background in zip(sig_dat, bkg_dat):
+        sig = np.loadtxt(signal)
+        bkg = np.loadtxt(background)
+        n, bins, patches = plt.hist([sig[:,0], bkg[:,0] ],
                             bins=range(0,4000, bin_size), histtype='stepfilled',
                             alpha=0.5, label=['Signal', 'Background'])
         plt.setp(patches)
-        plt.title('m$_{WWbb} =$ %s GeV/c$^2$' %mx_values[i])
-        plt.ylabel('Number of events$/%s$ GeV/c$^2$' %bin_size)
+        plt.title('m$_{WWbb} =$ %s GeV/c$^2$' %sig[0,1])
+        plt.ylabel('Number of events$/%0.0f$ GeV/c$^2$' %bin_size)
         plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
         plt.grid(True)
         plt.legend()
         plt.xlim([0, 4000])
         plt.ylim([0, 350])
-        plt.savefig('plots/histograms/histo_%s.pdf'%mx_text[i])
-        plt.savefig('plots/images/histograms/histo_%s.png'%mx_text[i])
+        plt.savefig('plots/histograms/histo_mx_%0.0f.pdf' %sig[0,1])
+        plt.savefig('plots/images/histograms/histo_mx_%0.0f.png' %sig[0,1])
         plt.clf()
 
+
 def mwwbb_fixed(iterations):
-    file = 'mwwbb'
-    mwwbb_400  = np.loadtxt('data/%s/mwwbb_400.dat' %file)
-    mwwbb_500  = np.loadtxt('data/%s/mwwbb_500.dat' %file)
-    mwwbb_600  = np.loadtxt('data/%s/mwwbb_600.dat' %file)
-    mwwbb_700  = np.loadtxt('data/%s/mwwbb_700.dat' %file)
-    mwwbb_800  = np.loadtxt('data/%s/mwwbb_800.dat' %file)
-    mwwbb_900  = np.loadtxt('data/%s/mwwbb_900.dat' %file)
-    mwwbb_1000 = np.loadtxt('data/%s/mwwbb_1000.dat' %file)
-    mwwbb_1100 = np.loadtxt('data/%s/mwwbb_1100.dat' %file)
-    mwwbb_1200 = np.loadtxt('data/%s/mwwbb_1200.dat' %file)
-    mwwbb_1300 = np.loadtxt('data/%s/mwwbb_1300.dat' %file)
-    mwwbb_1400 = np.loadtxt('data/%s/mwwbb_1400.dat' %file)
-    mwwbb_1500 = np.loadtxt('data/%s/mwwbb_1500.dat' %file)
-
-    mwwbb_train = [mwwbb_400[:,0:2],
-                    mwwbb_500[:,0:2],
-                    mwwbb_600[:,0:2],
-                    mwwbb_700[:,0:2],
-                    mwwbb_800[:,0:2],
-                    mwwbb_900[:,0:2],
-                    mwwbb_1000[:,0:2],
-                    mwwbb_1100[:,0:2],
-                    mwwbb_1200[:,0:2],
-                    mwwbb_1300[:,0:2],
-                    mwwbb_1400[:,0:2],
-                    mwwbb_1500[:,0:2]]
-
-    mwwbb_target = [mwwbb_400[:,2],
-                    mwwbb_500[:,2],
-                    mwwbb_600[:,2],
-                    mwwbb_700[:,2],
-                    mwwbb_800[:,2],
-                    mwwbb_900[:,2],
-                    mwwbb_1000[:,2],
-                    mwwbb_1100[:,2],
-                    mwwbb_1200[:,2],
-                    mwwbb_1300[:,2],
-                    mwwbb_1400[:,2],
-                    mwwbb_1500[:,2]]
-
-    mx_values  = [400, 500, 600, 700,
-                    800, 900, 1000, 1100,
-                    1200, 1300, 1400, 1500]
-
-    mx_text    = ['400', '500', '600', '700',
-                    '800', '900', '1000', '1100',
-                    '1200', '1300', '1400', '1500']
-
-    for i in range(len(mwwbb_target)):
-        print 'Working on mu=%s' %mwwbb_text[i]
-        traindata = mwwbb_train[i]
-        targetdata = mwwbb_target[i]
+    conc_files = glob.iglob('data/concatenated/ttbar_mx_*.dat')
+    for dat_file in conc_files:
+        data = np.loadtxt(dat_file)
+        traindata = data[:, 0:2]
+        targetdata = data[:, 2]
+        print 'Working on mu=%s' %data[0,1]
         nn = Pipeline([
             ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
             ('neural network',
                 Regressor(
-                    layers =[Layer("Sigmoid", units=3, pieces=4),Layer("Sigmoid")],
+                    layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                     learning_rate=0.01,
+                    #n_stable=1,
+                    #f_stable=100,
                     n_iter=iterations,
                     #learning_momentum=0.1,
-                    #batch_size=5,
+                    #batch_size=10,
                     learning_rule="nesterov",
                     #valid_size=0.05,
                     verbose=True,
@@ -234,40 +151,42 @@ def mwwbb_fixed(iterations):
         print 'score = %s' %fit_score
         outputs = nn.predict(traindata)
 
-        #plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5,
-            #label='$\mu=$%s' % mx_values[i])
         output_reshape = outputs.reshape((1,len(outputs)))
         actual = targetdata
         predictions = output_reshape[0]
         fpr, tpr, thresholds = roc_curve(actual, predictions)
         roc_auc = auc(fpr, tpr)
 
-        ROC_plot(mx_values[i], fpr, tpr, roc_auc)
+        fig1 = plt.figure(1)
+        plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%0.0f' %data[0,1])
+        plt.ylabel('NN_output( m$_{WWbb}$ )')
+        plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
+        plt.xlim([0, 4000])
+        plt.ylim([-0.1, 1.1])
+        plt.legend()
+        plt.grid(True)
+        plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', fontsize=14, fontweight='bold')
 
-    plt.ylabel('NN_output( m$_{WWbb}$ )')
-    plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
-    plt.xlim([0, 4000])
-    plt.ylim([-0.1, 1.1])
-    plt.legend()
-    plt.grid(True)
-    plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input',
-        fontsize=14, fontweight='bold')
-    #plt.show()
-    plt.savefig('plots/fixedTraining.pdf')
-    plt.savefig('plots/images/fixedTraining.png')
+        fig2 = plt.figure(2)
+        ROC_plot(data[0,1], fpr, tpr, roc_auc)
+    fig1.savefig('plots/fixedTraining.pdf')
+    fig2.savefig('plots/ROC_fixed.pdf')
+    fig1.savefig('plots/images/fixedTraining.png')
+    fig2.savefig('plots/images/ROC_fixed.png')
     plt.clf()
 
-    pickle.dump(nn, open('data/fixed.pkl', 'wb'))
+    pickle.dump(nn, open('data/pickle/fixed.pkl', 'wb'))
 
 
 def mwwbb_parameterized(iterations):
-    file = 'mwwbb'
-    mwwbb_complete = np.loadtxt('data/%s/mwwbb_complete.dat' %file)
+    mwwbb_complete = np.concatenate((
+                        np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1500.dat')),
+                        axis=0)
 
     traindata      = mwwbb_complete[:,0:2]
     targetdata     = mwwbb_complete[:,2]
-    print traindata
-    print targetdata
 
     nn = Pipeline([
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
@@ -276,11 +195,13 @@ def mwwbb_parameterized(iterations):
                 layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                 learning_rate=0.01,
                 n_iter=iterations,
+                #n_stable=1,
+                #f_stable=0.001,
                 #learning_momentum=0.1,
-                #batch_size=5,
+                #batch_size=10,
                 learning_rule="nesterov",
                 #valid_size=0.05,
-                #verbose=True,
+                verbose=True,
                 #debug=True
                 ))])
     print nn
@@ -298,28 +219,22 @@ def mwwbb_parameterized(iterations):
     plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
     plt.xlim([0, 4000])
     plt.ylim([-0.1, 1.1])
-    #plt.axhline(y=0, color = 'black', linewidth = 2, alpha=0.75)
-    #plt.axhline(y=1, color = 'black', linewidth = 2, alpha=0.75)
     plt.grid(True)
-    plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', 
+    plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input',
         fontsize=14, fontweight='bold')
     plt.savefig('plots/paramTraining.pdf')
     plt.savefig('plots/images/paramTraining.png')
-    #plt.show()
     plt.clf()
 
-    pickle.dump(nn, open('data/param.pkl', 'wb'))
+    pickle.dump(nn, open('data/pickle/param.pkl', 'wb'))
 
 def scikitlearnFunc(x, alpha):
-    nn = pickle.load(open('data/param.pkl','rb'))
-    #print "inouttest input was", x
+    nn = pickle.load(open('data/pickle/param.pkl','rb'))
     traindata = np.array((x, alpha), ndmin=2)
     outputs   = nn.predict(traindata)
-    #print outputs
 
     #print 'x,alpha,output =', x, alpha, outputs[0]
     #plt.plot(x, outputs, 'ro', alpha=0.5)
-    #plt.show()
     return outputs[[0]]
 
 def mwwbbParameterizedRunner():
@@ -327,7 +242,7 @@ def mwwbbParameterizedRunner():
     print "Running on %s alpha values: %s" %(len(alpha), alpha)
     for a in range(len(alpha)):
         print 'working on alpha=%s' %alpha[a]
-        for x in range(0,4000, 10):
+        for x in range(0,4000, 1000):
             outputs = scikitlearnFunc(x/1., alpha[a])
             plt.plot(x/1., outputs[0], plt_marker[a], alpha=0.5)
     for i in range(len(alpha)):
@@ -343,27 +258,26 @@ def mwwbbParameterizedRunner():
 
     plt.savefig('plots/paramTraining_complete.pdf')
     plt.savefig('plots/images/paramTraining_complete.png')
-    #plt.show()
+
 
 def ROC_plot(mx, fpr, tpr, roc_auc):
-        print "Plotting ROC curve for mx=%s" %mx
-        plt.title('Receiver Operating Characteristic')
-        plt.plot(fpr, tpr, label='AUC (mx=%s) = %0.2f' %(mx, roc_auc))
-        plt.legend(loc='lower right')
-        plt.plot([0,1],[0,1],'r--')
-        plt.xlim([-0.1,1.1])
-        plt.ylim([-0.1,1.1])
-        plt.ylabel('True Positive Rate')
-        plt.xlabel('False Positive Rate')
-        plt.grid(True)
-        plt.savefig('plots/ROC/ROC_fixed_mx_%s.pdf' %mx)
-        #plt.clf()
-        #plt.show()
+    print "Plotting ROC curve for mx=%s" %mx
+    plt.title('Receiver Operating Characteristic')
+    plt.plot(fpr, tpr, label='AUC (mx=%s) = %0.2f' %(mx, roc_auc), linewidth=1.5)
+    plt.legend(loc='lower right')
+    plt.plot([0,1],[0,1],'r--')
+    plt.xlim([0.0,1.0])
+    plt.ylim([0.0,1.0])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.grid(True)
+
 
 if __name__ == '__main__':
-    #flat_bkg_merge()
-    #param_merge()
+    file_runner()
+    flat_bkg(1000,0,5000)
     plt_histogram()
-    #mwwbb_fixed(100)
-    #mwwbb_parameterized(100)
-    #mwwbbParameterizedRunner()
+    file_concatenater()
+    mwwbb_fixed(100)
+    mwwbb_parameterized(100)
+    mwwbbParameterizedRunner()
