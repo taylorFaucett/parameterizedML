@@ -26,8 +26,6 @@ from sknn.mlp import Regressor, Classifier, Layer
 # Plot marks (color circles - i.e. bo = blue circle, go = green circle)
 plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
 
-mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
-
 def file_runner():
     root_files = glob.iglob('data/root_files/*.root')
     for data in root_files:
@@ -36,8 +34,9 @@ def file_runner():
         file_generate(data)
 
 def flat_bkg(bkgNum, low, high):
-    w = ROOT.RooWorkspace('w')
+    mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
 
+    w = ROOT.RooWorkspace('w')
     w.factory('Uniform::f(x[%s,%s])' %(low, high))
 
     # Define variables

@@ -22,12 +22,6 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.externals import joblib
 from sknn.mlp import Regressor, Classifier, Layer
 
-
-# Plot marks (color circles - i.e. bo = blue circle, go = green circle)
-plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
-
-mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
-
 def file_runner():
     root_files = glob.iglob('data/root_files/*.root')
     for data in root_files:
@@ -36,6 +30,7 @@ def file_runner():
         file_generate(data)
 
 def flat_bkg(bkgNum, low, high):
+    mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
     w = ROOT.RooWorkspace('w')
 
     w.factory('Uniform::f(x[%s,%s])' %(low, high))
@@ -113,7 +108,7 @@ def plt_histogram():
         plt.ylabel('Number of events$/%0.0f$ GeV/c$^2$' %bin_size)
         plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
         plt.grid(True)
-        plt.legend()
+        plt.legend(loc='upper right')
         plt.xlim([0, 4000])
         plt.ylim([0, 350])
         plt.savefig('plots/histograms/histo_mx_%0.0f.pdf' %sig[0,1])
@@ -163,7 +158,7 @@ def mwwbb_fixed(iterations):
         plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
         plt.xlim([0, 4000])
         plt.ylim([-0.1, 1.1])
-        plt.legend()
+        plt.legend(loc='upper right')
         plt.grid(True)
         plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', fontsize=14, fontweight='bold')
 
@@ -238,16 +233,18 @@ def scikitlearnFunc(x, alpha):
     return outputs[[0]]
 
 def mwwbbParameterizedRunner():
+    plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
     alpha = [500, 750, 1000, 1250, 1500]
     print "Running on %s alpha values: %s" %(len(alpha), alpha)
     for a in range(len(alpha)):
         print 'working on alpha=%s' %alpha[a]
-        for x in range(0,4000, 1000):
+        for x in range(0,4000, 10):
             outputs = scikitlearnFunc(x/1., alpha[a])
             plt.plot(x/1., outputs[0], plt_marker[a], alpha=0.5)
     for i in range(len(alpha)):
         plt.plot(-4,0, plt_marker[i], alpha=0.5, label="$\mu=$%s GeV/c$^2$" %alpha[i])
-    plt.legend(bbox_to_anchor=(0.6, .4), loc=2, borderaxespad=0)
+    #plt.legend(bbox_to_anchor=(0.6, .4), loc=2, borderaxespad=0)
+    plt.legend(loc='lower right')
     plt.ylabel('NN_output( m$_{WWbb}$ )')
     plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
     plt.xlim([0, 4000])
@@ -274,10 +271,10 @@ def ROC_plot(mx, fpr, tpr, roc_auc):
 
 
 if __name__ == '__main__':
-    file_runner()
-    flat_bkg(1000,0,5000)
-    plt_histogram()
-    file_concatenater()
-    mwwbb_fixed(100)
-    mwwbb_parameterized(100)
+    #file_runner()
+    #flat_bkg(1000,0,5000)
+    #plt_histogram()
+    #file_concatenater()
+    #mwwbb_fixed(100)
+    #mwwbb_parameterized(100)
     mwwbbParameterizedRunner()
