@@ -9,7 +9,7 @@
 <tr>
 <td width=65%, align=center>
 <h4>Histogram of Signal/Background</h4>
-<img src="/gaussian/plots/images/histogram_gaussian.png"><a href="/gaussian/histogram_gaussian.pdf">[Download PDF]</a></td>
+<img src="/gaussian/plots/images/histogram_gaussian.png"><a href="/gaussian/plots/histogram_gaussian.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li> # of data points per signal/background: 10,000</li>
@@ -23,7 +23,7 @@
 <tr>
 <td width=65%, align=center>
 <h4>Fixed Training</h4>
-<img src="/gaussian/plots/images/fixedTraining.png"><a href="/gaussian/fixedTraining.pdf">[Download PDF]</a></td>
+<img src="/gaussian/plots/images/fixedTraining.png"><a href="/gaussian/plots/fixedTraining.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>Fixed training at mu=-2, -1, 0, 1, 2</li>
@@ -33,7 +33,7 @@
 <tr>
 <td width=65%, align=center>
 <h4>Parameterized Training</h4>
-<img src="/gaussian/plots/images/paramTraining_complete.png"><a href="/gaussian/paramTraining_complete.pdf">[Download PDF]</a></td>
+<img src="/gaussian/plots/images/paramTraining_complete.png"><a href="/gaussian/plots/paramTraining_complete.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>Predictions made at mu=-2,-1.5,-1,-0.5,0,0.5,1,1.5,2</li>
@@ -45,7 +45,7 @@
 <tr>
 <td width=65%, align=center>
 <h4>Fixed Training ROC Curve</h4>
-<img src="/gaussian/plots/images/ROC_Fixed.png"><a href="/gaussian/ROC_Fixed.pdf">[Download PDF]</a></td>
+<img src="/gaussian/plots/images/ROC_Fixed.png"><a href="/gaussian/plots/ROC_Fixed.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>ROC Curve for fixed training at mu=-2,-1,0,1,2 </li>
@@ -57,7 +57,7 @@
 <h4>Parameterized Training ROC Curve</h4>
 
 This is a place holder for when I finish the parameterized ROC curve for the gaussian model. 
-<img src="/gaussian/plots/images/ROC_Parameterized.png"><a href="/gaussian/ROC_Parameterized.pdf">[Download PDF]</a></td>
+<img src="/gaussian/plots/images/ROC_Parameterized.png"><a href="/gaussian/plots/ROC_Parameterized.pdf">[Download PDF]</a></td>
 <td>
 <ol>
 <li>ROC Curve for fixed training at mu=-2,-1.5,-1,-0.5,0,0.5,1,1.5,2 </li>
@@ -76,7 +76,7 @@ This is a place holder for when I finish the parameterized ROC curve for the gau
 <td align=center> <h4>Parameters</h4> </td>
 </tr>
 <tr>
-<td width=65%, align=center><img src="/mwwbb/plots/images/mWWbb_histogram.png"><a href="/mwwbb/mWWbb_histogram.pdf">[Download PDF]</a></td>
+<td width=65%, align=center><img src="/mwwbb/plots/images/mWWbb_histogram.png"><a href="/mwwbb/plots/mWWbb_histogram.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li> Signal at mx=500, 750, 1000, 1250, 1500</li>
@@ -85,7 +85,7 @@ This is a place holder for when I finish the parameterized ROC curve for the gau
 </td>
 </tr>
 <tr>
-<td width=65%, align=center><img src="/mwwbb/plots/images/fixedTraining.png"><a href="/mwwbb/fixedTraining.pdf">[Download PDF]</a></td>
+<td width=65%, align=center><img src="/mwwbb/plots/images/fixedTraining.png"><a href="/mwwbb/plots/fixedTraining.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>Fixed training at mu=1000 GeV</li>
@@ -93,7 +93,7 @@ This is a place holder for when I finish the parameterized ROC curve for the gau
 </td>
 </tr>
 <tr>
-<td width=65%, align=center><img src="/mwwbb/plots/images/paramTraining_complete.png"><a href="/mwwbb/paramTraining_complete.pdf">[Download PDF]</a></td>
+<td width=65%, align=center><img src="/mwwbb/plots/images/paramTraining_complete.png"><a href="/mwwbb/plots/paramTraining_complete.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>Fixed training plot at mu=1000 GeV (red x)</li>
@@ -104,7 +104,7 @@ This is a place holder for when I finish the parameterized ROC curve for the gau
 </tr>
 <tr>
 <td width=65%, align=center> 
-<img src="/mwwbb/plots/images/ROC_parameterized.png"><a href="/mwwbb/ROC_parameterized.pdf">[Download PDF]</a></td>
+<img src="/mwwbb/plots/images/ROC_parameterized.png"><a href="/mwwbb/plots/ROC_parameterized.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>ROC curve for fixed training plot at mu=1000 GeV (red x)</li>
