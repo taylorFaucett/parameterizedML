@@ -12,7 +12,7 @@
 <img src="/gaussian/plots/images/histogram_gaussian.png"><a href="/gaussian/plots/histogram_gaussian.pdf">[Download PDF]</a></td>
 <td>
 <ul>
-<li> # of data points per signal/background: 10,000</li>
+<li> # of data points per signal/background: 50,000</li>
 <li> Signal: Gaussians at mu=-2,-1,0,1,2</li>
 <li> Background: Flat </li>
 <li> Bins: 100 </li>

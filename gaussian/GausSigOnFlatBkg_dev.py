@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 def makeData():
     print "Entering makeData"
     musteps  = 5
-    numTrain = 10000
+    numTrain = 50000
     numTest  = numTrain
 
     # Initialize ROOTs RooWorkspace
@@ -38,7 +38,7 @@ def makeData():
 
     # Generate Gaussian signals
     print "Generating Gaussians PDFs"
-    w.factory('Gaussian::g(x[-5,5],mu[0,-3,3],sigma[0.25, 0, 2])')
+    w.factory('Gaussian::g(x[-10,10],mu[0,-3,3],sigma[0.25, 0, 2])')
 
     # Generate a flat background signal
     print "Generating a flat background PDF"
@@ -98,7 +98,7 @@ def plt_histogram():
     testdata       = np.loadtxt('data/testdata.dat')
     traindata      = trainAndTarget[:, 0:2]
     targetdata     = trainAndTarget[:, 2]
-    bin_size   = 100
+    bin_size   = 25
     bin_width = 10.0/bin_size
 
     muPoints = np.unique(traindata[:, 1])
@@ -138,8 +138,8 @@ def plt_histogram():
     plt.ylabel('Number of events$/%0.2f x$' %bin_width)
     plt.xlabel('x')
     plt.grid(True)
-    plt.legend(loc='upper right')
-    plt.xlim([-3.5,3.5])
+    plt.legend(loc='upper right', bbox_to_anchor=(1.10, 1))
+    plt.xlim([-5,5])
     #plt.ylim([0,10])
     plt.savefig('plots/histogram_gaussian.pdf', dpi=400)
     plt.savefig('plots/images/histogram_gaussian.png')
@@ -253,10 +253,10 @@ def trainFixed(iterations):
 
     # Plot settings for the fixed training mode
     fig1 = plt.figure(1)
-    plt.legend(loc='upper right')
+    plt.legend(loc='upper right', bbox_to_anchor=(1.10, 1))
     plt.ylabel('NN output')
     plt.xlabel('NN input')
-    plt.xlim([-3.5, 3.5])
+    plt.xlim([-5, 5])
     plt.ylim([-0.1, 1.1])
     plt.grid(True)
 
@@ -264,8 +264,8 @@ def trainFixed(iterations):
     plt.title('Receiver Operating Characteristic')
     plt.legend(loc='lower right')
     plt.plot([0,1],[0,1],'r--')
-    plt.xlim([0.0,1.1])
-    plt.ylim([0.0,1.1])
+    plt.xlim([0.0,1.0])
+    plt.ylim([0.0,1.0])
 
     fig1.savefig('plots/fixedTraining.pdf', dpi=400)
     fig1.savefig('plots/images/fixedTraining.png')
@@ -360,13 +360,13 @@ def parameterizedRunner():
     alpha = [-1.5, -1.0, -0.5, 0.0, +0.5, +1.0, +1.5]
     step  = 350
 
-    plt_marker=['.', # mu=-1.5
+    plt_marker=['^', # mu=-1.5
                 'o', # mu=-1.0
-                '.', # mu=-0.5
+                '^', # mu=-0.5
                 'o', # mu=0.0
-                '.', # mu=0.5
+                '^', # mu=0.5
                 'o', # mu=1.0
-                '.', # mu=1.5
+                '^', # mu=1.5
                 ]
 
 
@@ -387,7 +387,7 @@ def parameterizedRunner():
     for i in range(len(alpha)):
         plt.plot(-1000,0, marker=plt_marker[i], alpha=0.5, color=plt_color[i], label="$\mu=$%s" %alpha[i], rasterized=True)
 
-    plt.legend(loc='upper right', bbox_to_anchor=(1.05, 1))
+    plt.legend(loc='upper right', bbox_to_anchor=(1.10, 1))
     plt.ylabel('NN output')
     plt.xlabel('NN input')
     plt.xlim([-(step/100.), (step/100.)])
@@ -409,14 +409,14 @@ def ROC_plot(mu, fpr, tpr, roc_auc):
         plt.ylim([0.0,1.0])
         plt.ylabel('Background rejection')
         plt.xlabel('Signal efficiency')
-        plt.savefig('plots/ROC_param.pdf', dpi=400)
+        #plt.savefig('plots/ROC_param.pdf', dpi=400)
         #plt.show()
 
 
 if __name__ == '__main__':
-    #makeData()
+    makeData()
     plt_histogram()
-    #trainFixed(50)
-    #trainParam(50)
-    #parameterizedRunner()
+    trainFixed(50)
+    trainParam(50)
+    parameterizedRunner()
     #ROC_plot()
