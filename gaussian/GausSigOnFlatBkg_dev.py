@@ -132,7 +132,7 @@ def plt_histogram():
     plt.xlabel('x')
     plt.grid(True)
     plt.legend(loc='upper right')
-    plt.xlim([-5,5])
+    plt.xlim([-3.5,3.5])
     #plt.ylim([0,10])
     plt.savefig('plots/histogram_gaussian.pdf', dpi=400)
     plt.savefig('plots/images/histogram_gaussian.png')
@@ -408,8 +408,8 @@ def ROC_plot(mu, fpr, tpr, roc_auc):
 
 if __name__ == '__main__':
     #makeData()
-    #plt_histogram()
+    plt_histogram()
     #trainFixed(50)
-    trainParam(50)
-    parameterizedRunner()
+    #trainParam(50)
+    #parameterizedRunner()
     #ROC_plot()
