@@ -84,9 +84,9 @@
 <td width=65%, align=center><img src="/mwwbb/plots/images/paramTraining_complete.png"><a href="/mwwbb/plots/paramTraining_complete.pdf">[Download PDF]</a></td>
 <td>
 <ul>
-<li>Fixed training plot at mu=1000 GeV (red x)</li>
-<li>Fixed training at mu=500, 750, 1250, 1500 (circles)</li>
-<li>Prediction at mu=1000 based on fixed training at mu=500, 750, 1250, 1500 (red dots)</li>
+<li>Fixed training prediction at mu=1000 GeV (red x)</li>
+<li>Parameterized training at mu=500, 750, 1250, 1500 (circles)</li>
+<li>Parameterized training prediction at mu=1000 (i.e parameterized training at mu=500, 750, 1250, 1500 (red dots))</li>
 </ul>
 </td>
 </tr>
@@ -95,9 +95,9 @@
 <img src="/mwwbb/plots/images/ROC_parameterized.png"><a href="/mwwbb/plots/ROC_parameterized.pdf">[Download PDF]</a></td>
 <td>
 <ul>
-<li>ROC curve for fixed training plot at mu=1000 GeV (red x)</li>
-<li>ROC curve for fixed training at mu=500, 750, 1250, 1500 (circles)</li>
-<li>ROC curve at predicted value of mu=1000 GeV based on fixed training at mu=500, 750, 1250, 1500 (red dots)</li>
+<li>ROC curve for fixed training at mu=1000 GeV (red x)</li>
+<li>ROC curve for parameterized training at mu=500, 750, 1250, 1500 (circles)</li>
+<li>ROC curve at predicted value of mu=1000 GeV based on parameterized training at mu=500, 750, 1250, 1500 (red dots)</li>
 </ul>
 </td>
 </tr>
