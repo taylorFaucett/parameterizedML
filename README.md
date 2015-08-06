@@ -52,18 +52,6 @@
 </ul>
 </td>
 </tr>
-<tr>
-<td width=65%, align=center>
-<h4>Parameterized Training ROC Curve</h4>
-
-This is a place holder for when I finish the parameterized ROC curve for the gaussian model. 
-<img src="/gaussian/plots/images/ROC_Parameterized.png"><a href="/gaussian/plots/ROC_Parameterized.pdf">[Download PDF]</a></td>
-<td>
-<ol>
-<li>ROC Curve for fixed training at mu=-2,-1.5,-1,-0.5,0,0.5,1,1.5,2 </li>
-</ol>
-</td>
-</tr>
 </table>
 
 ---
