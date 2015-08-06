@@ -20,7 +20,6 @@ from sklearn.metrics import roc_curve, auc
 from sknn.mlp import Regressor, Classifier, Layer, Convolution
 import pickle
 import smtplib
-from matplotlib import colors
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 
@@ -108,11 +107,18 @@ def plt_histogram():
 
     print chunk
     print shift
+    plt_color=['blue', # background
+        'green', # mu=500
+        'red', # mu=750
+        'cyan', # mu=1000
+        'magenta', # mu=1250
+        'black' # mu=1500
+        ]
 
     for i in range(len(muPoints)+1):
         # lowChunk and highChunk define the lower and upper bands of each
         # chunk as it moves through the data set.
-        plt_label = ['$\mu=-2$', '$\mu=-1$', '$\mu=0$', '$\mu=1$', '$\mu=2$', 'background']
+        plt_label = ['$\mu=-2$', '$\mu=-1$', '$\mu=0$', '$\mu=1$', '$\mu=2$', 'Background']
 
         lowChunk      = i
         highChunk     = i + 1
@@ -125,7 +131,8 @@ def plt_histogram():
 
         n, bins, patches = plt.hist(data,
                             bins=bin_size, histtype='stepfilled',
-                            alpha=0.5, label=plt_label[i])
+                            alpha=0.5, label=plt_label[i], color=plt_color[i],
+                            rasterized=True)
         plt.setp(patches)
     #plt.title('$\mu=$ %s' %muPoints[i])
     plt.ylabel('Number of events$/%0.2f x$' %bin_width)
