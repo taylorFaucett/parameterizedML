@@ -22,12 +22,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.externals import joblib
 from sknn.mlp import Regressor, Classifier, Layer
 
-
-# Plot marks (color circles - i.e. bo = blue circle, go = green circle)
-plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
-
 def file_runner():
-    root_files = glob.iglob('data/root_files/*.root')
+    root_files = glob.iglob('data/root_files_lg/*.root')
     for data in root_files:
         file_generate(data)
     for data in root_files:
@@ -35,8 +31,8 @@ def file_runner():
 
 def flat_bkg(bkgNum, low, high):
     mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
-
     w = ROOT.RooWorkspace('w')
+
     w.factory('Uniform::f(x[%s,%s])' %(low, high))
 
     # Define variables
@@ -70,18 +66,18 @@ def root_export(root_file, tree, leaf):
 def file_generate(root_file):
     signal = root_export(root_file,'xtt','mwwbb')
     mx = root_export(root_file,'xtt','mx')
-    target = root_export(root_file,'xtt','target')
-
+    #target = root_export(root_file,'xtt','target')
+    target = 1.000000
     size = len(signal)
     data = np.zeros((size, 3))
-    if target[0]<0.5:
+    if target<0.5:
         label = 'bkg'
-    elif target[0]>0.5:
+    elif target>0.5:
         label = 'sig'
     for i in range(size):
         data[i, 0] = signal[i]
         data[i, 1] = mx[i]
-        data[i, 2] = target[i]
+        data[i, 2] = target
     np.savetxt('data/root_export/%s_mx_%0.0f.dat' %(label, mx[0]), data, fmt='%f')
 
 def file_concatenater():
@@ -105,16 +101,16 @@ def plt_histogram():
         sig = np.loadtxt(signal)
         bkg = np.loadtxt(background)
         n, bins, patches = plt.hist([sig[:,0], bkg[:,0] ],
-                            bins=range(0,4000, bin_size), histtype='stepfilled',
+                            bins=range(0,5000, bin_size), histtype='stepfilled',
                             alpha=0.5, label=['Signal', 'Background'])
         plt.setp(patches)
         plt.title('m$_{WWbb} =$ %s GeV/c$^2$' %sig[0,1])
         plt.ylabel('Number of events$/%0.0f$ GeV/c$^2$' %bin_size)
         plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
         plt.grid(True)
-        plt.legend()
-        plt.xlim([0, 4000])
-        plt.ylim([0, 350])
+        plt.legend(loc='upper right')
+        plt.xlim([0, 5000])
+        plt.ylim([0, 35000])
         plt.savefig('plots/histograms/histo_mx_%0.0f.pdf' %sig[0,1])
         plt.savefig('plots/images/histograms/histo_mx_%0.0f.png' %sig[0,1])
         plt.clf()
@@ -137,7 +133,7 @@ def mwwbb_fixed(iterations):
                     #f_stable=100,
                     n_iter=iterations,
                     #learning_momentum=0.1,
-                    #batch_size=10,
+                    batch_size=10,
                     learning_rule="nesterov",
                     #valid_size=0.05,
                     verbose=True,
@@ -162,7 +158,7 @@ def mwwbb_fixed(iterations):
         plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
         plt.xlim([0, 4000])
         plt.ylim([-0.1, 1.1])
-        plt.legend()
+        plt.legend(loc='upper right')
         plt.grid(True)
         plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', fontsize=14, fontweight='bold')
 
@@ -197,7 +193,7 @@ def mwwbb_parameterized(iterations):
                 #n_stable=1,
                 #f_stable=0.001,
                 #learning_momentum=0.1,
-                #batch_size=10,
+                batch_size=10,
                 learning_rule="nesterov",
                 #valid_size=0.05,
                 verbose=True,
@@ -237,16 +233,18 @@ def scikitlearnFunc(x, alpha):
     return outputs[[0]]
 
 def mwwbbParameterizedRunner():
+    plt_marker=['bo', 'go', 'ro', 'co', 'mo', 'yo', 'bo', 'wo']
     alpha = [500, 750, 1000, 1250, 1500]
     print "Running on %s alpha values: %s" %(len(alpha), alpha)
     for a in range(len(alpha)):
         print 'working on alpha=%s' %alpha[a]
-        for x in range(0,4000, 1000):
+        for x in range(0,4000, 10):
             outputs = scikitlearnFunc(x/1., alpha[a])
             plt.plot(x/1., outputs[0], plt_marker[a], alpha=0.5)
     for i in range(len(alpha)):
         plt.plot(-4,0, plt_marker[i], alpha=0.5, label="$\mu=$%s GeV/c$^2$" %alpha[i])
-    plt.legend(bbox_to_anchor=(0.6, .4), loc=2, borderaxespad=0)
+    #plt.legend(bbox_to_anchor=(0.6, .4), loc=2, borderaxespad=0)
+    plt.legend(loc='lower right')
     plt.ylabel('NN_output( m$_{WWbb}$ )')
     plt.xlabel('m$_{WWbb}$ [GeV/c$^2$]')
     plt.xlim([0, 4000])
@@ -273,8 +271,8 @@ def ROC_plot(mx, fpr, tpr, roc_auc):
 
 
 if __name__ == '__main__':
-    file_runner()
-    flat_bkg(1000,0,5000)
+    #file_runner()
+    flat_bkg(10000,0,5000)
     plt_histogram()
     file_concatenater()
     mwwbb_fixed(100)
