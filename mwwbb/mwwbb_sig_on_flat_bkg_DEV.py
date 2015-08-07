@@ -375,7 +375,7 @@ def mwwbbParameterizedRunner():
     #plt.legend(bbox_to_anchor=(0.6, .4), loc=2, borderaxespad=0)
     fig1 = plt.figure(1)
     plt.legend(loc='lower right')
-    plt.ylabel('NN_output')
+    plt.ylabel('NN output')
     plt.xlabel('m$_{WWbb}$ [GeV]')
     plt.xlim([250, 3000])
     plt.ylim([-0.1, 1.1])
