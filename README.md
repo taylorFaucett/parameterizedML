@@ -45,7 +45,7 @@
 <tr>
 <td width=65%, align=center>
 <h4>Parameterized Training ROC Curve</h4>
-<img src="/gaussian/plots/images/ROC_Parameterized.png"><a href="/gaussian/plots/ROC_Parameterized.pdf">[Download PDF]</a></td>
+<img src="/gaussian/plots/images/ROC_parameterized.png"><a href="/gaussian/plots/ROC_parameterized.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>ROC Curve for fixed training at mu=-2,-1,0,1,2 </li>
