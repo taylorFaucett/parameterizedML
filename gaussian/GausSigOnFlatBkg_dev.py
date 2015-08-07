@@ -15,6 +15,7 @@ import ROOT
 import numpy as np
 import pylab as P
 from sklearn import svm
+from array import *
 from sklearn.externals import joblib
 from sklearn.metrics import roc_curve, auc
 from sknn.mlp import Regressor, Classifier, Layer, Convolution
@@ -359,6 +360,65 @@ def scikitlearnFunc(x, alpha):
 def parameterizedRunner():
     alpha = [-1.5, -1.0, -0.5, 0.0, +0.5, +1.0, +1.5]
     step  = 350
+    trainAndTarget = np.loadtxt('data/traindata1.dat')
+    traindata      = trainAndTarget[:, 0:2]
+    targetdata     = trainAndTarget[:, 2]
+
+    muPoints = np.unique(traindata[:, 1])
+    chunk    = len(traindata) / len(muPoints) / 2
+    shift    = len(traindata) / 2
+    shrink = chunk #chunk = 50,000    
+
+    mu_n20 = np.concatenate((traindata[0*chunk:1*chunk,0],traindata[9*chunk:10*chunk,0]))
+    mu_n15 = np.concatenate((traindata[1*chunk:2*chunk,0],traindata[10*chunk:11*chunk,0]))
+    mu_n10 = np.concatenate((traindata[2*chunk:3*chunk,0],traindata[11*chunk:12*chunk,0]))
+    mu_n05 = np.concatenate((traindata[3*chunk:4*chunk,0],traindata[12*chunk:13*chunk,0]))
+    mu_zero= np.concatenate((traindata[4*chunk:5*chunk,0],traindata[13*chunk:14*chunk,0]))
+    mu_p05 = np.concatenate((traindata[5*chunk:6*chunk,0],traindata[14*chunk:15*chunk,0]))
+    mu_p10 = np.concatenate((traindata[6*chunk:7*chunk,0],traindata[15*chunk:16*chunk,0]))
+    mu_p15 = np.concatenate((traindata[7*chunk:8*chunk,0],traindata[16*chunk:17*chunk,0]))
+    mu_p20 = np.concatenate((traindata[8*chunk:9*chunk,0],traindata[17*chunk:18*chunk,0]))
+
+    Tmu_n20 = np.concatenate((targetdata[0*chunk:1*chunk],targetdata[9*chunk:10*chunk]))
+    Tmu_n15 = np.concatenate((targetdata[1*chunk:2*chunk],targetdata[10*chunk:11*chunk]))
+    Tmu_n10 = np.concatenate((targetdata[2*chunk:3*chunk],targetdata[11*chunk:12*chunk]))
+    Tmu_n05 = np.concatenate((targetdata[3*chunk:4*chunk],targetdata[12*chunk:13*chunk]))
+    Tmu_zero= np.concatenate((targetdata[4*chunk:5*chunk],targetdata[13*chunk:14*chunk]))
+    Tmu_p05 = np.concatenate((targetdata[5*chunk:6*chunk],targetdata[14*chunk:15*chunk]))
+    Tmu_p10 = np.concatenate((targetdata[6*chunk:7*chunk],targetdata[15*chunk:16*chunk]))
+    Tmu_p15 = np.concatenate((targetdata[7*chunk:8*chunk],targetdata[16*chunk:17*chunk]))
+    Tmu_p20 = np.concatenate((targetdata[8*chunk:9*chunk],targetdata[17*chunk:18*chunk]))
+
+    mu_n20 = np.concatenate((mu_n20[0:shrink], mu_n20[chunk:chunk+shrink]))
+    mu_n15 = np.concatenate((mu_n15[0:shrink], mu_n15[chunk:chunk+shrink]))
+    mu_n10 = np.concatenate((mu_n10[0:shrink], mu_n10[chunk:chunk+shrink]))
+    mu_n05 = np.concatenate((mu_n05[0:shrink], mu_n05[chunk:chunk+shrink]))
+    mu_zero= np.concatenate((mu_zero[0:shrink], mu_zero[chunk:chunk+shrink]))
+    mu_p05 = np.concatenate((mu_p05[0:shrink], mu_p05[chunk:chunk+shrink]))
+    mu_p10 = np.concatenate((mu_p10[0:shrink], mu_p10[chunk:chunk+shrink]))
+    mu_p15 = np.concatenate((mu_p15[0:shrink], mu_p15[chunk:chunk+shrink]))
+    mu_p20 = np.concatenate((mu_p20[0:shrink], mu_p20[chunk:chunk+shrink]))
+
+    Tmu_n20 = np.concatenate((Tmu_n20[0:shrink], Tmu_n20[chunk:chunk+shrink]))
+    Tmu_n15 = np.concatenate((Tmu_n15[0:shrink], Tmu_n15[chunk:chunk+shrink]))
+    Tmu_n10 = np.concatenate((Tmu_n10[0:shrink], Tmu_n10[chunk:chunk+shrink]))
+    Tmu_n05 = np.concatenate((Tmu_n05[0:shrink], Tmu_n05[chunk:chunk+shrink]))
+    Tmu_zero= np.concatenate((Tmu_zero[0:shrink], Tmu_zero[chunk:chunk+shrink]))
+    Tmu_p05 = np.concatenate((Tmu_p05[0:shrink], Tmu_p05[chunk:chunk+shrink]))
+    Tmu_p10 = np.concatenate((Tmu_p10[0:shrink], Tmu_p10[chunk:chunk+shrink]))
+    Tmu_p15 = np.concatenate((Tmu_p15[0:shrink], Tmu_p15[chunk:chunk+shrink]))
+    Tmu_p20 = np.concatenate((Tmu_p20[0:shrink], Tmu_p20[chunk:chunk+shrink]))
+
+    print mu_n20
+    print mu_zero
+    print mu_p20
+
+    print Tmu_n20
+    print Tmu_zero
+    print Tmu_p20
+
+    print len(mu_n20)
+    print len(Tmu_n20)
 
     plt_marker=['^', # mu=-1.5
                 'o', # mu=-1.0
@@ -378,33 +438,72 @@ def parameterizedRunner():
                 'cyan', # mu=1.0
                 'black', # mu=1.5
                 ]
+
+    input_list = [#mu_n20,
+                    mu_n15,
+                    mu_n10,
+                    mu_n05,
+                    mu_zero,
+                    mu_p05,
+                    mu_p10,
+                    mu_p15,
+                    #mu_p20
+                    ]
+    
+    actual_list = [#Tmu_n20,
+                    Tmu_n15,
+                    Tmu_n10,
+                    Tmu_n05,
+                    Tmu_zero,
+                    Tmu_p05,
+                    Tmu_p10,
+                    Tmu_p15,
+                    #Tmu_p20
+                    ]
+
     print "Running on %s alpha values: %s" %(len(alpha), alpha)
     for a in range(len(alpha)):
         print 'working on alpha=%s' %alpha[a]
-        for x in range(-step, step, 1):
-            outputs = scikitlearnFunc(x/100., alpha[a])
-            plt.plot(x/100., outputs[0], marker=plt_marker[a], color=plt_color[a], alpha=0.5, rasterized=True)
+        predictions = []
+        input = input_list[a]
+        for x in range(0, 2*shrink, 1):
+            print x/(2.*shrink)
+            outputs = scikitlearnFunc(input[x]/1., alpha[a])
+            print outputs
+            predictions.append(outputs[0])
+            fig1 = plt.figure(1)
+            plt.plot(input[x]/1., outputs[0], marker=plt_marker[a], color=plt_color[a], alpha=0.5, rasterized=True)
+        actual = actual_list[a]
+        fpr, tpr, thresholds = roc_curve(actual, predictions)
+        roc_auc = auc(fpr, tpr)
+        fig2 = plt.figure(2)
+        ROC_plot_param(alpha[a], fpr, tpr, roc_auc, plt_color[a])
+        fig2.savefig('plots/ROC_parameterized.pdf', dpi=400)
     for i in range(len(alpha)):
+        fig1 = plt.figure(1)
         plt.plot(-1000,0, marker=plt_marker[i], alpha=0.5, color=plt_color[i], label="$\mu=$%s" %alpha[i], rasterized=True)
-
+    fig1 = plt.figure(1)
     plt.legend(loc='upper right', bbox_to_anchor=(1.10, 1))
     plt.ylabel('NN output')
     plt.xlabel('NN input')
-    plt.xlim([-(step/100.), (step/100.)])
+    plt.xlim([-5,5])
     plt.ylim([-0.1, 1.1])
     plt.grid(True)
     #plt.suptitle('Theano NN regression output for parameterized gaussians',
                #fontsize=12, fontweight='bold')
 
-    plt.savefig('plots/paramTraining_complete.pdf', dpi=400)
-    plt.savefig('plots/images/paramTraining_complete.png')
+    fig1.savefig('plots/paramTraining_complete.pdf', dpi=400)
+    fig1.savefig('plots/images/paramTraining_complete.png')
+    fig2 = plt.figure(2)
+    fig2.savefig('plots/ROC_parameterized.pdf', dpi=400)
+    fig2.savefig('plots/images/ROC_parameterized.png')
     #plt.show()
 
 def ROC_plot(mu, fpr, tpr, roc_auc):
         plt.title('Receiver Operating Characteristic')
         plt.plot(fpr, tpr, label='AUC ($\mu=$%s) = %0.2f' %(mu, roc_auc), rasterized=True)
         plt.legend(loc='lower right')
-        plt.plot([0,1],[0,1],'r--')
+        plt.plot([0,1],[0,1],'k--')
         plt.xlim([0.0,1.0])
         plt.ylim([0.0,1.0])
         plt.ylabel('Background rejection')
@@ -412,11 +511,22 @@ def ROC_plot(mu, fpr, tpr, roc_auc):
         #plt.savefig('plots/ROC_param.pdf', dpi=400)
         #plt.show()
 
+def ROC_plot_param(mu, fpr, tpr, roc_auc, plt_color):
+    print "Plotting ROC curve for mu=%s" %mu
+    plt.title('Receiver Operating Characteristic')
+    plt.plot(fpr, tpr, label='mu=%s (AUC=%0.2f)' %(mu, roc_auc), color=plt_color, linewidth=2, alpha=0.5, rasterized=True)
+    plt.legend(loc='lower right')
+    plt.plot([0,1],[0,1],'k--')
+    plt.xlim([0.0,1.0])
+    plt.ylim([0.0,1.05])
+    plt.ylabel('Background rejection')
+    plt.xlabel('Signal efficiency')
+    plt.grid(True)
 
 if __name__ == '__main__':
-    makeData()
-    plt_histogram()
-    trainFixed(50)
-    trainParam(50)
+    #makeData()
+    #plt_histogram()
+    #trainFixed(50)
+    #trainParam(50)
     parameterizedRunner()
     #ROC_plot()
