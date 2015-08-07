@@ -111,23 +111,31 @@ def plt_histogram():
                 'data/root_export/sig_mx_1250.dat',
                 'data/root_export/sig_mx_1500.dat']
 
+    histtype_list = ['stepfilled',
+                        'step',
+                        'step',
+                        'step',
+                        'step',
+                        'step']
+
     label_count = 0
     for i in range(len(data_list)):
         data = np.loadtxt(data_list[i])
         label = ['Background', 
-                    '$\mu=500\, GeV$',
-                    '$\mu=750\, GeV$', 
-                    '$\mu=1000\, GeV$', 
-                    '$\mu=1250\, GeV$',
-                    '$\mu=1500\, GeV$']
+                    '$\mu=500\,$ GeV',
+                    '$\mu=750\,$ GeV', 
+                    '$\mu=1000\,$ GeV', 
+                    '$\mu=1250\,$ GeV',
+                    '$\mu=1500\,$ GeV']
         n, bins, patches = plt.hist([data[:,0] ],
-                            bins=range(0,3000, bin_size), histtype='stepfilled',
-                            alpha=0.3, label=[label[label_count]], color=plt_color[i],
+                            bins=range(0,3000, bin_size), normed=True,
+                            histtype=histtype_list[i], alpha=0.75, linewidth=2, 
+                            label=[label[label_count]], color=plt_color[i],
                             rasterized=True)
         label_count = label_count + 1
         plt.setp(patches)
     #plt.title('m$_{WWbb} =$ %s GeV' %sig[0,1])
-    plt.ylabel('Number of events$/%0.0f$ GeV' %bin_size)
+    plt.ylabel('Fraction of events$/%0.0f$ GeV' %bin_size)
     plt.xlabel('m$_{WWbb}$ [GeV]')
     plt.grid(True)
     plt.legend(loc='upper right')
@@ -140,8 +148,11 @@ def plt_histogram():
 
 def mwwbb_fixed(iterations):
     #conc_files = glob.iglob('data/concatenated/ttbar_mx_*.dat')
-    conc_files = ['data/concatenated/ttbar_mx_1000.dat']
-
+    conc_files = ['data/concatenated/ttbar_mx_750.dat',
+                    'data/concatenated/ttbar_mx_1000.dat',
+                    'data/concatenated/ttbar_mx_1250.dat']
+    plt_marker =['g+', 'r+', 'c+']
+    counter = 0
     for dat_file in conc_files:
         data = np.loadtxt(dat_file)
         traindata = data[:, 0:2]
@@ -157,7 +168,7 @@ def mwwbb_fixed(iterations):
                     #f_stable=100,
                     n_iter=iterations,
                     #learning_momentum=0.1,
-                    #batch_size=10,
+                    batch_size=10,
                     learning_rule="nesterov",
                     #valid_size=0.05,
                     verbose=True,
@@ -177,17 +188,18 @@ def mwwbb_fixed(iterations):
         roc_auc = auc(fpr, tpr)
 
         fig1 = plt.figure(1)
-        plt.plot(traindata[:, 0], outputs, 'rx', alpha=0.5, label='$\mu=$%0.0f GeV' %data[0,1], rasterized=True)
+        plt.plot(traindata[:, 0], outputs, plt_marker[counter], alpha=1, label='$\mu=$%0.0f GeV' %data[0,1], rasterized=True)
         plt.ylabel('NN output')
         plt.xlabel('m$_{WWbb}$ [GeV]')
-        plt.xlim([0, 3000])
+        plt.xlim([250, 3000])
         plt.ylim([-0.1, 1.1])
         plt.legend(loc='lower right')
         plt.grid(True)
         #plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input', fontsize=14, fontweight='bold')
 
         fig2 = plt.figure(2)
-        ROC_plot_fixed(data[0,1], fpr, tpr, roc_auc)
+        ROC_plot_fixed(data[0,1], fpr, tpr, roc_auc, plt_marker[counter])
+        counter = counter+1
     fig1.savefig('plots/fixedTraining.pdf', dpi=400)
     fig2.savefig('plots/ROC_fixed.pdf', dpi=400)
     fig1.savefig('plots/images/fixedTraining.png')
@@ -198,58 +210,85 @@ def mwwbb_fixed(iterations):
 
 
 def mwwbb_parameterized(iterations):
-    mwwbb_complete = np.concatenate((
+    mwwbb_complete750 = np.concatenate((
                         np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
                         np.loadtxt('data/concatenated/ttbar_mx_1250.dat'),
                         np.loadtxt('data/concatenated/ttbar_mx_1500.dat')),
                         axis=0)
 
-    traindata      = mwwbb_complete[:,0:2]
-    targetdata     = mwwbb_complete[:,2]
+    mwwbb_complete1000 = np.concatenate((
+                    np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
+                    np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
+                    np.loadtxt('data/concatenated/ttbar_mx_1250.dat'),
+                    np.loadtxt('data/concatenated/ttbar_mx_1500.dat')),
+                    axis=0)
 
-    nn = Pipeline([
-        ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
-        ('neural network',
-            Regressor(
-                layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
-                learning_rate=0.01,
-                n_iter=iterations,
-                #n_stable=1,
-                #f_stable=0.001,
-                #learning_momentum=0.1,
-                batch_size=25 ,
-                learning_rule="nesterov",
-                #valid_size=0.05,
-                #verbose=True,
-                #debug=True
-                ))])
-    print nn
+    mwwbb_complete1250 = np.concatenate((
+                np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
+                np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
+                np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
+                np.loadtxt('data/concatenated/ttbar_mx_1500.dat')),
+                axis=0)
 
-    nn.fit(traindata, targetdata)
+    train_list = [mwwbb_complete750[:,0:2],
+                    mwwbb_complete1000[:,0:2],
+                    mwwbb_complete1250[:,0:2]
+                    ]
 
-    fit_score = nn.score(traindata, targetdata)
-    print 'score = %s' %fit_score
+    target_list = [mwwbb_complete750[:,2],
+                    mwwbb_complete1000[:,2],
+                    mwwbb_complete1250[:,2]
+                    ]
 
-    outputs = nn.predict(traindata)
+    mx_list = [750, 1000, 1250]
 
-    # Plot settings
-    plt.plot(traindata[:, 0], outputs, 'o', alpha=0.5, rasterized=True)
-    plt.ylabel('NN output')
-    plt.xlabel('m$_{WWbb}$ [GeV]')
-    plt.xlim([0, 3000])
-    plt.ylim([-0.1, 1.1])
-    plt.grid(True)
-    #plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input',
-        #fontsize=14, fontweight='bold')
-    #plt.savefig('plots/paramTraining.pdf', dpi=400)
-    #plt.savefig('plots/images/paramTraining.png')
-    plt.clf()
+    for i in range(3):
+        traindata      = train_list[i]
+        targetdata     = target_list[i]
 
-    pickle.dump(nn, open('data/pickle/param.pkl', 'wb'))
+        nn = Pipeline([
+            ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
+            ('neural network',
+                Regressor(
+                    layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
+                    learning_rate=0.01,
+                    n_iter=iterations,
+                    #n_stable=1,
+                    #f_stable=0.001,
+                    #learning_momentum=0.1,
+                    batch_size=10,
+                    learning_rule="nesterov",
+                    #valid_size=0.05,
+                    verbose=True,
+                    #debug=True
+                    ))])
+        print nn
 
-def scikitlearnFunc(x, alpha):
-    nn = pickle.load(open('data/pickle/param.pkl','rb'))
+        nn.fit(traindata, targetdata)
+
+        fit_score = nn.score(traindata, targetdata)
+        print 'score = %s' %fit_score
+
+        outputs = nn.predict(traindata)
+
+        # Plot settings
+        plt.plot(traindata[:, 0], outputs, 'o', alpha=1, rasterized=True)
+        plt.ylabel('NN output')
+        plt.xlabel('m$_{WWbb}$ [GeV]')
+        plt.xlim([250, 3000])
+        plt.ylim([-0.1, 1.1])
+        plt.grid(True)
+        #plt.suptitle('Theano NN fixed training for m$_{WWbb}$ input',
+            #fontsize=14, fontweight='bold')
+        #plt.savefig('plots/paramTraining.pdf', dpi=400)
+        #plt.savefig('plots/images/paramTraining.png')
+        plt.clf()
+
+        pickle.dump(nn, open('data/pickle/param_%s.pkl' %mx_list[i], 'wb'))
+
+def scikitlearnFunc(x, alpha, mx):
+    nn = pickle.load(open('data/pickle/param_%s.pkl' %mx,'rb'))
     traindata = np.array((x, alpha), ndmin=2)
     outputs   = nn.predict(traindata)
 
@@ -259,8 +298,10 @@ def scikitlearnFunc(x, alpha):
 
 def mwwbbParameterizedRunner():
     plt_marker=['bo', 'go', 'r.', 'co', 'mo']
+    plt_marker = ['o', 'o', 'o', 'o', 'o']
+    plt_color = ['blue', 'DarkGreen', 'DarkRed', 'DarkCyan', 'magenta']
     alpha = [500, 750, 1000, 1250, 1500]
-    size = 500
+    size = 20000
 
     mx_500_raw = np.loadtxt('data/concatenated/ttbar_mx_500.dat')
     mx_750_raw = np.loadtxt('data/concatenated/ttbar_mx_750.dat')
@@ -318,25 +359,25 @@ def mwwbbParameterizedRunner():
         predictions = []
         input = input_list[a]
         for x in range(0,2*size, 1):
-            outputs = scikitlearnFunc(input[x]/1., alpha[a])
+            outputs = scikitlearnFunc(input[x]/1., alpha[a], 1000)
             predictions.append(outputs[0])
             fig1 = plt.figure(1)
-            plt.plot(input[x]/1., outputs[0], plt_marker[a], alpha=0.5, rasterized=True)
+            plt.plot(input[x]/1., outputs[0], marker=plt_marker[a], color=plt_color[a], alpha=1, rasterized=True)
             print "%s - Percent Complete: %s" %(alpha[a], (x/(2.0*size))*100.0)
         actual = actual_list[a]
         fpr, tpr, thresholds = roc_curve(actual, predictions)
         roc_auc = auc(fpr, tpr)
         fig2 = plt.figure(2)
-        ROC_plot_param(alpha[a], fpr, tpr, roc_auc, plt_marker[a])
+        ROC_plot_param(alpha[a], fpr, tpr, roc_auc, plt_marker[a], plt_color[a])
     for i in range(len(alpha)):
         fig1 = plt.figure(1)
-        plt.plot(-4,0, plt_marker[i], alpha=0.5, label="$\mu=$%s GeV" %alpha[i], rasterized=True)
+        plt.plot(-4,0, plt_marker[i], alpha=1, label="$\mu=$%s GeV" %alpha[i], rasterized=True)
     #plt.legend(bbox_to_anchor=(0.6, .4), loc=2, borderaxespad=0)
     fig1 = plt.figure(1)
     plt.legend(loc='lower right')
     plt.ylabel('NN_output')
     plt.xlabel('m$_{WWbb}$ [GeV]')
-    plt.xlim([0, 3000])
+    plt.xlim([250, 3000])
     plt.ylim([-0.1, 1.1])
     plt.grid(True)
     #plt.suptitle('Theano NN regression output for parameterized m$_{WWbb}$ input',
@@ -348,11 +389,11 @@ def mwwbbParameterizedRunner():
     fig2.savefig('plots/ROC_parameterized.pdf', dpi=400)
     fig2.savefig('plots/images/ROC_parameterized.png')
 
-def ROC_plot_fixed(mx, fpr, tpr, roc_auc):
+def ROC_plot_fixed(mx, fpr, tpr, roc_auc, plt_marker):
     print "Plotting ROC curve for mx=%s" %mx
     plt.title('Receiver Operating Characteristic')
-    plt.plot(fpr, tpr, label='AUC (mx=%s) = %0.2f' %(mx, roc_auc), 
-                marker='x', color='red', alpha=0.5, rasterized=True)
+    plt.plot(fpr, tpr, plt_marker, label='AUC (mx=%s) = %0.2f' %(mx, roc_auc), 
+                alpha=1, rasterized=True)
     plt.legend(loc='lower right')
     plt.plot([0,1],[0,1],'k--')
     plt.xlim([0.0,1.0])
@@ -361,10 +402,10 @@ def ROC_plot_fixed(mx, fpr, tpr, roc_auc):
     plt.xlabel('Signal efficiency')
     plt.grid(True)
 
-def ROC_plot_param(mx, fpr, tpr, roc_auc, plt_marker):
+def ROC_plot_param(mx, fpr, tpr, roc_auc, plt_marker, plt_color):
     print "Plotting ROC curve for mx=%s" %mx
     plt.title('Receiver Operating Characteristic')
-    plt.plot(fpr, tpr, plt_marker, label='AUC (mx=%s) = %0.2f' %(mx, roc_auc), alpha=0.5, rasterized=True)
+    plt.plot(fpr, tpr, marker=plt_marker, color=plt_color, label='AUC (mx=%s) = %0.2f' %(mx, roc_auc), alpha=1, rasterized=True)
     plt.legend(loc='lower right')
     plt.plot([0,1],[0,1],'k--')
     plt.xlim([0.0,1.0])
@@ -372,12 +413,80 @@ def ROC_plot_param(mx, fpr, tpr, roc_auc, plt_marker):
     plt.ylabel('Background rejection')
     plt.xlabel('Signal efficiency')
     plt.grid(True)
+
+def fixVSparam():
+    plt_marker = ['o', 'o', 'o']
+    plt_color = ['DarkGreen', 'DarkRed', 'DarkCyan']
+    alpha = [750, 1000, 1250]
+    size = 20000
+
+    mx_750_raw = np.loadtxt('data/concatenated/ttbar_mx_750.dat')
+    mx_1000_raw = np.loadtxt('data/concatenated/ttbar_mx_1000.dat')
+    mx_1250_raw = np.loadtxt('data/concatenated/ttbar_mx_1250.dat')
+
+    mx_750_sig = mx_750_raw[:size, :]
+    mx_750_bkg = mx_750_raw[-size:, :]
+
+    mx_1000_sig = mx_1000_raw[:size, :]
+    mx_1000_bkg = mx_1000_raw[-size:, :]
+
+    mx_1250_sig = mx_1250_raw[:size, :]
+    mx_1250_bkg = mx_1250_raw[-size:, :]
+
+    mx_750 = np.concatenate((mx_750_sig, mx_750_bkg), axis=0)
+    mx_1000 = np.concatenate((mx_1000_sig, mx_1000_bkg), axis=0)
+    mx_1250 = np.concatenate((mx_1250_sig, mx_1250_bkg), axis=0)
+
+    input_list = [mx_750[:,0],
+                    mx_1000[:,0],
+                    mx_1250[:,0]]
+
+    actual_list = [mx_750[:,2],
+                    mx_1000[:,2],
+                    mx_1250[:,2]]
+
+
+    mwwbb_complete = np.concatenate((
+                        np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1250.dat')),
+                        axis=0)
+
+    traindata      = mwwbb_complete[:,0:2]
+    targetdata     = mwwbb_complete[:,2]
+
+    print "Running on %s alpha values: %s" %(len(alpha), alpha)
+
+    for a in range(len(alpha)):
+        print 'working on alpha=%s' %alpha[a]
+        predictions = []
+        input = input_list[a]
+        for x in range(0,2*size, 1):
+            outputs = scikitlearnFunc(input[x]/1., alpha[a], alpha[a])
+            predictions.append(outputs[0])
+            print "%s - Percent Complete: %s" %(alpha[a], (x/(2.0*size))*100.0)
+        actual = actual_list[a]
+        fpr, tpr, thresholds = roc_curve(actual, predictions)
+        roc_auc = auc(fpr, tpr)
+        fig2 = plt.figure(2)
+        ROC_plot_param(alpha[a], fpr, tpr, roc_auc, plt_marker[a], plt_color[a])
+    fig1 = plt.figure(1)
+    fig2 = plt.figure(2)
+    fig2.savefig('plots/fixVSparam.pdf', dpi=400)
+    fig2.savefig('plots/images/fixVSparam.png')
+    fig1.clf()
+    fig2.clf()
+    plt.clf()
 
 if __name__ == '__main__':
     #file_runner()
     #flat_bkg(10000,0,5000)
     #plt_histogram()
     #file_concatenater()
-    mwwbb_fixed(100)
     mwwbb_parameterized(100)
+
+    mwwbb_fixed(100)
+    fixVSparam()
+
+    mwwbb_fixed(100)
     mwwbbParameterizedRunner()
