@@ -101,4 +101,15 @@
 </ul>
 </td>
 </tr>
+<tr>
+<td width=65%, align=center> 
+<img src="/mwwbb/plots/images/fixVSparam.png"><a href="/mwwbb/plots/fixVSparam.pdf">[Download PDF]</a></td>
+<td>
+<ul>
+<li>ROC curve for Fixed training at mu=750, 1000, 1250 (circle markers)</li>
+<li>ROC curve for interpolations in parameterized training at mu=750, 1000, 1250 (+ marker)</li>
+<li>Note: for interpolations, signals trained for exclude that being predicted. For example, green + markers measuing at mu=750 GeV is an interpolation from parameterized training signals at mu=500, 1000, 1250, 1500. Similarly, red + markers for the prediction at mu=1000 is an interpolation from signals at mu=500, 750, 1250, 1500. </li>
+</ul>
+</td>
+</tr>
 </table>
