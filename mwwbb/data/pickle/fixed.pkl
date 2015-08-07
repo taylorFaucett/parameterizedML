@@ -136,8 +136,7 @@ NsS'dropout_rate'
 p60
 NsS'verbose'
 p61
-I01
-sS'valid_set'
+NsS'valid_set'
 p62
 NsS'loss_type'
 p63

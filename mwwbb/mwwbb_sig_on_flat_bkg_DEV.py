@@ -171,7 +171,7 @@ def mwwbb_fixed(iterations):
                     batch_size=10,
                     learning_rule="nesterov",
                     #valid_size=0.05,
-                    verbose=True,
+                    #verbose=True,
                     #debug=True
                     ))])
 
@@ -301,7 +301,7 @@ def mwwbbParameterizedRunner():
     plt_marker = ['o', 'o', 'o', 'o', 'o']
     plt_color = ['blue', 'DarkGreen', 'DarkRed', 'DarkCyan', 'magenta']
     alpha = [500, 750, 1000, 1250, 1500]
-    size = 20000
+    size = 2500
 
     mx_500_raw = np.loadtxt('data/concatenated/ttbar_mx_500.dat')
     mx_750_raw = np.loadtxt('data/concatenated/ttbar_mx_750.dat')
@@ -483,10 +483,10 @@ if __name__ == '__main__':
     #flat_bkg(10000,0,5000)
     #plt_histogram()
     #file_concatenater()
-    mwwbb_parameterized(100)
+    #mwwbb_parameterized(100)
 
-    mwwbb_fixed(100)
-    fixVSparam()
+    #mwwbb_fixed(100)
+    #fixVSparam()
 
     mwwbb_fixed(100)
     mwwbbParameterizedRunner()
