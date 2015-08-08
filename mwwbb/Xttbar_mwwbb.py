@@ -23,7 +23,7 @@ from sklearn.externals import joblib
 from sknn.mlp import Regressor, Classifier, Layer
 
 def file_runner():
-	print 'Entering file_runner'
+    print 'Entering file_runner'
     sig_files = glob.iglob('data/root_files/xttbar_*.root')
     bkg_files = glob.iglob('data/root_files/smttbar.root')
     for data in sig_files:
@@ -32,8 +32,8 @@ def file_runner():
         file_generate(data, 0.000000)
 
 def flat_bkg(bkgNum, low, high):
-	print 'Entering flat_bkg'
-	print 'Genterating a flat background with %s data points betwee %s-%s' %(bkgNum, low, high)
+    print 'Entering flat_bkg'
+    print 'Genterating a flat background with %s data points betwee %s-%s' %(bkgNum, low, high)
     mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
     w = ROOT.RooWorkspace('w')
 
@@ -56,8 +56,8 @@ def flat_bkg(bkgNum, low, high):
         np.savetxt('data/flat_bkg/bkg_mx_%s.dat' %mx_values[j], bkg_data, fmt='%f')
 
 def file_generate(root_file, target):
-	print 'Entering file_generate'
-	print 'Generating data using values from: %s' %root_file
+    print 'Entering file_generate'
+    print 'Generating data using values from: %s' %root_file
     signal = root_export(root_file,'xtt','mwwbb')
     mx = root_export(root_file,'xtt','mx')
     #target = root_export(root_file,'xtt','target')
@@ -74,10 +74,10 @@ def file_generate(root_file, target):
     np.savetxt('data/root_export/%s_mx_%0.0f.dat' %(label, mx[0]), data, fmt='%f')
 
 def root_export(root_file, tree, leaf):
-	print 'Entering root_export'
-	print 'Extracting data from file: %s' %root_file
-	print 'Extracting data from TTree: %s' %tree
-	print 'Extracting data from TLeaf: %s' %leaf
+    print 'Entering root_export'
+    print 'Extracting data from file: %s' %root_file
+    print 'Extracting data from TTree: %s' %tree
+    print 'Extracting data from TLeaf: %s' %leaf
     f = ROOT.TFile(root_file)
     t = f.Get(tree)
     l = t.GetLeaf(leaf)
@@ -90,7 +90,7 @@ def root_export(root_file, tree, leaf):
     return entries
 
 def file_concatenater():
-	print 'Entering file_concatenater'
+    print 'Entering file_concatenater'
     sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
     bkg_dat = glob.iglob('data/root_export/bkg_mx_*.dat')
     flt_dat = glob.iglob('data/flat_bkg/*.dat')
@@ -107,57 +107,57 @@ def file_concatenater():
 ''' NN Training '''
 
 def mwwbb_fixed():
-	print 'Entering mwwbb_fixed'
-	files = ['data/concatenated/ttbar_mx_500.dat',
-				'data/concatenated/ttbar_mx_750.dat',
-				'data/concatenated/ttbar_mx_1000.dat',
-				'data/concatenated/ttbar_mx_1250.dat',
-				'data/concatenated/ttbar_mx_1500.dat']
-	mx = [500, 750, 1000, 1250, 1500]
-	nn = Pipeline([
-	    ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
-	    ('neural network',
-	        Regressor(
-	            layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
-	            learning_rate=0.01,
-	            #n_stable=1,
-	            #f_stable=100,
-	            n_iter=20,
-	            #learning_momentum=0.1,
-	            batch_size=10,
-	            learning_rule="nesterov",
-	            #valid_size=0.05,
-	            #verbose=True,
-	            #debug=True
-	            ))])
-	print nn
-	for i in range(len(files)):
-		print 'Processing fixed training on mu=%s' %mx[i]
-		data = np.loadtxt(files[i])
-		traindata = data[:,0:2]
-		targetdata = data[:,2]
-		nn.fit(traindata, targetdata)
+    print 'Entering mwwbb_fixed'
+    files = ['data/concatenated/ttbar_mx_500.dat',
+    			'data/concatenated/ttbar_mx_750.dat',
+    			'data/concatenated/ttbar_mx_1000.dat',
+    			'data/concatenated/ttbar_mx_1250.dat',
+    			'data/concatenated/ttbar_mx_1500.dat']
+    mx = [500, 750, 1000, 1250, 1500]
+    nn = Pipeline([
+        ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
+        ('neural network',
+            Regressor(
+                layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
+                learning_rate=0.01,
+                #n_stable=1,
+                #f_stable=100,
+                n_iter=20,
+                #learning_momentum=0.1,
+                batch_size=10,
+                learning_rule="nesterov",
+                #valid_size=0.05,
+                #verbose=True,
+                #debug=True
+                ))])
+    print nn
+    for i in range(len(files)):
+    	print 'Processing fixed training on mu=%s' %mx[i]
+    	data = np.loadtxt(files[i])
+    	traindata = data[:,0:2]
+    	targetdata = data[:,2]
+    	nn.fit(traindata, targetdata)
 
-		fit_score = nn.score(traindata, targetdata)
-		print 'score = %s' %fit_score
-		outputs = nn.predict(traindata)
-		outputs = outputs.reshape((1,len(outputs)))
-		fixed_plot = np.vstack((traindata[:,0], outputs)).T
-		np.savetxt('data/plot_data/fixed_%s.dat' %mx[i], fixed_plot, fmt='%f')
+    	fit_score = nn.score(traindata, targetdata)
+    	print 'score = %s' %fit_score
+    	outputs = nn.predict(traindata)
+    	outputs = outputs.reshape((1,len(outputs)))
+    	fixed_plot = np.vstack((traindata[:,0], outputs)).T
+    	np.savetxt('data/plot_data/fixed_%s.dat' %mx[i], fixed_plot, fmt='%f')
 
-		actual = targetdata
-		predictions = outputs[0]
-		fpr, tpr, thresholds = roc_curve(actual, predictions)
-		ROC_plot = np.vstack((fpr, tpr)).T
-		roc_auc = [auc(fpr, tpr)]
-		np.savetxt('data/plot_data/fixed_ROC_%s.dat' %mx[i], ROC_plot, fmt='%f')
-		np.savetxt('data/plot_data/fixed_ROC_AUC_%s.dat' %mx[i], roc_auc)
+    	actual = targetdata
+    	predictions = outputs[0]
+    	fpr, tpr, thresholds = roc_curve(actual, predictions)
+    	ROC_plot = np.vstack((fpr, tpr)).T
+    	roc_auc = [auc(fpr, tpr)]
+    	np.savetxt('data/plot_data/fixed_ROC_%s.dat' %mx[i], ROC_plot, fmt='%f')
+    	np.savetxt('data/plot_data/fixed_ROC_AUC_%s.dat' %mx[i], roc_auc)
 
-		pickle.dump(nn, open('data/pickle/fixed_%s.pkl' %mx[i], 'wb'))
+    	pickle.dump(nn, open('data/pickle/fixed_%s.pkl' %mx[i], 'wb'))
 
 
 def mwwbb_parameterized():
-	print 'Entering mwwbb_parameterized'
+    print 'Entering mwwbb_parameterized'
     mwwbb_complete750 = np.concatenate((
                         np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
                         np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
@@ -235,7 +235,7 @@ def scikitlearnFunc(x, alpha, mx):
     return outputs[[0]]
 
 def mwwbbParameterizedRunner():
-	print 'Entering mwwbbParameterizedRunner'
+    print 'Entering mwwbbParameterizedRunner'
     alpha = [500, 750, 1000, 1250, 1500]
     size = 2000
 
@@ -310,7 +310,7 @@ def mwwbbParameterizedRunner():
         np.savetxt('data/plot_data/param_alpha_ROC_AUC_%s.dat' %alpha[a], roc_auc)
 
 def fixVSparam():
-	print 'Entering fixVSparam'
+    print 'Entering fixVSparam'
     alpha = [750, 1000, 1250]
     size = 2000
 
@@ -374,7 +374,7 @@ def fixVSparam():
 
 
 def plt_histogram():
-	print 'Entering plt_histogram'
+    print 'Entering plt_histogram'
     bin_size   = 50
     #sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
     #bkg_dat = glob.iglob('data/root_export/bkg_mx_*.dat')
@@ -429,188 +429,188 @@ def plt_histogram():
 
 
 def fixed_plot(): 
-	print 'Entering fixed_plot'
-	files = [#np.loadtxt('data/plot_data/fixed_500.dat'),
-				np.loadtxt('data/plot_data/fixed_750.dat'),
-				np.loadtxt('data/plot_data/fixed_1000.dat'),
-				np.loadtxt('data/plot_data/fixed_1250.dat'),
-				#np.loadtxt('data/plot_data/fixed_1500.dat')
-				]
-	mx = [500, 750, 1000, 1250, 1500]
-	plt_marker = ['b.', 'g.', 'r.', 'c.', 'm.']
-	for i in range(len(files)):
-		plt.plot(files[i][:,0], files[i][:,1], 
-					plt_marker[i+1], alpha=0.5, markevery = 50, 
-					label='$\mu=$%s' %mx[i], rasterized=True)
-	plt.ylabel('NN output')
-	plt.xlabel('m$_{WWbb}$ [GeV]')
-	plt.xlim([250,3000])
-	plt.ylim([0,1])
-	plt.legend(loc='lower right')
-	plt.grid(True)
-	plt.savefig('plots/fixedTraining.pdf', dpi=400)
-	plt.savefig('plots/images/fixedTraining.png')
-	plt.clf()
+    print 'Entering fixed_plot'
+    files = [#np.loadtxt('data/plot_data/fixed_500.dat'),
+    			np.loadtxt('data/plot_data/fixed_750.dat'),
+    			np.loadtxt('data/plot_data/fixed_1000.dat'),
+    			np.loadtxt('data/plot_data/fixed_1250.dat'),
+    			#np.loadtxt('data/plot_data/fixed_1500.dat')
+    			]
+    mx = [500, 750, 1000, 1250, 1500]
+    plt_marker = ['b.', 'g.', 'r.', 'c.', 'm.']
+    for i in range(len(files)):
+    	plt.plot(files[i][:,0], files[i][:,1], 
+    				plt_marker[i+1], alpha=0.5, markevery = 50, 
+    				label='$\mu=$%s' %mx[i], rasterized=True)
+    plt.ylabel('NN output')
+    plt.xlabel('m$_{WWbb}$ [GeV]')
+    plt.xlim([250,3000])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/fixedTraining.pdf', dpi=400)
+    plt.savefig('plots/images/fixedTraining.png')
+    plt.clf()
 
 def fixed_ROC_plot():
-	print "Entering fixed_ROC_plot"
-	files = [np.loadtxt('data/plot_data/fixed_ROC_500.dat'),
-				np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
-				np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
-				np.loadtxt('data/plot_data/fixed_ROC_1250.dat'),
-				np.loadtxt('data/plot_data/fixed_ROC_1500.dat')]
-	AUC = [np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
-			np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
-			np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
-			np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
-			np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')]
-	mx = [500, 750, 1000, 1250, 1500]
-	plt_color = ['blue', 'green', 'red', 'cyan', 'magenta']
-	plt_marker = ['.', '.', '.', '.', '.']
-	for i in range(len(files)):
-		plt.plot(files[i][:,0], files[i][:,1],
-					marker=plt_marker[i], color=plt_color[i], alpha=0.5, 
-					markevery = 1000, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC[i]), rasterized=True)
-	plt.plot([0,1],[0,1], 'r--')
-	plt.title('Receiver Operating Characteristic')
-	plt.ylabel('Background rejection')
-	plt.xlabel('Signal efficiency')
-	plt.xlim([0,1])
-	plt.ylim([0,1])
-	plt.legend(loc='lower right')
-	plt.grid(True)
-	plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
-	plt.savefig('plots/images/fixed_ROC_plot.png')
-	plt.clf()
+    print "Entering fixed_ROC_plot"
+    files = [np.loadtxt('data/plot_data/fixed_ROC_500.dat'),
+    			np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
+    			np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
+    			np.loadtxt('data/plot_data/fixed_ROC_1250.dat'),
+    			np.loadtxt('data/plot_data/fixed_ROC_1500.dat')]
+    AUC = [np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
+    		np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
+    		np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
+    		np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
+    		np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')]
+    mx = [500, 750, 1000, 1250, 1500]
+    plt_color = ['blue', 'green', 'red', 'cyan', 'magenta']
+    plt_marker = ['.', '.', '.', '.', '.']
+    for i in range(len(files)):
+    	plt.plot(files[i][:,0], files[i][:,1],
+    				marker=plt_marker[i], color=plt_color[i], alpha=0.5, 
+    				markevery = 1000, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC[i]), rasterized=True)
+    plt.plot([0,1],[0,1], 'r--')
+    plt.title('Receiver Operating Characteristic')
+    plt.ylabel('Background rejection')
+    plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
+    plt.savefig('plots/images/fixed_ROC_plot.png')
+    plt.clf()
 
 
 def fixVSparam_plot():
-	print 'Entering fixVSparam_plot'
-	param_files = [np.loadtxt('data/plot_data/fixVSparam_750.dat'),
-				np.loadtxt('data/plot_data/fixVSparam_1000.dat'),
-				np.loadtxt('data/plot_data/fixVSparam_1250.dat')
-				]
-	fixed_files = [np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
-				np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
-				np.loadtxt('data/plot_data/fixed_ROC_1250.dat')
-				]
-	AUC_param = [np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_750.dat'),
-					np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_1000.dat'),
-					np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_1250.dat')]
-	AUC_fixed = [#np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
-					#np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')
-					]
-	param_markers = ['go', 'ro', 'co']
-	fixed_markers = ['g.', 'r.', 'c.']
-	mx = [750, 1000, 1250]
-	for i in range(len(param_files)):
-		plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i], 
-					alpha=0.5, markevery=1, 
-					label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]), rasterized=True)
-	for i in range(len(fixed_files)):
-		plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
-					alpha=0.5, markevery=1000, 
-					label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  rasterized=True)
-	plt.plot([0,1], [0,1], 'r--')
-	plt.title('Receiver Operating Characteristic')
-	plt.ylabel('Background rejection')
-	plt.xlabel('Signal efficiency')
-	plt.xlim([0,1])
-	plt.ylim([0,1])
-	plt.legend(loc='lower right')
-	plt.grid(True)
-	plt.savefig('plots/fixVSparam_plot.pdf', dpi=400)
-	plt.savefig('plots/images/fixVSparam.png')
-	plt.clf()
+    print 'Entering fixVSparam_plot'
+    param_files = [np.loadtxt('data/plot_data/fixVSparam_750.dat'),
+    			np.loadtxt('data/plot_data/fixVSparam_1000.dat'),
+    			np.loadtxt('data/plot_data/fixVSparam_1250.dat')
+    			]
+    fixed_files = [np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
+    			np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
+    			np.loadtxt('data/plot_data/fixed_ROC_1250.dat')
+    			]
+    AUC_param = [np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_750.dat'),
+    				np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_1000.dat'),
+    				np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_1250.dat')]
+    AUC_fixed = [#np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
+    				#np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')
+    				]
+    param_markers = ['go', 'ro', 'co']
+    fixed_markers = ['g.', 'r.', 'c.']
+    mx = [750, 1000, 1250]
+    for i in range(len(param_files)):
+    	plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i], 
+    				alpha=0.5, markevery=1, 
+    				label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]), rasterized=True)
+    for i in range(len(fixed_files)):
+    	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
+    				alpha=0.5, markevery=1000, 
+    				label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  rasterized=True)
+    plt.plot([0,1], [0,1], 'r--')
+    plt.title('Receiver Operating Characteristic')
+    plt.ylabel('Background rejection')
+    plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/fixVSparam_plot.pdf', dpi=400)
+    plt.savefig('plots/images/fixVSparam.png')
+    plt.clf()
 
 def param_ROC_plot():
-	print 'Entering param_ROC_plot'
-	param_files = [#np.loadtxt('data/plot_data/param_alpha_ROC_500.dat'),
-				np.loadtxt('data/plot_data/param_alpha_ROC_750.dat'),
-				np.loadtxt('data/plot_data/param_alpha_ROC_1000.dat'),
-				np.loadtxt('data/plot_data/param_alpha_ROC_1250.dat'),
-				#np.loadtxt('data/plot_data/param_alpha_ROC_1500.dat')
-				]
-	fixed_files = [np.loadtxt('data/plot_data/fixed_ROC_500.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_1250.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_1500.dat')
-					]
-	AUC_param = [#np.loadtxt('data/plot_data/param_alpha_ROC_AUC_500.dat'),
-					np.loadtxt('data/plot_data/param_alpha_ROC_AUC_750.dat'),
-					np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1000.dat'),
-					np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1250.dat'),
-					#np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1500.dat')
-					]
+    print 'Entering param_ROC_plot'
+    param_files = [#np.loadtxt('data/plot_data/param_alpha_ROC_500.dat'),
+    			np.loadtxt('data/plot_data/param_alpha_ROC_750.dat'),
+    			np.loadtxt('data/plot_data/param_alpha_ROC_1000.dat'),
+    			np.loadtxt('data/plot_data/param_alpha_ROC_1250.dat'),
+    			#np.loadtxt('data/plot_data/param_alpha_ROC_1500.dat')
+    			]
+    fixed_files = [np.loadtxt('data/plot_data/fixed_ROC_500.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_1250.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_1500.dat')
+    				]
+    AUC_param = [#np.loadtxt('data/plot_data/param_alpha_ROC_AUC_500.dat'),
+    				np.loadtxt('data/plot_data/param_alpha_ROC_AUC_750.dat'),
+    				np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1000.dat'),
+    				np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1250.dat'),
+    				#np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1500.dat')
+    				]
 
-	AUC_fixed = [np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
-					np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')
-					]
-	param_markers = ['bo', 'go', 'ro', 'co', 'mo']
-	fixed_markers = ['b.', 'g.', 'r.', 'c.', 'm.']
-	mx = [500,750, 1000, 1250,1500]
+    AUC_fixed = [np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
+    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')
+    				]
+    param_markers = ['bo', 'go', 'ro', 'co', 'mo']
+    fixed_markers = ['b.', 'g.', 'r.', 'c.', 'm.']
+    mx = [500,750, 1000, 1250,1500]
 
-	for i in range(len(param_files)):
-		plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i+1], 
-					alpha=0.5, markevery=1, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
-					rasterized=True)
-	for i in range(len(fixed_files)):
-		plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
-					alpha=0.5, markevery=1000, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
-					rasterized=True)
-	plt.plot([0,1], [0,1], 'r--')
-	plt.title('Receiver Operating Characteristic')
-	plt.ylabel('Background rejection')
-	plt.xlabel('Signal efficiency')
-	plt.xlim([0,1])
-	plt.ylim([0,1])
-	plt.legend(loc='lower right')
-	plt.grid(True)
-	plt.savefig('plots/param_ROC_plot.pdf', dpi=400)
-	plt.savefig('plots/images/param_ROC_plot.png')	
-	plt.clf()
+    for i in range(len(param_files)):
+    	plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i+1], 
+    				alpha=0.5, markevery=100, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
+    				rasterized=True)
+    for i in range(len(fixed_files)):
+    	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
+    				alpha=0.5, markevery=100, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
+    				rasterized=True)
+    plt.plot([0,1], [0,1], 'r--')
+    plt.title('Receiver Operating Characteristic')
+    plt.ylabel('Background rejection')
+    plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/param_ROC_plot.pdf', dpi=400)
+    plt.savefig('plots/images/param_ROC_plot.png')	
+    plt.clf()
 
 def param_plot(): 
-	print 'Entering fixed_plot'
-	fixed_files = [#np.loadtxt('data/plot_data/fixed_500.dat'),
-				np.loadtxt('data/plot_data/fixed_750.dat'),
-				np.loadtxt('data/plot_data/fixed_1000.dat'),
-				np.loadtxt('data/plot_data/fixed_1250.dat'),
-				#np.loadtxt('data/plot_data/fixed_1500.dat')
-				]
-	param_files = [np.loadtxt('data/plot_data/param_alpha_500.dat'),
-				np.loadtxt('data/plot_data/param_alpha_750.dat'),
-				np.loadtxt('data/plot_data/param_alpha_1000.dat'),
-				np.loadtxt('data/plot_data/param_alpha_1250.dat'),
-				np.loadtxt('data/plot_data/param_alpha_1500.dat')
-				]
-	mx = [500, 750, 1000, 1250, 1500]
-	fixed_colors = ['blue', 'green', 'red', 'cyan', 'magenta']
-	param_colors = ['DarkBlue', 'DarkGreen', 'DarkRed', 'DarkCyan', 'DarkMagenta']
-	for i in range(len(fixed_files)):
-		plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], 
-					'.', color=fixed_colors[i+1], alpha=0.5, markevery = 1, 
-					label='$\mu=$%s' %mx[i+1], rasterized=True)
-	for i in range(len(param_files)):
-		plt.plot(param_files[i][:,0], param_files[i][:,1], 
-					'o', color=param_colors[i], alpha=0.5, markevery = 1, 
-					label='$\mu=$%s' %mx[i], rasterized=True)
-	plt.ylabel('NN output')
-	plt.xlabel('m$_{WWbb}$ [GeV]')
-	plt.xlim([250,3000])
-	plt.ylim([0,1])
-	plt.legend(loc='lower right')
-	plt.grid(True)
-	plt.savefig('plots/paramTraining_complete.pdf', dpi=400)
-	plt.savefig('plots/images/paramTraining_complete.png')
-	plt.clf()
+    print 'Entering fixed_plot'
+    fixed_files = [#np.loadtxt('data/plot_data/fixed_500.dat'),
+    			np.loadtxt('data/plot_data/fixed_750.dat'),
+    			np.loadtxt('data/plot_data/fixed_1000.dat'),
+    			np.loadtxt('data/plot_data/fixed_1250.dat'),
+    			#np.loadtxt('data/plot_data/fixed_1500.dat')
+    			]
+    param_files = [np.loadtxt('data/plot_data/param_alpha_500.dat'),
+    			np.loadtxt('data/plot_data/param_alpha_750.dat'),
+    			np.loadtxt('data/plot_data/param_alpha_1000.dat'),
+    			np.loadtxt('data/plot_data/param_alpha_1250.dat'),
+    			np.loadtxt('data/plot_data/param_alpha_1500.dat')
+    			]
+    mx = [500, 750, 1000, 1250, 1500]
+    fixed_colors = ['blue', 'green', 'red', 'cyan', 'magenta']
+    param_colors = ['DarkBlue', 'DarkGreen', 'DarkRed', 'DarkCyan', 'DarkMagenta']
+    for i in range(len(fixed_files)):
+    	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], 
+    				'.', color=fixed_colors[i+1], alpha=0.5, markevery = 1, 
+    				label='$\mu=$%s' %mx[i+1], rasterized=True)
+    for i in range(len(param_files)):
+    	plt.plot(param_files[i][:,0], param_files[i][:,1], 
+    				'o', color=param_colors[i], alpha=0.5, markevery = 1, 
+    				label='$\mu=$%s' %mx[i], rasterized=True)
+    plt.ylabel('NN output')
+    plt.xlabel('m$_{WWbb}$ [GeV]')
+    plt.xlim([250,3000])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/paramTraining_complete.pdf', dpi=400)
+    plt.savefig('plots/images/paramTraining_complete.png')
+    plt.clf()
 
 
 if __name__ == '__main__':
@@ -622,13 +622,13 @@ if __name__ == '__main__':
     ''' NN Training '''
     #mwwbb_fixed()
     #mwwbb_parameterized()
-    mwwbbParameterizedRunner()
+    #mwwbbParameterizedRunner()
     #fixVSparam()
 
     '''Plotters'''
     #plt_histogram()
-    fixed_plot()
-    fixed_ROC_plot()
-    fixVSparam_plot()
+    #fixed_plot()
+    #fixed_ROC_plot()
+    #fixVSparam_plot()
     param_ROC_plot()
-    param_plot()
+    #param_plot()
