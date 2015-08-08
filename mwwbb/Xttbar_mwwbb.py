@@ -523,7 +523,7 @@ def fixVSparam_plot():
     plt.legend(loc='lower right')
     plt.grid(True)
     plt.savefig('plots/fixVSparam_plot.pdf', dpi=400)
-    plt.savefig('plots/images/fixVSparam.png')
+    plt.savefig('plots/images/fixVSparam_plot.png')
     plt.clf()
 
 def param_ROC_plot():
@@ -629,6 +629,6 @@ if __name__ == '__main__':
     #plt_histogram()
     #fixed_plot()
     #fixed_ROC_plot()
-    #fixVSparam_plot()
+    fixVSparam_plot()
     param_ROC_plot()
     #param_plot()
