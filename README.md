@@ -92,7 +92,7 @@
 </tr>
 <tr>
 <td width=65%, align=center> 
-<img src="/mwwbb/plots/images/ROC_parameterized.png"><a href="/mwwbb/plots/ROC_parameterized.pdf">[Download PDF]</a></td>
+<img src="/mwwbb/plots/images/param_ROC_plot.png"><a href="/mwwbb/plots/param_ROC_plot.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>ROC curve for fixed training at mu=1000 GeV (red x)</li>
@@ -103,7 +103,7 @@
 </tr>
 <tr>
 <td width=65%, align=center> 
-<img src="/mwwbb/plots/images/fixVSparam.png"><a href="/mwwbb/plots/fixVSparam.pdf">[Download PDF]</a></td>
+<img src="/mwwbb/plots/images/fixVSparam_plot.png"><a href="/mwwbb/plots/fixVSparam_plot.pdf">[Download PDF]</a></td>
 <td>
 <ul>
 <li>ROC curve for Fixed training at mu=750, 1000, 1250 (circle markers)</li>
