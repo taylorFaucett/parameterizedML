@@ -67,7 +67,7 @@
 <td width=65%, align=center><img src="/mwwbb/plots/images/mWWbb_histogram.png"><a href="/mwwbb/plots/mWWbb_histogram.pdf">[Download PDF]</a></td>
 <td>
 <ul>
-<li> Signal at mx=500, 750, 1000, 1250, 1500</li>
+<li> Signal at mx=500, 750, 1000, 1250, and 1500</li>
 <li> Bin Width: 50 GeV </li>
 </ul>
 </td>
