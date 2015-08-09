@@ -114,25 +114,25 @@ def mwwbb_fixed():
     			'data/concatenated/ttbar_mx_1250.dat',
     			'data/concatenated/ttbar_mx_1500.dat']
     mx = [500, 750, 1000, 1250, 1500]
-    nn = Pipeline([
-        ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
-        ('neural network',
-            Regressor(
-                layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
-                learning_rate=0.01,
-                #n_stable=1,
-                #f_stable=100,
-                n_iter=20,
-                #learning_momentum=0.1,
-                batch_size=10,
-                learning_rule="nesterov",
-                #valid_size=0.05,
-                #verbose=True,
-                #debug=True
-                ))])
-    print nn
     for i in range(len(files)):
-    	print 'Processing fixed training on mu=%s' %mx[i]
+        print 'Processing fixed training on mu=%s' %mx[i]
+        nn = Pipeline([
+            ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
+            ('neural network',
+                Regressor(
+                    layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
+                    learning_rate=0.01,
+                    #n_stable=1,
+                    #f_stable=100,
+                    n_iter=100,
+                    #learning_momentum=0.1,
+                    batch_size=5,
+                    learning_rule="nesterov",
+                    #valid_size=0.05,
+                    #verbose=True,
+                    #debug=True
+                    ))])
+        print nn
     	data = np.loadtxt(files[i])
     	traindata = data[:,0:2]
     	targetdata = data[:,2]
@@ -202,7 +202,7 @@ def mwwbb_parameterized():
                 Regressor(
                     layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                     learning_rate=0.01,
-                    n_iter=20,
+                    n_iter=100,
                     #n_stable=1,
                     #f_stable=0.001,
                     #learning_momentum=0.1,
@@ -237,7 +237,7 @@ def scikitlearnFunc(x, alpha, mx):
 def mwwbbParameterizedRunner():
     print 'Entering mwwbbParameterizedRunner'
     alpha = [500, 750, 1000, 1250, 1500]
-    size = 2000
+    size = 10000
 
     mx_500_raw = np.loadtxt('data/concatenated/ttbar_mx_500.dat')
     mx_750_raw = np.loadtxt('data/concatenated/ttbar_mx_750.dat')
@@ -312,7 +312,7 @@ def mwwbbParameterizedRunner():
 def fixVSparam():
     print 'Entering fixVSparam'
     alpha = [750, 1000, 1250]
-    size = 2000
+    size = 10000
 
     mx_750_raw = np.loadtxt('data/concatenated/ttbar_mx_750.dat')
     mx_1000_raw = np.loadtxt('data/concatenated/ttbar_mx_1000.dat')
@@ -440,7 +440,7 @@ def fixed_plot():
     plt_marker = ['b.', 'g.', 'r.', 'c.', 'm.']
     for i in range(len(files)):
     	plt.plot(files[i][:,0], files[i][:,1], 
-    				plt_marker[i+1], alpha=0.5, markevery = 50, 
+    				plt_marker[i+1], alpha=1, markevery = 1, 
     				label='$\mu=$%s' %mx[i], rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('m$_{WWbb}$ [GeV]')
@@ -469,8 +469,8 @@ def fixed_ROC_plot():
     plt_marker = ['.', '.', '.', '.', '.']
     for i in range(len(files)):
     	plt.plot(files[i][:,0], files[i][:,1],
-    				marker=plt_marker[i], color=plt_color[i], alpha=0.5, 
-    				markevery = 1000, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC[i]), rasterized=True)
+    				marker=plt_marker[i], color=plt_color[i], alpha=1, 
+    				markevery = 1, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC[i]), rasterized=True)
     plt.plot([0,1],[0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
     plt.ylabel('Background rejection')
@@ -508,11 +508,11 @@ def fixVSparam_plot():
     mx = [750, 1000, 1250]
     for i in range(len(param_files)):
     	plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i], 
-    				alpha=0.5, markevery=1, 
+    				alpha=0.5, markevery=200, 
     				label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]), rasterized=True)
     for i in range(len(fixed_files)):
     	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
-    				alpha=0.5, markevery=1000, 
+    				alpha=1, markevery=1000, 
     				label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
@@ -559,11 +559,11 @@ def param_ROC_plot():
 
     for i in range(len(param_files)):
     	plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i+1], 
-    				alpha=0.5, markevery=100, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
+    				alpha=0.5, markevery=200, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
     				rasterized=True)
     for i in range(len(fixed_files)):
     	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
-    				alpha=0.5, markevery=100, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
+    				alpha=1, markevery=100, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
     				rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
@@ -618,6 +618,7 @@ if __name__ == '__main__':
     #file_runner()
     #flat_bkg(10000,0,5000)
     #file_concatenater()
+    #plt_histogram()
     
     ''' NN Training '''
     #mwwbb_fixed()
@@ -625,10 +626,10 @@ if __name__ == '__main__':
     #mwwbbParameterizedRunner()
     #fixVSparam()
 
+    
     '''Plotters'''
-    #plt_histogram()
-    #fixed_plot()
-    #fixed_ROC_plot()
+    fixed_plot()
+    fixed_ROC_plot()
     fixVSparam_plot()
     param_ROC_plot()
-    #param_plot()
+    param_plot()
