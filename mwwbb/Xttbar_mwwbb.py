@@ -437,11 +437,18 @@ def fixed_plot():
     			#np.loadtxt('data/plot_data/fixed_1500.dat')
     			]
     mx = [500, 750, 1000, 1250, 1500]
-    plt_marker = ['b.', 'g.', 'r.', 'c.', 'm.']
+    plt_marker = ['b', 'g', 'r', 'c', 'm']
     for i in range(len(files)):
-    	plt.plot(files[i][:,0], files[i][:,1], 
-    				plt_marker[i+1], alpha=1, markevery = 1, 
-    				label='$\mu=$%s' %mx[i], rasterized=True)
+    	file = files[i]
+    	file.sort(axis=0)
+    	plt.plot(file[:,0], file[:,1], 
+    				plt_marker[i+1], 
+    				linewidth = 2,
+    				#alpha=1, 
+    				#markevery = 1, 
+    				#markersize = 1,
+    				label='$\mu_f=$%s' %mx[i+1], 
+    				rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('m$_{WWbb}$ [GeV]')
     plt.xlim([250,3000])
@@ -466,14 +473,19 @@ def fixed_ROC_plot():
     		np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')]
     mx = [500, 750, 1000, 1250, 1500]
     plt_color = ['blue', 'green', 'red', 'cyan', 'magenta']
-    plt_marker = ['.', '.', '.', '.', '.']
+    plt_marker = ['-', '-', '-', '-', '-']
     for i in range(len(files)):
     	plt.plot(files[i][:,0], files[i][:,1],
-    				marker=plt_marker[i], color=plt_color[i], alpha=1, 
-    				markevery = 1, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC[i]), rasterized=True)
+    				plt_marker[i], 
+    				linewidth = 2,
+    				color=plt_color[i], 
+    				alpha=1, 
+    				markevery = 1, 
+    				label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC[i]), 
+    				rasterized=True)
     plt.plot([0,1],[0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
-    plt.ylabel('Background rejection')
+    plt.ylabel('1/Background efficiency')
     plt.xlabel('Signal efficiency')
     plt.xlim([0,1])
     plt.ylim([0,1])
@@ -504,19 +516,31 @@ def fixVSparam_plot():
     				#np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')
     				]
     param_markers = ['go', 'ro', 'co']
-    fixed_markers = ['g.', 'r.', 'c.']
+    fixed_markers = ['g-', 'r-', 'c-']
     mx = [750, 1000, 1250]
     for i in range(len(param_files)):
-    	plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i], 
-    				alpha=0.5, markevery=200, 
-    				label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]), rasterized=True)
+    	plt.plot(param_files[i][:,0], param_files[i][:,1], 
+    				param_markers[i], 
+    				alpha=0.5, 
+    				markevery=500, 
+    				label='$\mu_p=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]), 
+    				markeredgewidth=1, 
+    				markeredgecolor='black', 
+    				rasterized=True)
     for i in range(len(fixed_files)):
-    	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
-    				alpha=1, markevery=1000, 
-    				label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  rasterized=True)
+    	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], 
+    				fixed_markers[i], 
+    				#alpha=1, 
+    				markevery=200, 
+    				linewidth=2,
+    				#markersize = 8,
+    				#markeredgecolor = 'DarkGray',
+    				#markeredgewidth = 0.5,
+    				label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]), 
+    				rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
-    plt.ylabel('Background rejection')
+    plt.ylabel('1/Background efficiency')
     plt.xlabel('Signal efficiency')
     plt.xlim([0,1])
     plt.ylim([0,1])
@@ -554,20 +578,20 @@ def param_ROC_plot():
     				np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')
     				]
     param_markers = ['bo', 'go', 'ro', 'co', 'mo']
-    fixed_markers = ['b.', 'g.', 'r.', 'c.', 'm.']
+    fixed_markers = ['b-', 'g-', 'r-', 'c-', 'm-']
     mx = [500,750, 1000, 1250,1500]
 
     for i in range(len(param_files)):
     	plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i+1], 
-    				alpha=0.5, markevery=200, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
+    				alpha=0.5, markevery=500, label='$\mu_p=$%s (AUC=%0.2f)' %(mx[i+1], AUC_param[i]),  
     				rasterized=True)
     for i in range(len(fixed_files)):
     	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
-    				alpha=1, markevery=100, label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
+    				alpha=1, markevery=100, linewidth=2, label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
     				rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
-    plt.ylabel('Background rejection')
+    plt.ylabel('1/Background efficiency')
     plt.xlabel('Signal efficiency')
     plt.xlim([0,1])
     plt.ylim([0,1])
@@ -578,7 +602,7 @@ def param_ROC_plot():
     plt.clf()
 
 def param_plot(): 
-    print 'Entering fixed_plot'
+    print 'Entering param_plot'
     fixed_files = [#np.loadtxt('data/plot_data/fixed_500.dat'),
     			np.loadtxt('data/plot_data/fixed_750.dat'),
     			np.loadtxt('data/plot_data/fixed_1000.dat'),
@@ -593,15 +617,28 @@ def param_plot():
     			]
     mx = [500, 750, 1000, 1250, 1500]
     fixed_colors = ['blue', 'green', 'red', 'cyan', 'magenta']
-    param_colors = ['DarkBlue', 'DarkGreen', 'DarkRed', 'DarkCyan', 'DarkMagenta']
-    for i in range(len(fixed_files)):
-    	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], 
-    				'.', color=fixed_colors[i+1], alpha=0.5, markevery = 1, 
-    				label='$\mu=$%s' %mx[i+1], rasterized=True)
+    param_colors = ['blue', 'green', 'red', 'cyan', 'magenta']
     for i in range(len(param_files)):
-    	plt.plot(param_files[i][:,0], param_files[i][:,1], 
-    				'o', color=param_colors[i], alpha=0.5, markevery = 1, 
-    				label='$\mu=$%s' %mx[i], rasterized=True)
+    	file = param_files[i]
+    	plt.plot(file[:,0], file[:,1],
+    				'o', 
+    				color=param_colors[i], 
+    				alpha=0.5,
+    				markeredgewidth=1,
+    				markeredgecolor='DarkGray', 
+    				markevery = 1, 
+    				label='$\mu_p=$%s' %mx[i], 
+    				rasterized=True)
+    for i in range(len(fixed_files)):
+    	file = fixed_files[i]
+    	file.sort(axis=0)
+    	plt.plot(file[:,0], file[:,1], 
+    				fixed_colors[i+1], 
+    				linewidth=2,
+    				#alpha=1, 
+    				#markevery = 1, 
+    				label='$\mu_f=$%s' %mx[i+1], 
+    				rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('m$_{WWbb}$ [GeV]')
     plt.xlim([250,3000])
@@ -628,7 +665,7 @@ if __name__ == '__main__':
 
     
     '''Plotters'''
-    fixed_plot()
+    #fixed_plot()
     fixed_ROC_plot()
     fixVSparam_plot()
     param_ROC_plot()
