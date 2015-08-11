@@ -595,7 +595,7 @@ def param_ROC_plot():
     plt.xlabel('Signal efficiency')
     plt.xlim([0,1])
     plt.ylim([0,1])
-    plt.legend(loc='lower right')
+    plt.legend(loc='lower right', bbox_to_anchor=(1.10, 0))
     plt.grid(True)
     plt.savefig('plots/param_ROC_plot.pdf', dpi=400)
     plt.savefig('plots/images/param_ROC_plot.png')	
@@ -666,7 +666,7 @@ if __name__ == '__main__':
     
     '''Plotters'''
     #fixed_plot()
-    fixed_ROC_plot()
-    fixVSparam_plot()
+    #fixed_ROC_plot()
+    #fixVSparam_plot()
     param_ROC_plot()
-    param_plot()
+    #param_plot()
