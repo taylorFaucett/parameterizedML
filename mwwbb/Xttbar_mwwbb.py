@@ -743,7 +743,7 @@ def parameterized_vs_fixed_output_histogram():
     plt.xlim([0,1])
     plt.legend(loc='upper left', bbox_to_anchor=(0.02, 1), fontsize=10)
     plt.savefig('plots/parameterized_vs_fixed_output_histogram.pdf', dpi=400)
-    plt.savefig('plots/images/parameterized_vs_fixed_output_histogram.pdf')
+    plt.savefig('plots/images/parameterized_vs_fixed_output_histogram.png')
     plt.clf()
 
 if __name__ == '__main__':
@@ -772,11 +772,11 @@ if __name__ == '__main__':
     '''
     Comparison Training and Plots
     '''
-    parameterized_vs_fixed_output_plot()
-    parameterized_vs_fixed_ROC_plot()
+    #parameterized_vs_fixed_output_plot()
+    #parameterized_vs_fixed_ROC_plot()
     
     '''
     Output Histograms
     '''
     #plot_histogram()
-    #parameterized_vs_fixed_output_histogram()
+    parameterized_vs_fixed_output_histogram()
