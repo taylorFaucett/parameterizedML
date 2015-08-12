@@ -22,7 +22,19 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.externals import joblib
 from sknn.mlp import Regressor, Classifier, Layer
 
+''' 
+The standard set of matplotlib colors are used in multiple functions so they
+are defined globally here.
+'''
+colors  = ['blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'white']
+
+
 def file_runner():
+    '''
+    file_runner's only responsibility is to pull in files from the root_files directory
+    and pass them to the file_generate command. 
+    '''
+
     print 'Entering file_runner'
     sig_files = glob.iglob('data/root_files/xttbar_*.root')
     bkg_files = glob.iglob('data/root_files/smttbar.root')
@@ -32,6 +44,12 @@ def file_runner():
         file_generate(data, 0.000000)
 
 def flat_bkg(bkgNum, low, high):
+    '''
+    flat_bkg creates a data set for a flat background. You can specify the number of data points
+    with bkgNum and the domain of the data with low and high. Additionally, you can append mx
+    values to the output file.
+    '''
+
     print 'Entering flat_bkg'
     print 'Genterating a flat background with %s data points betwee %s-%s' %(bkgNum, low, high)
     mx_values = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500]
@@ -43,7 +61,7 @@ def flat_bkg(bkgNum, low, high):
     x      = w.var('x')
     bkgpdf = w.pdf('f')
 
-    # Fill traindata, testdata and testdata1
+    # Fill training_data, testdata and testdata1
     print 'Generating background data'
     bkg_values = bkgpdf.generate(ROOT.RooArgSet(x), bkgNum)
     bkg_data = np.zeros((bkgNum, 3))
@@ -56,6 +74,13 @@ def flat_bkg(bkgNum, low, high):
         np.savetxt('data/flat_bkg/bkg_mx_%s.dat' %mx_values[j], bkg_data, fmt='%f')
 
 def file_generate(root_file, target):
+    '''
+    file_generate is a file runner for the root_export function. Values from a root tree 
+    are scanned with the root_export function and then added to a numpy array before being
+    saved as a .dat file. The target value is used to determine if the data set is a signal
+    or background.
+    '''
+
     print 'Entering file_generate'
     print 'Generating data using values from: %s' %root_file
     signal = root_export(root_file,'xtt','mwwbb')
@@ -74,6 +99,15 @@ def file_generate(root_file, target):
     np.savetxt('data/root_export/%s_mx_%0.0f.dat' %(label, mx[0]), data, fmt='%f')
 
 def root_export(root_file, tree, leaf):
+    '''
+    root_export uses pyROOT to scan invidual values from a selected TTree and TLeaf. 
+    The function returns an array of all values.
+
+    Note: GetEntriesFast() is preferred over GetEntires() as it correctly returns a
+    floating point number in case of a value of 0.0 rather than, in the case of GetEntries(),
+    returning a NULL. 
+    '''
+
     print 'Entering root_export'
     print 'Extracting data from file: %s' %root_file
     print 'Extracting data from TTree: %s' %tree
@@ -90,74 +124,191 @@ def root_export(root_file, tree, leaf):
     return entries
 
 def file_concatenater():
+    '''
+    file_concatenater pulls in the seperate signal and background .dat files and 
+    combines them prior to analysis. The concatenated are output into the directory
+    of the same name.
+    '''
+
     print 'Entering file_concatenater'
     sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
     bkg_dat = glob.iglob('data/root_export/bkg_mx_*.dat')
-    flt_dat = glob.iglob('data/flat_bkg/*.dat')
-    for signal, background, flat in zip(sig_dat, bkg_dat, flt_dat):
+    for signal, background in zip(sig_dat, bkg_dat):
         sig = np.loadtxt(signal)
         bkg = np.loadtxt(background)
-        flt = np.loadtxt(flat)
         data_complete = np.concatenate((sig, bkg), axis=0)
         np.savetxt('data/concatenated/ttbar_mx_%0.0f.dat' %sig[0,1], data_complete, fmt='%f')
-        data_complete = np.concatenate((sig, flt), axis=0)
-        np.savetxt('data/concatenated/flat_mx_%0.0f.dat' %sig[0,1], data_complete, fmt='%f')
 
 
-''' NN Training '''
+''' Fixed Training and Plots '''
 
-def mwwbb_fixed():
-    print 'Entering mwwbb_fixed'
-    files = ['data/concatenated/ttbar_mx_500.dat',
-    			'data/concatenated/ttbar_mx_750.dat',
-    			'data/concatenated/ttbar_mx_1000.dat',
-    			'data/concatenated/ttbar_mx_1250.dat',
-    			'data/concatenated/ttbar_mx_1500.dat']
-    mx = [500, 750, 1000, 1250, 1500]
-    for i in range(len(files)):
-        print 'Processing fixed training on mu=%s' %mx[i]
-        nn = Pipeline([
-            ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
-            ('neural network',
-                Regressor(
-                    layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
-                    learning_rate=0.01,
-                    #n_stable=1,
-                    #f_stable=100,
-                    n_iter=100,
-                    #learning_momentum=0.1,
-                    batch_size=5,
-                    learning_rule="nesterov",
-                    #valid_size=0.05,
-                    #verbose=True,
-                    #debug=True
-                    ))])
-        print nn
-    	data = np.loadtxt(files[i])
-    	traindata = data[:,0:2]
-    	targetdata = data[:,2]
-    	nn.fit(traindata, targetdata)
+def fixed_training():
+    '''
+    fixed_training takes concatenated data and splits the data set into training_data 
+    (i.e. [mx_value, mx], e.g. [[532.1, 500], [728.4, 500]]) and target_data (i.e. [1, 1, ... 0, 0]).
+    The input undergoes pre-processing via SKLearns pipeline and then a NN is trained using the 
+    SKLearnNN wrapper which processes the data using Theano/PyLearn2. NN learning parameters 
+    (e.g. learning_rate, n_iter, etc) are selected before hand. target_data from the inputs
+    are then used along with predictions to calculate the Receiver Operating Characteristic (ROC) curve
+    and Area Under the Curve (AUC). 
+    '''
 
-    	fit_score = nn.score(traindata, targetdata)
+    print 'Entering fixed_training'
+
+    # Training input files
+    file_list = ['data/concatenated/ttbar_mx_500.dat',
+                    'data/concatenated/ttbar_mx_750.dat',
+                    'data/concatenated/ttbar_mx_1000.dat',
+                    'data/concatenated/ttbar_mx_1250.dat',
+                    'data/concatenated/ttbar_mx_1500.dat']
+    nn = Pipeline([
+        ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
+        ('neural network',
+            Regressor(
+                layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
+                learning_rate=0.01,
+                #n_stable=1,
+                #f_stable=100,
+                n_iter=100,
+                #learning_momentum=0.1,
+                batch_size=10,
+                learning_rule="nesterov",
+                #valid_size=0.05,
+                #verbose=True,
+                #debug=True
+                ))])
+
+    for file in file_list:
+        input_data = np.loadtxt(file)
+
+        training_data = input_data[:,0:2]
+        target_data = input_data[:,2]
+        
+        mx = training_data[0,1]
+        
+        print 'Processing fixed training on mu=%0.0f' %mx
+
+    	nn.fit(training_data, target_data)
+
+    	fit_score = nn.score(training_data, target_data)
     	print 'score = %s' %fit_score
-    	outputs = nn.predict(traindata)
-    	outputs = outputs.reshape((1,len(outputs)))
-    	fixed_plot = np.vstack((traindata[:,0], outputs)).T
-    	np.savetxt('data/plot_data/fixed_%s.dat' %mx[i], fixed_plot, fmt='%f')
 
-    	actual = targetdata
+    	outputs = nn.predict(training_data)
+    	outputs = outputs.reshape((1,len(outputs)))
+
+    	output_data = np.vstack((training_data[:,0], outputs)).T
+    	np.savetxt('data/plot_data/fixed_%0.0f.dat' %mx, output_data, fmt='%f')
+
+    	actual = target_data
     	predictions = outputs[0]
     	fpr, tpr, thresholds = roc_curve(actual, predictions)
     	ROC_plot = np.vstack((fpr, tpr)).T
-    	roc_auc = [auc(fpr, tpr)]
-    	np.savetxt('data/plot_data/fixed_ROC_%s.dat' %mx[i], ROC_plot, fmt='%f')
-    	np.savetxt('data/plot_data/fixed_ROC_AUC_%s.dat' %mx[i], roc_auc)
+    	ROC_AUC = [auc(fpr, tpr)]
+    	np.savetxt('data/plot_data/ROC/fixed_ROC_%0.0f.dat' %mx, ROC_plot, fmt='%f')
+    	np.savetxt('data/plot_data/AUC/fixed_ROC_AUC_%0.0f.dat' %mx, ROC_AUC)
 
-    	pickle.dump(nn, open('data/pickle/fixed_%s.pkl' %mx[i], 'wb'))
+    	pickle.dump(nn, open('data/pickle/fixed_%0.0f.pkl' %mx, 'wb'))
+
+def fixed_training_plot(): 
+    '''
+    fixed_training_plot is no longer necessary and has been replaced by
+    parameterized_vs_fixed_output_plot. Initially this took prediction data 
+    from fixed_training and plotted the values. However, it is more convenient to pickle
+    the NN training from fixed training and then run predictions separately rather than
+    generate prediction outputs during training. This is left here because I'm a hoarder.
+    '''
+
+    print 'Entering fixed_training_plot'
+    file_list = [np.loadtxt('data/plot_data/fixed_500.dat'),
+                np.loadtxt('data/plot_data/fixed_750.dat'),
+                np.loadtxt('data/plot_data/fixed_1000.dat'),
+                np.loadtxt('data/plot_data/fixed_1250.dat'),
+                np.loadtxt('data/plot_data/fixed_1500.dat')
+                ]
+    mx = [500, 750, 1000, 1250, 1500]
+    for idx, file in enumerate(file_list):
+        file.sort(axis=0)
+        plt.plot(file[:,0], file[:,1], 
+                    colors[idx], 
+                    linewidth = 2,
+                    #alpha=1, 
+                    #markevery = 1, 
+                    #markersize = 1,
+                    label='$\mu_f=$%s' %mx[idx], 
+                    rasterized=True)
+    plt.ylabel('NN output')
+    plt.xlabel('m$_{WWbb}$ [GeV]')
+    plt.xlim([0,3000])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/fixed_training_plot.pdf', dpi=400)
+    plt.savefig('plots/images/fixed_training_plot.png')
+    plt.clf()
+
+def fixed_ROC_plot():
+    '''
+    fixed_ROC_plot takes in ROC and AUC values processed during training in fixed_training
+    and plots the ROC curve. This will be deprecated in the future, for the same reason as
+    fixed_training_plot, so that AUC and ROC values will be calculated and plotted separately
+    from the training time.
+    '''
+
+    print "Entering fixed_ROC_plot"
+    files = [np.loadtxt('data/plot_data/ROC/fixed_ROC_500.dat'),
+                np.loadtxt('data/plot_data/ROC/fixed_ROC_750.dat'),
+                np.loadtxt('data/plot_data/ROC/fixed_ROC_1000.dat'),
+                np.loadtxt('data/plot_data/ROC/fixed_ROC_1250.dat'),
+                np.loadtxt('data/plot_data/ROC/fixed_ROC_1500.dat')]
+    AUC = [np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_500.dat'),
+            np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_750.dat'),
+            np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1000.dat'),
+            np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1250.dat'),
+            np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1500.dat')]
+    mx = [500, 750, 1000, 1250, 1500]
+    for idx, files in enumerate(files):
+        plt.plot(files[:,0], files[:,1],
+                    '-', 
+                    linewidth = 2,
+                    color=colors[idx], 
+                    alpha=1,  
+                    label='$\mu_f=$%s (AUC=%0.2f)' %(mx[idx], AUC[idx]), 
+                    rasterized=True)
+    plt.plot([0,1],[0,1], 'r--')
+    plt.title('Receiver Operating Characteristic')
+    plt.ylabel('1/Background efficiency')
+    plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
+    plt.savefig('plots/images/fixed_ROC_plot.png')
+    plt.clf()
 
 
-def mwwbb_parameterized():
-    print 'Entering mwwbb_parameterized'
+
+''' 
+Parameterized Training and Plots 
+'''
+
+def parameterized_training():
+    '''
+    parameterized_training Trains a NN with multiple signals. In each case, one signal is 
+    excluded (e.g. mwwbb_complete500 trains for all signals excluding the one at mu=500). 
+    A seperate NN is trained for each of these scenarios and then pickled in an appropriately 
+    labeled file (e.g. Training excluding mu=500 is pickled as param_500.pkl)
+    '''
+
+    print 'Entering parameterized_training'
+
+    mwwbb_complete500 = np.concatenate((
+                        np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1250.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1500.dat')),
+                        axis=0)
+
     mwwbb_complete750 = np.concatenate((
                         np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
                         np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
@@ -173,29 +324,37 @@ def mwwbb_parameterized():
                     axis=0)
 
     mwwbb_complete1250 = np.concatenate((
+                        np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1500.dat')),
+                        axis=0)
+
+    mwwbb_complete1500 = np.concatenate((
                 np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
                 np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
                 np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
-                np.loadtxt('data/concatenated/ttbar_mx_1500.dat')),
+                np.loadtxt('data/concatenated/ttbar_mx_1250.dat')),
                 axis=0)
 
-    train_list = [mwwbb_complete750[:,0:2],
-                    mwwbb_complete1000[:,0:2],
-                    mwwbb_complete1250[:,0:2]
+    training_list = [mwwbb_complete500[:,0:2],
+                        mwwbb_complete750[:,0:2],
+                        mwwbb_complete1000[:,0:2],
+                        mwwbb_complete1250[:,0:2],
+                        mwwbb_complete1500[:,0:2]
                     ]
 
-    target_list = [mwwbb_complete750[:,2],
+    target_list = [mwwbb_complete500[:,2],
+                    mwwbb_complete750[:,2],
                     mwwbb_complete1000[:,2],
-                    mwwbb_complete1250[:,2]
+                    mwwbb_complete1250[:,2],
+                    mwwbb_complete1500[:,2]
                     ]
 
-    mx = [750, 1000, 1250]
+    mx_list = [500, 750, 1000, 1250, 1500]
 
-    for i in range(len(mx)):
-    	print 'Parameterized training on all signals except for mu=%s' %mx[i]
-        traindata      = train_list[i]
-        targetdata     = target_list[i]
-
+    for idx, (training_data, target_data, mx) in enumerate(zip(training_list, target_list, mx_list)):
+    	print 'Parameterized training on all signals except for mu=%s' %mx
         nn = Pipeline([
             ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
             ('neural network',
@@ -206,174 +365,283 @@ def mwwbb_parameterized():
                     #n_stable=1,
                     #f_stable=0.001,
                     #learning_momentum=0.1,
-                    batch_size=5,
+                    batch_size=10,
                     learning_rule="nesterov",
                     #valid_size=0.05,
                     #verbose=True,
                     #debug=True
                     ))])
-        print nn
 
-        nn.fit(traindata, targetdata)
-        fit_score = nn.score(traindata, targetdata)
+        nn.fit(training_data, target_data)
+
+        fit_score = nn.score(training_data, target_data)
         print 'score = %s' %fit_score
-        outputs = nn.predict(traindata)
-        outputs = outputs.reshape((1, len(outputs)))
-        param_plot = np.vstack((traindata[:,0], outputs)).T
-        np.savetxt('data/plot_data/param_%s.dat' %mx[i], param_plot, fmt='%f')
-        pickle.dump(nn, open('data/pickle/param_%s.pkl' %mx[i], 'wb'))
-
         
+        outputs = nn.predict(training_data)
+        #outputs = outputs.reshape((1, len(outputs)))
+        #param_plot = np.vstack((training_data[:,0], outputs)).T
+        #np.savetxt('data/plot_data/param_%s.dat' %mx[idx], param_plot, fmt='%f')
+        pickle.dump(nn, open('data/pickle/param_%s.pkl' %mx, 'wb'))
 
-def scikitlearnFunc(x, alpha, mx):
-    nn = pickle.load(open('data/pickle/param_%s.pkl' %mx,'rb'))
-    traindata = np.array((x, alpha), ndmin=2)
-    outputs   = nn.predict(traindata)
+def parameterized_function(x, alpha, nn):
+    '''
+    parameterized_function acts as the function with an additional parameter alpha. 
+    This is used in parameterized_function_runner as the function which interpolates 
+    signals at alpha values. For example, a NN trained at mu=500, 750, 1250 and 1500
+    can use the parameterized_function with a specificied value of alpha=1000 to 
+    interpolate the curve, ROC and AUC values at mu=1000 despite not having been trained
+    for that location. 
+    '''
 
-    #print 'x,alpha,output =', x, alpha, outputs[0]
-    #plt.plot(x, outputs, 'ro', alpha=0.5)
+    training_data = np.array((x, alpha), ndmin=2)
+    outputs   = nn.predict(training_data)
     return outputs[[0]]
 
-def mwwbbParameterizedRunner():
-    print 'Entering mwwbbParameterizedRunner'
-    alpha = [500, 750, 1000, 1250, 1500]
-    size = 10000
+def parameterized_function_runner():
+    '''
+    parameterized_function_runner takes the NN training from parameterized_training and
+    calculates the outputs, and ROC/AUC from sample inputs. In each case of mu=500, 750,
+    1000, 1250, 1500 the prediction of alpha is made using the NN which excluded that signal.
+    For example, when a prediction is made with the parameter alpha=500, the prediction is made
+    using the NN trained only at mu=750, 1000, 1250, 1500. Similarly, a prediction with the 
+    parameter alpha=750 is made with the NN trained at mu=500, 1000, 1250, 1500. 
+    '''
 
-    mx_500_raw = np.loadtxt('data/concatenated/ttbar_mx_500.dat')
-    mx_750_raw = np.loadtxt('data/concatenated/ttbar_mx_750.dat')
-    mx_1000_raw = np.loadtxt('data/concatenated/ttbar_mx_1000.dat')
-    mx_1250_raw = np.loadtxt('data/concatenated/ttbar_mx_1250.dat')
-    mx_1500_raw = np.loadtxt('data/concatenated/ttbar_mx_1500.dat')
+    print 'Entering parameterized_function_runner'
+    alpha_list = [500, 
+                    750, 
+                    1000, 
+                    1250, 
+                    1500]
 
-    mx_500_sig = mx_500_raw[:size, :]
-    mx_500_bkg = mx_500_raw[-size:, :]
+    file_list = [np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
+                np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
+                np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
+                np.loadtxt('data/concatenated/ttbar_mx_1250.dat'),
+                np.loadtxt('data/concatenated/ttbar_mx_1500.dat')]
 
-    mx_750_sig = mx_750_raw[:size, :]
-    mx_750_bkg = mx_750_raw[-size:, :]
-
-    mx_1000_sig = mx_1000_raw[:size, :]
-    mx_1000_bkg = mx_1000_raw[-size:, :]
-
-    mx_1250_sig = mx_1250_raw[:size, :]
-    mx_1250_bkg = mx_1250_raw[-size:, :]
-
-    mx_1500_sig = mx_1500_raw[:size, :]
-    mx_1500_bkg = mx_1500_raw[-size:, :]
-
-    mx_500 = np.concatenate((mx_500_sig, mx_500_bkg), axis=0)
-    mx_750 = np.concatenate((mx_750_sig, mx_750_bkg), axis=0)
-    mx_1000 = np.concatenate((mx_1000_sig, mx_1000_bkg), axis=0)
-    mx_1250 = np.concatenate((mx_1250_sig, mx_1250_bkg), axis=0)
-    mx_1500 = np.concatenate((mx_1500_sig, mx_1500_bkg), axis=0)
-
-    input_list = [mx_500[:,0],
-                    mx_750[:,0],
-                    mx_1000[:,0],
-                    mx_1250[:,0],
-                    mx_1500[:,0]]
-
-    actual_list = [mx_500[:,2],
-                    mx_750[:,2],
-                    mx_1000[:,2],
-                    mx_1250[:,2],
-                    mx_1500[:,2]]
-
-
-    mwwbb_complete = np.concatenate((
-                        np.loadtxt('data/concatenated/ttbar_mx_500.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1500.dat')),
-                        axis=0)
-
-    traindata      = mwwbb_complete[:,0:2]
-    targetdata     = mwwbb_complete[:,2]
-
-    print "Running on %s alpha values: %s" %(len(alpha), alpha)
-
-    for a in range(len(alpha)):
-        print 'working on alpha=%s' %alpha[a]
-        inputs = []
+    for idx, (file, alpha) in enumerate(zip(file_list, alpha_list)):
+        size = len(file[:,0])
+        print 'processing using: data/pickle/param_%0.0f.pkl' %alpha
+        nn = pickle.load(open('data/pickle/param_%0.0f.pkl' %alpha, 'rb'))
+        inputs = file[:,0]
+        actuals = file[:,2]
         predictions = []
-        input = input_list[a]
-        for x in range(0,2*size, 1):
-            outputs = scikitlearnFunc(input[x]/1., alpha[a], 1000)
-            inputs.append(input[x]/1.)
+        for x in range(0,size):
+            outputs = parameterized_function(inputs[x]/1., alpha, nn)
             predictions.append(outputs[0][0])
+            #print 'Percent: %0.3f' %((100.*x)/size)
         data = np.vstack((inputs, predictions)).T
-        np.savetxt('data/plot_data/param_alpha_%s.dat' %alpha[a], data, fmt='%f')
-        actual = actual_list[a]
-        fpr, tpr, thresholds = roc_curve(actual, predictions)
+        np.savetxt('data/plot_data/param_%0.0f.dat' %alpha, data, fmt='%f')
+        fpr, tpr, thresholds = roc_curve(actuals, predictions)
         roc_auc = [auc(fpr, tpr)]
 
         roc_data = np.vstack((fpr, tpr)).T
-        np.savetxt('data/plot_data/param_alpha_ROC_%s.dat' %alpha[a], roc_data, fmt='%f')
-        np.savetxt('data/plot_data/param_alpha_ROC_AUC_%s.dat' %alpha[a], roc_auc)
+        np.savetxt('data/plot_data/ROC/param_ROC_%0.0f.dat' %alpha, roc_data, fmt='%f')
+        np.savetxt('data/plot_data/AUC/param_ROC_AUC_%0.0f.dat' %alpha, roc_auc)
 
-def fixVSparam():
-    print 'Entering fixVSparam'
-    alpha = [750, 1000, 1250]
-    size = 10000
+def parameterized_training_plot(): 
+    '''
+    parameterized_training_plot plots the output values generated during 
+    parameterized_function_runner.
+    '''
 
-    mx_750_raw = np.loadtxt('data/concatenated/ttbar_mx_750.dat')
-    mx_1000_raw = np.loadtxt('data/concatenated/ttbar_mx_1000.dat')
-    mx_1250_raw = np.loadtxt('data/concatenated/ttbar_mx_1250.dat')
+    print 'Entering parameterized_training_plot'
+    files = ['data/plot_data/param_500.dat',
+                'data/plot_data/param_750.dat',
+                'data/plot_data/param_1000.dat',
+                'data/plot_data/param_1250.dat',
+                'data/plot_data/param_1500.dat']
 
-    mx_750_sig = mx_750_raw[:size, :]
-    mx_750_bkg = mx_750_raw[-size:, :]
-
-    mx_1000_sig = mx_1000_raw[:size, :]
-    mx_1000_bkg = mx_1000_raw[-size:, :]
-
-    mx_1250_sig = mx_1250_raw[:size, :]
-    mx_1250_bkg = mx_1250_raw[-size:, :]
-
-    mx_750 = np.concatenate((mx_750_sig, mx_750_bkg), axis=0)
-    mx_1000 = np.concatenate((mx_1000_sig, mx_1000_bkg), axis=0)
-    mx_1250 = np.concatenate((mx_1250_sig, mx_1250_bkg), axis=0)
-
-    input_list = [mx_750[:,0],
-                    mx_1000[:,0],
-                    mx_1250[:,0]]
-
-    actual_list = [mx_750[:,2],
-                    mx_1000[:,2],
-                    mx_1250[:,2]]
-
-
-    mwwbb_complete = np.concatenate((
-                        np.loadtxt('data/concatenated/ttbar_mx_750.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1000.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1250.dat')),
-                        axis=0)
-
-    traindata      = mwwbb_complete[:,0:2]
-    targetdata     = mwwbb_complete[:,2]
-
-    print "Running on %s alpha values: %s" %(len(alpha), alpha)
-
-    for a in range(len(alpha)):
-        print 'working on alpha=%s' %alpha[a]
-        predictions = []
-        input = input_list[a]
-        for x in range(0,2*size, 1):
-            outputs = scikitlearnFunc(input[x]/1., alpha[a], alpha[a])
-            predictions.append(outputs[0])
-            print "%s - Percent Complete: %s" %(alpha[a], (x/(2.0*size))*100.0)
-        actual = actual_list[a]
-        fpr, tpr, thresholds = roc_curve(actual, predictions)
-        roc_auc = [auc(fpr, tpr)]
-        roc_data = np.vstack((fpr, tpr)).T
-        np.savetxt('data/plot_data/fixVSparam_%s.dat' %alpha[a], roc_data, fmt='%f')
-        np.savetxt('data/plot_data/fixVSparam_ROC_AUC_%s.dat' %alpha[a], roc_auc)
+    mx = [500, 750, 1000, 1250, 1500]
+    for idx, file in enumerate(files):
+        data = np.loadtxt(file)
+        plt.plot(data[:,0], data[:,1],
+                    'o', 
+                    color=colors[idx], 
+                    alpha=0.5,
+                    markevery = 100, 
+                    label='$\mu_p=$%s' %mx[idx], 
+                    rasterized=True)
+    plt.ylabel('NN output')
+    plt.xlabel('m$_{WWbb}$ [GeV]')
+    plt.xlim([250,3000])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/parameterized_training_plot.pdf', dpi=400)
+    plt.savefig('plots/images/parameterized_training_plot.png')
+    plt.clf()
 
 
+def parameterized_ROC_plot():
+    '''
+    parameterized_ROC_plot plots the ROC and AUC values generated during
+    parameterized_function_runner
+    '''
+
+    print 'Entering parameterized_ROC_plot'
+    param_files = [np.loadtxt('data/plot_data/ROC/param_ROC_500.dat'),
+                np.loadtxt('data/plot_data/ROC/param_ROC_750.dat'),
+                np.loadtxt('data/plot_data/ROC/param_ROC_1000.dat'),
+                np.loadtxt('data/plot_data/ROC/param_ROC_1250.dat'),
+                np.loadtxt('data/plot_data/ROC/param_ROC_1500.dat')
+                ]
+
+    AUC_param = [np.loadtxt('data/plot_data/AUC/param_ROC_AUC_500.dat'),
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_750.dat'),
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1000.dat'),
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1250.dat'),
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1500.dat')
+                    ]
+
+    mx = [500, 750, 1000, 1250,1500]
+
+    for i in range(len(param_files)):
+        plt.plot(param_files[i][:,0], param_files[i][:,1], 'o', markerfacecolor=colors[i],
+                    alpha=0.5, markevery=2000, label='$\mu_p=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
+                    rasterized=True)
+    plt.plot([0,1], [0,1], 'r--')
+    plt.title('Receiver Operating Characteristic')
+    plt.ylabel('1/Background efficiency')
+    plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right', bbox_to_anchor=(1.10, 0))
+    plt.grid(True)
+    plt.savefig('plots/parameterized_ROC_plot.pdf', dpi=400)
+    plt.savefig('plots/images/parameterized_ROC_plot.png')  
+    plt.clf()
 
 
 
-''' Plots '''
+'''
+Comparison Training and Plots
+'''
+
+def parameterized_vs_fixed_output_plot():
+    '''
+    parameterized_vs_fixed_output_plot generates an array of points between 0-3000
+    which are used to make predictions using the fixed and parameterized NN training
+    in fixed_*.pkl and param_*.pkl
+    '''
+
+    print 'Entering parameterized_vs_fixed_output_plot'
+    mx = [500, 750, 1000, 1250, 1500]
+    size = 3000
+    for i in range(len(mx)):
+        inputs = np.zeros((size, 2))
+        for x in range(size):
+            inputs[x, 0] = x
+            inputs[x, 1] = mx[i]
+        nn = pickle.load(open('data/pickle/fixed_%0.0f.pkl' %mx[i], 'rb'))
+        outputs = nn.predict(inputs)
+        plt.plot(inputs[:,0], outputs,
+                    '-', 
+                    linewidth=2,
+                    color=colors[i], 
+                    label='$\mu_f=$%0.0f' %mx[i], 
+                    markevery=20)
+    for i in range(len(mx)):
+        inputs = np.zeros((size, 2))
+        for x in range(size):
+            inputs[x, 0] = x
+            inputs[x, 1] = mx[i]
+        nn = pickle.load(open('data/pickle/param_%0.0f.pkl' %mx[i], 'rb'))
+        outputs = nn.predict(inputs)
+        plt.plot(inputs[:,0], outputs,
+                    'o', 
+                    color=colors[i], 
+                    alpha=0.5,
+                    label='$\mu_p=$%0.0f' %mx[i], 
+                    markevery=20)
+    plt.legend(loc='lower right', fontsize=10)
+    plt.grid(True)
+    plt.xlim([0,size])
+    plt.ylim([0,1])
+    plt.xlabel('$m_{WWbb}$')
+    plt.ylabel('NN output')
+    plt.savefig('plots/parameterized_vs_fixed_output_plot.pdf', dpi=400)
+    plt.savefig('plots/images/parameterized_vs_fixed_output_plot.png')
+    plt.clf()
 
 
-def plt_histogram():
+def parameterized_vs_fixed_ROC_plot():
+    '''
+    parameterized_vs_fixed_ROC_plot pulls the ROC/AUC data for both fixed
+    and parameterized training to plot both on the same canvas.
+    '''
+
+    print 'Entering parameterized_vs_fixed_ROC_plot'
+    param_files = [np.loadtxt('data/plot_data/ROC/param_ROC_500.dat'),
+                np.loadtxt('data/plot_data/ROC/param_ROC_750.dat'),
+                np.loadtxt('data/plot_data/ROC/param_ROC_1000.dat'),
+                np.loadtxt('data/plot_data/ROC/param_ROC_1250.dat'),
+                np.loadtxt('data/plot_data/ROC/param_ROC_1500.dat')
+                ]
+    fixed_files = [np.loadtxt('data/plot_data/ROC/fixed_ROC_500.dat'),
+                    np.loadtxt('data/plot_data/ROC/fixed_ROC_750.dat'),
+                    np.loadtxt('data/plot_data/ROC/fixed_ROC_1000.dat'),
+                    np.loadtxt('data/plot_data/ROC/fixed_ROC_1250.dat'),
+                    np.loadtxt('data/plot_data/ROC/fixed_ROC_1500.dat')
+                    ]
+    AUC_param = [np.loadtxt('data/plot_data/AUC/param_ROC_AUC_500.dat'),
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_750.dat'),
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1000.dat'),
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1250.dat'),
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1500.dat')
+                    ]
+
+    AUC_fixed = [np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_500.dat'),
+                    np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_750.dat'),
+                    np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1000.dat'),
+                    np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1250.dat'),
+                    np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1500.dat')
+                    ]
+    fixed_markers = ['b-', 'g-', 'r-', 'c-', 'm-']
+    mx = [500, 750, 1000, 1250,1500]
+
+    for i in range(len(param_files)):
+        plt.plot(param_files[i][:,0], param_files[i][:,1], 
+                    'o', 
+                    markerfacecolor=colors[i],
+                    alpha=0.5, 
+                    markevery=5000, 
+                    label='$\mu_p=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
+                    rasterized=True)
+    for i in range(len(fixed_files)):
+        plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], 
+                    '-', 
+                    color=colors[i], 
+                    alpha=1, 
+                    markevery=100, 
+                    linewidth=2, 
+                    label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
+                    rasterized=True)
+    plt.plot([0,1], [0,1], 'r--')
+    plt.title('Receiver Operating Characteristic')
+    plt.ylabel('1/Background efficiency')
+    plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right', fontsize=10)
+    plt.grid(True)
+    plt.savefig('plots/parameterized_vs_fixed_ROC_plot.pdf', dpi=400)
+    plt.savefig('plots/images/parameterized_vs_fixed_ROC_plot.png')  
+    plt.clf()
+
+
+'''
+Histograms 
+'''
+
+
+def plot_histogram():
+    '''
+    plot_histogram plots a histogram of the signal and backgrounds pulled from 
+    the root files in the root_export directory
+    '''
+
     print 'Entering plt_histogram'
     bin_size   = 50
     #sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
@@ -419,254 +687,92 @@ def plt_histogram():
     plt.ylabel('Fraction of events$/%0.0f$ GeV' %bin_size)
     plt.xlabel('m$_{WWbb}$ [GeV]')
     plt.grid(True)
-    plt.legend(loc='upper right')
-    plt.xlim([0, 3000])
+    plt.legend(loc='upper right', fontsize=10)
+    plt.xlim([250, 3000])
     #plt.ylim([0, 35000])
-    plt.savefig('plots/mWWbb_histogram.pdf', dpi=400)
-    plt.savefig('plots/images/mWWbb_histogram.png')
+    plt.savefig('plots/signal_background_histogram.pdf', dpi=400)
+    plt.savefig('plots/images/signal_background_histogram.png')
     plt.clf()
 
 
+def parameterized_vs_fixed_output_histogram():
+    '''
+    parameterized_vs_fixed_output_histogram plots the outputs of the fixed and 
+    parameterized training outputs to see the distribution of signal/background
+    after trianing.
+    '''
 
-def fixed_plot(): 
-    print 'Entering fixed_plot'
-    files = [#np.loadtxt('data/plot_data/fixed_500.dat'),
-    			np.loadtxt('data/plot_data/fixed_750.dat'),
-    			np.loadtxt('data/plot_data/fixed_1000.dat'),
-    			np.loadtxt('data/plot_data/fixed_1250.dat'),
-    			#np.loadtxt('data/plot_data/fixed_1500.dat')
-    			]
+    print 'Entering output_histogram'
+
     mx = [500, 750, 1000, 1250, 1500]
-    plt_marker = ['b', 'g', 'r', 'c', 'm']
-    for i in range(len(files)):
-    	file = files[i]
-    	file.sort(axis=0)
-    	plt.plot(file[:,0], file[:,1], 
-    				plt_marker[i+1], 
-    				linewidth = 2,
-    				#alpha=1, 
-    				#markevery = 1, 
-    				#markersize = 1,
-    				label='$\mu_f=$%s' %mx[i+1], 
-    				rasterized=True)
-    plt.ylabel('NN output')
-    plt.xlabel('m$_{WWbb}$ [GeV]')
-    plt.xlim([250,3000])
-    plt.ylim([0,1])
-    plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.savefig('plots/fixedTraining.pdf', dpi=400)
-    plt.savefig('plots/images/fixedTraining.png')
-    plt.clf()
+    fixed_files = ['data/plot_data/fixed_500.dat',
+                    'data/plot_data/fixed_750.dat',
+                    'data/plot_data/fixed_1000.dat',
+                    'data/plot_data/fixed_1250.dat',
+                    'data/plot_data/fixed_1500.dat']
 
-def fixed_ROC_plot():
-    print "Entering fixed_ROC_plot"
-    files = [np.loadtxt('data/plot_data/fixed_ROC_500.dat'),
-    			np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
-    			np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
-    			np.loadtxt('data/plot_data/fixed_ROC_1250.dat'),
-    			np.loadtxt('data/plot_data/fixed_ROC_1500.dat')]
-    AUC = [np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
-    		np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
-    		np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
-    		np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
-    		np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')]
-    mx = [500, 750, 1000, 1250, 1500]
-    plt_color = ['blue', 'green', 'red', 'cyan', 'magenta']
-    plt_marker = ['-', '-', '-', '-', '-']
-    for i in range(len(files)):
-    	plt.plot(files[i][:,0], files[i][:,1],
-    				plt_marker[i], 
-    				linewidth = 2,
-    				color=plt_color[i], 
-    				alpha=1, 
-    				markevery = 1, 
-    				label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC[i]), 
-    				rasterized=True)
-    plt.plot([0,1],[0,1], 'r--')
-    plt.title('Receiver Operating Characteristic')
-    plt.ylabel('1/Background efficiency')
-    plt.xlabel('Signal efficiency')
+    param_files = ['data/plot_data/param_500.dat',
+                    'data/plot_data/param_750.dat',
+                    'data/plot_data/param_1000.dat',
+                    'data/plot_data/fixed_1250.dat',
+                    'data/plot_data/fixed_1500.dat']
+    for idx, file in enumerate(fixed_files):
+        data = np.loadtxt(file)
+        n, bins, patches = plt.hist([data[:,1]],
+                    bins=50, 
+                    normed=True,
+                    histtype='step', 
+                    color=colors[idx],
+                    label='$\mu_f=$%s' %mx[idx],
+                    alpha=0.5, 
+                    rasterized=True)
+
+    for idx, file in enumerate(param_files):
+        data = np.loadtxt(file)
+        n, bins, patches = plt.hist([data[:,1]],
+                    bins=50, 
+                    normed=True,
+                    histtype='stepfilled', 
+                    color=colors[idx],
+                    label='$\mu_p=$%s' %mx[idx],
+                    alpha=0.3, 
+                    rasterized=True)
+    plt.setp(patches)
     plt.xlim([0,1])
-    plt.ylim([0,1])
-    plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
-    plt.savefig('plots/images/fixed_ROC_plot.png')
+    plt.legend(loc='upper left', bbox_to_anchor=(0.02, 1), fontsize=10)
+    plt.savefig('plots/parameterized_vs_fixed_output_histogram.pdf', dpi=400)
+    plt.savefig('plots/images/parameterized_vs_fixed_output_histogram.pdf')
     plt.clf()
-
-
-def fixVSparam_plot():
-    print 'Entering fixVSparam_plot'
-    param_files = [np.loadtxt('data/plot_data/fixVSparam_750.dat'),
-    			np.loadtxt('data/plot_data/fixVSparam_1000.dat'),
-    			np.loadtxt('data/plot_data/fixVSparam_1250.dat')
-    			]
-    fixed_files = [np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
-    			np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
-    			np.loadtxt('data/plot_data/fixed_ROC_1250.dat')
-    			]
-    AUC_param = [np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_750.dat'),
-    				np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_1000.dat'),
-    				np.loadtxt('data/plot_data/fixVSparam_ROC_AUC_1250.dat')]
-    AUC_fixed = [#np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
-    				#np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')
-    				]
-    param_markers = ['go', 'ro', 'co']
-    fixed_markers = ['g-', 'r-', 'c-']
-    mx = [750, 1000, 1250]
-    for i in range(len(param_files)):
-    	plt.plot(param_files[i][:,0], param_files[i][:,1], 
-    				param_markers[i], 
-    				alpha=0.5, 
-    				markevery=500, 
-    				label='$\mu_p=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]), 
-    				markeredgewidth=1, 
-    				markeredgecolor='black', 
-    				rasterized=True)
-    for i in range(len(fixed_files)):
-    	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], 
-    				fixed_markers[i], 
-    				#alpha=1, 
-    				markevery=200, 
-    				linewidth=2,
-    				#markersize = 8,
-    				#markeredgecolor = 'DarkGray',
-    				#markeredgewidth = 0.5,
-    				label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]), 
-    				rasterized=True)
-    plt.plot([0,1], [0,1], 'r--')
-    plt.title('Receiver Operating Characteristic')
-    plt.ylabel('1/Background efficiency')
-    plt.xlabel('Signal efficiency')
-    plt.xlim([0,1])
-    plt.ylim([0,1])
-    plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.savefig('plots/fixVSparam_plot.pdf', dpi=400)
-    plt.savefig('plots/images/fixVSparam_plot.png')
-    plt.clf()
-
-def param_ROC_plot():
-    print 'Entering param_ROC_plot'
-    param_files = [#np.loadtxt('data/plot_data/param_alpha_ROC_500.dat'),
-    			np.loadtxt('data/plot_data/param_alpha_ROC_750.dat'),
-    			np.loadtxt('data/plot_data/param_alpha_ROC_1000.dat'),
-    			np.loadtxt('data/plot_data/param_alpha_ROC_1250.dat'),
-    			#np.loadtxt('data/plot_data/param_alpha_ROC_1500.dat')
-    			]
-    fixed_files = [np.loadtxt('data/plot_data/fixed_ROC_500.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_750.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_1000.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_1250.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_1500.dat')
-    				]
-    AUC_param = [#np.loadtxt('data/plot_data/param_alpha_ROC_AUC_500.dat'),
-    				np.loadtxt('data/plot_data/param_alpha_ROC_AUC_750.dat'),
-    				np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1000.dat'),
-    				np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1250.dat'),
-    				#np.loadtxt('data/plot_data/param_alpha_ROC_AUC_1500.dat')
-    				]
-
-    AUC_fixed = [np.loadtxt('data/plot_data/fixed_ROC_AUC_500.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_AUC_750.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1000.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1250.dat'),
-    				np.loadtxt('data/plot_data/fixed_ROC_AUC_1500.dat')
-    				]
-    param_markers = ['bo', 'go', 'ro', 'co', 'mo']
-    fixed_markers = ['b-', 'g-', 'r-', 'c-', 'm-']
-    mx = [500,750, 1000, 1250,1500]
-
-    for i in range(len(param_files)):
-    	plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i+1], 
-    				alpha=0.5, markevery=500, label='$\mu_p=$%s (AUC=%0.2f)' %(mx[i+1], AUC_param[i]),  
-    				rasterized=True)
-    for i in range(len(fixed_files)):
-    	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
-    				alpha=1, markevery=100, linewidth=2, label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
-    				rasterized=True)
-    plt.plot([0,1], [0,1], 'r--')
-    plt.title('Receiver Operating Characteristic')
-    plt.ylabel('1/Background efficiency')
-    plt.xlabel('Signal efficiency')
-    plt.xlim([0,1])
-    plt.ylim([0,1])
-    plt.legend(loc='lower right', bbox_to_anchor=(1.10, 0))
-    plt.grid(True)
-    plt.savefig('plots/param_ROC_plot.pdf', dpi=400)
-    plt.savefig('plots/images/param_ROC_plot.png')	
-    plt.clf()
-
-def param_plot(): 
-    print 'Entering param_plot'
-    fixed_files = [#np.loadtxt('data/plot_data/fixed_500.dat'),
-    			np.loadtxt('data/plot_data/fixed_750.dat'),
-    			np.loadtxt('data/plot_data/fixed_1000.dat'),
-    			np.loadtxt('data/plot_data/fixed_1250.dat'),
-    			#np.loadtxt('data/plot_data/fixed_1500.dat')
-    			]
-    param_files = [np.loadtxt('data/plot_data/param_alpha_500.dat'),
-    			np.loadtxt('data/plot_data/param_alpha_750.dat'),
-    			np.loadtxt('data/plot_data/param_alpha_1000.dat'),
-    			np.loadtxt('data/plot_data/param_alpha_1250.dat'),
-    			np.loadtxt('data/plot_data/param_alpha_1500.dat')
-    			]
-    mx = [500, 750, 1000, 1250, 1500]
-    fixed_colors = ['blue', 'green', 'red', 'cyan', 'magenta']
-    param_colors = ['blue', 'green', 'red', 'cyan', 'magenta']
-    for i in range(len(param_files)):
-    	file = param_files[i]
-    	plt.plot(file[:,0], file[:,1],
-    				'o', 
-    				color=param_colors[i], 
-    				alpha=0.5,
-    				markeredgewidth=1,
-    				markeredgecolor='DarkGray', 
-    				markevery = 1, 
-    				label='$\mu_p=$%s' %mx[i], 
-    				rasterized=True)
-    for i in range(len(fixed_files)):
-    	file = fixed_files[i]
-    	file.sort(axis=0)
-    	plt.plot(file[:,0], file[:,1], 
-    				fixed_colors[i+1], 
-    				linewidth=2,
-    				#alpha=1, 
-    				#markevery = 1, 
-    				label='$\mu_f=$%s' %mx[i+1], 
-    				rasterized=True)
-    plt.ylabel('NN output')
-    plt.xlabel('m$_{WWbb}$ [GeV]')
-    plt.xlim([250,3000])
-    plt.ylim([0,1])
-    plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.savefig('plots/paramTraining_complete.pdf', dpi=400)
-    plt.savefig('plots/images/paramTraining_complete.png')
-    plt.clf()
-
 
 if __name__ == '__main__':
-    '''File Runners'''
+    '''
+    File Runners
+    '''
     #file_runner()
     #flat_bkg(10000,0,5000)
     #file_concatenater()
-    #plt_histogram()
     
-    ''' NN Training '''
-    #mwwbb_fixed()
-    #mwwbb_parameterized()
-    #mwwbbParameterizedRunner()
-    #fixVSparam()
-
-    
-    '''Plotters'''
-    #fixed_plot()
+    '''
+    Fixed Training and Plots
+    '''
+    #fixed_training()
+    #fixed_training_plot()
     #fixed_ROC_plot()
-    #fixVSparam_plot()
-    param_ROC_plot()
-    #param_plot()
+
+    '''
+    Parameterized Training and Plots 
+    '''
+    #parameterized_training()
+    #parameterized_function_runner()
+    #parameterized_training_plot()    
+    #parameterized_ROC_plot()
+
+    '''
+    Comparison Training and Plots
+    '''
+    parameterized_vs_fixed_output_plot()
+    parameterized_vs_fixed_ROC_plot()
+    
+    '''Output Histograms'''
+    #plot_histogram()
+    #parameterized_vs_fixed_output_histogram()

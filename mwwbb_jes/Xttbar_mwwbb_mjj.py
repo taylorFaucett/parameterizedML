@@ -16,14 +16,12 @@ import pickle
 import os
 import glob
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.externals import joblib
 from sknn.mlp import Regressor, Classifier, Layer
-
-
-nn = pickle.load(open('data/pickle/param.pkl','rb'))
 
 def file_runner(directory):
     print 'Entering file_runner'
@@ -72,9 +70,9 @@ def file_generate(root_file):
     for i in range(size):
         data[i, 0] = mwwbb[i]
         data[i, 1] = mjj[i]
-        data[i, 2] = mx[i]
+        data[i, 2] = jes[i]
         data[i, 3] = target[i]
-        data[i, 4] = jes[i]
+        data[i, 4] = mx[i]
     np.savetxt('data/root_export/%s_mx_%0.0f_jes_%0.3f.dat' %(label, mx[0], jes[0]), data, fmt='%f')
 
 def root_export(root_file, tree, leaf):
@@ -95,15 +93,15 @@ def root_export(root_file, tree, leaf):
 
 def file_concatenater():
     print 'Entering file_concatenater'
-    sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
-    bkg_dat = glob.iglob('data/root_export/bkg_mx_*.dat')
+    sig_files = glob.iglob('data/root_export/sig_mx_*.dat')
+    bkg_files = glob.iglob('data/root_export/bkg_mx_*.dat')
     #flt_dat = glob.iglob('data/flat_bkg/*.dat')
-    for signal, background in zip(sig_dat, bkg_dat):
+    for signal, background in zip(sig_files, bkg_files):
         sig = np.loadtxt(signal)
         bkg = np.loadtxt(background)
         #flt = np.loadtxt(flat)
         data_complete = np.concatenate((sig, bkg), axis=0)
-        np.savetxt('data/concatenated/ttbar_mx_%0.2f.dat' %sig[0,4], data_complete, fmt='%f')
+        np.savetxt('data/concatenated/ttbar_mx_%0.3f.dat' %sig[0,2], data_complete, fmt='%f')
         #data_complete = np.concatenate((sig, flt), axis=0)
         #np.savetxt('data/concatenated/flat_mx_%0.0f.dat' %sig[0,1], data_complete, fmt='%f')
 
@@ -112,10 +110,10 @@ def file_concatenater():
 
 def mwwbb_fixed():
     print 'Entering mwwbb_fixed'
-    files = glob.iglob('data/concatenated/ttbar_mx_1.00.dat')
+    files = glob.iglob('data/concatenated/*.dat')
     for dat in files:
         data = np.loadtxt(dat)
-        print 'Processing fixed training on mu=%s' %data[0,4]
+        print 'Processing fixed training on mu=%s' %data[0,2]
         nn = Pipeline([
             ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
             ('neural network',
@@ -124,7 +122,7 @@ def mwwbb_fixed():
                     learning_rate=0.01,
                     #n_stable=1,
                     #f_stable=100,
-                    n_iter=25,
+                    n_iter=10,
                     #learning_momentum=0.1,
                     batch_size=10,
                     learning_rule="nesterov",
@@ -135,15 +133,16 @@ def mwwbb_fixed():
         print nn
     	traindata = data[:,0:3]
     	targetdata = data[:,3]
+        print traindata
+        print targetdata
     	nn.fit(traindata, targetdata)
 
     	fit_score = nn.score(traindata, targetdata)
     	print 'Fixed training score = %s' %fit_score
     	outputs = nn.predict(traindata)
-        print outputs
     	outputs = outputs.reshape((1,len(outputs)))
-    	fixed_plot = np.vstack((traindata[:,0], outputs)).T
-    	np.savetxt('data/plot_data/fixed_%0.3f.dat' %data[0,4], fixed_plot, fmt='%f')
+    	fixed_plot = np.vstack((traindata[:,0], traindata[:,1], outputs)).T
+    	np.savetxt('data/plot_data/fixed_plot_%0.3f.dat' %data[0,2], fixed_plot, fmt='%f')
 
     	actual = targetdata
     	predictions = outputs[0]
@@ -151,35 +150,29 @@ def mwwbb_fixed():
     	ROC_plot = np.vstack((fpr, tpr)).T
     	roc_auc = [auc(fpr, tpr)]
 
-    	np.savetxt('data/plot_data/fixed_ROC_%0.3f.dat' %data[0,4], ROC_plot, fmt='%f')
-    	np.savetxt('data/plot_data/fixed_ROC_AUC_%0.3f.dat' %data[0,4], roc_auc)
+    	np.savetxt('data/plot_data/ROC/fixed_ROC_plot_%0.3f.dat' %data[0,2], ROC_plot, fmt='%f')
+    	np.savetxt('data/plot_data/ROC/fixed_ROC_AUC_%0.3f.dat' %data[0,2], roc_auc)
 
-    	pickle.dump(nn, open('data/pickle/fixed_%0.3f.pkl' %data[0,4], 'wb'))
+    	pickle.dump(nn, open('data/pickle/fixed_%0.3f.pkl' %data[0,2], 'wb'))
 
 
 def mwwbb_parameterized():
     print 'Entering mwwbb_parameterized'
     mwwbb_complete = np.concatenate((
-                        np.loadtxt('data/concatenated/ttbar_mx_0.75.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_0.90.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_0.95.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_0.97.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1.00.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1.02.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1.05.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1.10.dat'),
-                        np.loadtxt('data/concatenated/ttbar_mx_1.25.dat')),
+                        np.loadtxt('data/concatenated/ttbar_mx_0.750.dat'),
+                        #np.loadtxt('data/concatenated/ttbar_mx_0.90.dat'),
+                        #np.loadtxt('data/concatenated/ttbar_mx_0.95.dat'),
+                        #np.loadtxt('data/concatenated/ttbar_mx_0.97.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1.000.dat'),
+                        #np.loadtxt('data/concatenated/ttbar_mx_1.02.dat'),
+                        #np.loadtxt('data/concatenated/ttbar_mx_1.05.dat'),
+                        #np.loadtxt('data/concatenated/ttbar_mx_1.10.dat'),
+                        np.loadtxt('data/concatenated/ttbar_mx_1.250.dat')),
                         axis=0)
 
     print 'Parameterized training on all signals'
-    traindata = np.zeros((len(mwwbb_complete), 3))
-    for i in range(len(mwwbb_complete)):
-        traindata[i, 0] = mwwbb_complete[i, 0]
-        traindata[i, 1] = mwwbb_complete[i, 1]
-        traindata[i, 2] = mwwbb_complete[i, 4]       
+    traindata = mwwbb_complete[:, 0:3]      
     targetdata     = mwwbb_complete[:, 3]
-    print traindata
-    print targetdata
 
     nn = Pipeline([
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
@@ -191,28 +184,27 @@ def mwwbb_parameterized():
                 #n_stable=1,
                 #f_stable=0.001,
                 #learning_momentum=0.1,
-                batch_size=100,
+                batch_size=10,
                 learning_rule="nesterov",
                 #valid_size=0.05,
                 verbose=True,
                 #debug=True
                 ))])
-    print nn
 
     nn.fit(traindata, targetdata)
     fit_score = nn.score(traindata, targetdata)
     print 'Parameterized training score = %s' %fit_score
     outputs = nn.predict(traindata)
     outputs = outputs.reshape((1, len(outputs)))
-    print outputs
-    param_plot = np.vstack((traindata[:,0], outputs)).T
+    param_plot = np.vstack((traindata[:,0], traindata[:,1], outputs)).T
     np.savetxt('data/plot_data/param.dat', param_plot, fmt='%f')
     pickle.dump(nn, open('data/pickle/param.pkl', 'wb'))
 
         
 
-def scikitlearnFunc(mx, jes, alpha):
-    traindata = np.array((mx, jes, alpha), ndmin=2)
+def scikitlearnFunc(mx, mjj, alpha):
+    nn = pickle.load(open('data/pickle/param.pkl','rb'))
+    traindata = np.array((mx, mjj, alpha), ndmin=2)
     outputs   = nn.predict(traindata)
 
     #print 'x,alpha,output =', x, alpha, outputs[0]
@@ -222,17 +214,17 @@ def scikitlearnFunc(mx, jes, alpha):
 def mwwbbParameterizedRunner():
     print 'Entering mwwbbParameterizedRunner'
     alpha = [0.75, 0.95, 1.00, 1.05, 1.25]
-    size = 5000
+    size = 1000
 
-    mx_75_raw = np.loadtxt('data/concatenated/ttbar_mx_0.75.dat')
-    mx_90_raw = np.loadtxt('data/concatenated/ttbar_mx_0.90.dat')
-    mx_95_raw = np.loadtxt('data/concatenated/ttbar_mx_0.95.dat')
-    mx_97_raw = np.loadtxt('data/concatenated/ttbar_mx_0.97.dat')
-    mx_100_raw = np.loadtxt('data/concatenated/ttbar_mx_1.00.dat')
-    mx_102_raw = np.loadtxt('data/concatenated/ttbar_mx_1.02.dat')
-    mx_105_raw = np.loadtxt('data/concatenated/ttbar_mx_1.05.dat')
-    mx_110_raw = np.loadtxt('data/concatenated/ttbar_mx_1.10.dat')
-    mx_125_raw = np.loadtxt('data/concatenated/ttbar_mx_1.25.dat')
+    mx_75_raw = np.loadtxt('data/concatenated/ttbar_mx_0.750.dat')
+    mx_90_raw = np.loadtxt('data/concatenated/ttbar_mx_0.900.dat')
+    mx_95_raw = np.loadtxt('data/concatenated/ttbar_mx_0.950.dat')
+    mx_97_raw = np.loadtxt('data/concatenated/ttbar_mx_0.975.dat')
+    mx_100_raw = np.loadtxt('data/concatenated/ttbar_mx_1.000.dat')
+    mx_102_raw = np.loadtxt('data/concatenated/ttbar_mx_1.025.dat')
+    mx_105_raw = np.loadtxt('data/concatenated/ttbar_mx_1.050.dat')
+    mx_110_raw = np.loadtxt('data/concatenated/ttbar_mx_1.100.dat')
+    mx_125_raw = np.loadtxt('data/concatenated/ttbar_mx_1.250.dat')
 
     mx_75 = np.concatenate((mx_75_raw[:size, :],mx_75_raw[-size:, :]), axis=0)
     mx_90 = np.concatenate((mx_90_raw[:size, :],mx_90_raw[-size:, :]), axis=0)
@@ -282,14 +274,12 @@ def mwwbbParameterizedRunner():
         data = np.vstack((inputs, predictions)).T
         np.savetxt('data/plot_data/param_alpha_%s.dat' %alpha[a], data, fmt='%f')
         actual = actual_list[a]
-        print actual
-        print predictions
         fpr, tpr, thresholds = roc_curve(actual, predictions)
         roc_auc = [auc(fpr, tpr)]
 
         roc_data = np.vstack((fpr, tpr)).T
-        np.savetxt('data/plot_data/param_alpha_ROC_%s.dat' %alpha[a], roc_data, fmt='%f')
-        np.savetxt('data/plot_data/param_alpha_ROC_AUC_%s.dat' %alpha[a], roc_auc)
+        np.savetxt('data/plot_data/ROC/param_alpha_ROC_%s.dat' %alpha[a], roc_data, fmt='%f')
+        np.savetxt('data/plot_data/ROC/param_alpha_ROC_AUC_%s.dat' %alpha[a], roc_auc)
 
 def fixVSparam():
     print 'Entering fixVSparam'
@@ -400,30 +390,40 @@ def plt_histogram():
 
 
 def fixed_plot(): 
-    files = glob.iglob('data/plot_data/fixed_1.000.dat')
+    files = glob.iglob('data/plot_data/fixed_plot_*.dat')
+    jes = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+    i=0
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
     for dat in files:
         data = np.loadtxt(dat)
-    	plt.plot(data[:,0], data[:,1], 
-    				'.', alpha=1, markevery = 1000, 
-    				label='jes=1.000', rasterized=True)
-    plt.ylabel('NN output')
-    plt.xlabel('m$_{WWbb}$ [GeV]')
-    plt.xlim([0,3000])
-    plt.ylim([0,1])
-    plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.savefig('plots/fixedTraining.pdf', dpi=400)
-    plt.savefig('plots/images/fixedTraining.png')
-    plt.clf()
+        for c, m, zl, zh in [('r', 'o', -50, 25), ('b', '^', -30, -5)]:
+            xs = data[:,0]
+            ys = data[:,1]
+            zs = data[:,2]
+            ax.plot(xs, ys, zs, c=c, marker=m)
+        ax.set_xlabel('$m_{WWbb}$')
+        ax.set_ylabel('$m_{jj}$')
+        ax.set_zlabel('NN output')
+        data = np.loadtxt(dat)
+        i=i+1
+        plt.savefig('plots/fixedTraining_%0.3f.pdf' %jes[i], dpi=400)
+        plt.savefig('plots/images/fixedTraining_%0.3f.png' %jes[i])
+        plt.clf()
 
 def fixed_ROC_plot():
     print "Entering fixed_ROC_plot"
-    data = np.loadtxt('data/plot_data/fixed_ROC_1.000.dat')
-    AUC = np.loadtxt('data/plot_data/fixed_ROC_AUC_1.000.dat')
-    print AUC
-    plt.plot(data[:,0], data[:,1],
-                marker='o', alpha=0.5, 
-                markevery = 10000, label='jes=1.000 (AUC=%0.2f)' %AUC, rasterized=True)
+    jes = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+    ROC_files = glob.iglob('data/plot_data/ROC/fixed_ROC_plot_*.dat')
+    AUC_files = glob.iglob('data/plot_data/ROC/fixed_ROC_AUC_*.dat')
+    i=0
+    for (ROC, AUC) in zip(ROC_files, AUC_files):
+        ROC_data = np.loadtxt(ROC)
+        AUC = np.loadtxt(AUC)
+        plt.plot(ROC_data[:,0], ROC_data[:,1], '-', 
+                    label='jes=%0.3f (AUC=%0.3f)' %(jes[i], AUC), 
+                    rasterized=True)
+        i=i+1
     plt.plot([0,1],[0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
     plt.ylabel('Background rejection')
@@ -434,6 +434,7 @@ def fixed_ROC_plot():
     plt.grid(True)
     plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
     plt.savefig('plots/images/fixed_ROC_plot.png')
+    plt.clf()
 
 
 def fixVSparam_plot():
@@ -461,11 +462,11 @@ def fixVSparam_plot():
     for i in range(len(param_files)):
     	plt.plot(param_files[i][:,0], param_files[i][:,1], param_markers[i], 
     				alpha=0.5, markevery=200, 
-    				label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]), rasterized=True)
+    				label='$\mu=$%s (AUC=%0.3f)' %(mx[i], AUC_param[i]), rasterized=True)
     for i in range(len(fixed_files)):
     	plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], fixed_markers[i], 
     				alpha=1, markevery=1000, 
-    				label='$\mu=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  rasterized=True)
+    				label='$\mu=$%s (AUC=%0.3f)' %(mx[i], AUC_fixed[i]),  rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
     plt.ylabel('Background rejection')
@@ -480,29 +481,38 @@ def fixVSparam_plot():
 
 def param_ROC_plot():
     print 'Entering param_ROC_plot'
-    param_files = glob.iglob('data/plot_data/param_alpha_ROC_*.dat')
+    param_files = glob.iglob('data/plot_data/ROC/param_alpha_ROC_*.dat')
 
-    fixed_files = glob.iglob('data/plot_data/fixed_ROC_1.000.dat')
+    fixed_files = ['data/plot_data/ROC/fixed_ROC_plot_0.750.dat',
+                    'data/plot_data/ROC/fixed_ROC_plot_1.000.dat',
+                    'data/plot_data/ROC/fixed_ROC_plot_1.250.dat']
 
-    AUC_param = glob.iglob('data/plot_data/param_alpha_ROC_AUC_*.dat')
+    AUC_param = glob.iglob('data/plot_data/ROC/param_alpha_ROC_AUC_*.dat')
 
-    AUC_fixed = glob.iglob('data/plot_data/fixed_ROC_AUC_1.000.dat')
+    AUC_fixed = glob.iglob('data/plot_data/ROC/fixed_ROC_AUC_*.dat')
 
-    jes = [0.75, 0.95, 1.00, 1.05, 1.25]
+    jes = [0.75, 0.90, 0.95, 0.975, 1.00, 1.025, 1.05, 1.100, 1.25]
+    marker = ['o', 'x', '^', 'v', 's', 'p']
     i = 0
     for file, AUC_val in zip(param_files, AUC_param):
         data = np.loadtxt(file)
         AUC = np.loadtxt(AUC_val)
-    	plt.plot(data[:,0], data[:,1], 
-    				alpha=0.5, markevery=200, label='jes=%s (AUC=%0.2f)' %(jes[i], AUC),  
+    	plt.plot(data[:,0], data[:,1],
+                    marker[i], 
+    				alpha=0.2, 
+                    markevery=10, 
+                    label='jes$_p$=%s (AUC=%0.3f)' %(jes[i+2], AUC),  
     				rasterized=True)
         i=i+1
     i=0
     for file, AUC_val in zip(fixed_files, AUC_fixed):
         data = np.loadtxt(file)
         AUC = np.loadtxt(AUC_val)
-    	plt.plot(data[:,0], data[:,1], 
-    				alpha=1, markevery=100, label='jes=%s (AUC=%0.2f)' %(jes[i+2], AUC),  
+    	plt.plot(data[:,0], data[:,1],
+                    '-', 
+    				alpha=1, 
+                    markevery=100, 
+                    label='jes$_f$=%s (AUC=%0.3f)' %(jes[i], AUC),  
     				rasterized=True)
         i=i+1
     plt.plot([0,1], [0,1], 'r--')
@@ -561,8 +571,8 @@ if __name__ == '__main__':
     
     ''' NN Training '''
     #mwwbb_fixed()
-    mwwbb_parameterized()
-    mwwbbParameterizedRunner()
+    #mwwbb_parameterized()
+    #mwwbbParameterizedRunner()
     #fixVSparam()
 
     
@@ -570,6 +580,6 @@ if __name__ == '__main__':
     #plt_histogram()
     #fixed_plot()
     #fixed_ROC_plot()
-    param_plot()
+    #param_plot()
     param_ROC_plot()
     #fixVSparam_plot()
