@@ -195,7 +195,7 @@ def fixed_training_plot():
                     #alpha=1, 
                     markevery = 100, 
                     #markersize = 1,
-                    label='jes$_f$=%s' %jes, 
+                    label='jes$_f$=%0.3f' %jes, 
                     rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('$m_{WWbb}$')
@@ -216,7 +216,7 @@ def fixed_training_plot():
                     #alpha=1, 
                     markevery = 100, 
                     #markersize = 1,
-                    label='$\mu_f=$%s' %jes, 
+                    label='jes$_f$=%0.3f' %jes, 
                     rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('$m_{jj}$')
@@ -244,7 +244,7 @@ def fixed_ROC_plot():
         plt.plot(data[:,0], data[:,1],
                     '-', 
                     color=colors[idx], 
-                    label='$\mu_f=$%s (AUC=%0.2f)' %(jes, AUC), 
+                    label='jes$_f$=%0.3f (AUC=%0.3f)' %(jes, AUC), 
                     rasterized=True)
     plt.plot([0,1],[0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
@@ -509,7 +509,7 @@ def parameterized_training_plot():
                     alpha=0.3, 
                     markevery = 10000, 
                     #markersize = 1,
-                    label='$\mu_f=$%s' %jes, 
+                    label='jes$_p$=%0.3f' %jes, 
                     rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('$m_{WWbb}$')
@@ -531,7 +531,7 @@ def parameterized_training_plot():
                     alpha=0.3, 
                     markevery = 10000, 
                     #markersize = 1,
-                    label='$\mu_f=$%s' %jes, 
+                    label='jes$_p$=%0.3f' %jes, 
                     rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('$m_{jj}$')
@@ -562,7 +562,7 @@ def parameterized_ROC_plot():
                     markerfacecolor=colors[idx],
                     alpha=0.5, 
                     markevery=2000, 
-                    label='jes$_p$=%0.3f (AUC=%0.2f)' %(jes, AUC),  
+                    label='jes$_p$=%0.3f (AUC=%0.3f)' %(jes, AUC),  
                     rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
@@ -894,24 +894,24 @@ if __name__ == '__main__':
     Fixed Training and Plots
     '''
     #fixed_training()
-    #fixed_training_plot()
+    fixed_training_plot()
     fixed_ROC_plot()
-    #fixed_output_plot_heat_map()
+    fixed_output_plot_heat_map()
     
     '''
     Parameterized Training and Plots 
     '''
     #parameterized_training()
     #parameterized_function_runner()
-    #parameterized_training_plot()    
-    #parameterized_ROC_plot()
-    #parameterized_output_plot_heat_map()
+    parameterized_training_plot()    
+    parameterized_ROC_plot()
+    parameterized_output_plot_heat_map()
     
     '''
     Comparison Training and Plots
     '''
-    #parameterized_vs_fixed_output_plot()
-    #parameterized_vs_fixed_ROC_plot()
+    parameterized_vs_fixed_output_plot()
+    parameterized_vs_fixed_ROC_plot()
     
     '''
     Output Histograms
