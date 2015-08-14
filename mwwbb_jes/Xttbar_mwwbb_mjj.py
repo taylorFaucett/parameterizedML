@@ -195,7 +195,7 @@ def fixed_training_plot():
                     #alpha=1, 
                     markevery = 100, 
                     #markersize = 1,
-                    label='$\mu_f=$%s' %jes, 
+                    label='jes$_f$=%s' %jes, 
                     rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('$m_{WWbb}$')
