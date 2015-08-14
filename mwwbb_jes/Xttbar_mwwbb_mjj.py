@@ -184,19 +184,10 @@ def fixed_training_plot():
     '''
 
     print 'Entering fixed_training_plot'
-    file_list = ['data/plot_data/fixed_0.750.dat',
-                    'data/plot_data/fixed_0.900.dat',
-                    'data/plot_data/fixed_0.950.dat',
-                    'data/plot_data/fixed_0.975.dat',
-                    'data/plot_data/fixed_1.000.dat',
-                    'data/plot_data/fixed_1.025.dat',
-                    'data/plot_data/fixed_1.050.dat',
-                    'data/plot_data/fixed_1.100.dat',
-                    'data/plot_data/fixed_1.250.dat']
 
     jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-    for idx, (file, jes) in enumerate(zip(file_list, jes_list)):
-        data = np.loadtxt(file)
+    for idx, jes in enumerate(jes_list):
+        data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
         data.sort(axis=0)
         plt.plot(data[:,0], data[:,4], 
                     color=colors[idx], 
@@ -216,8 +207,8 @@ def fixed_training_plot():
     plt.savefig('plots/images/fixed_training_mwwbb_plot.png')
     plt.clf()
 
-    for idx, (file, jes) in enumerate(zip(file_list, jes_list)):
-        data = np.loadtxt(file)
+    for idx, jes in enumerate(jes_list):
+        data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
         data.sort(axis=0)
         plt.plot(data[:,1], data[:,4], 
                     color=colors[idx], 
@@ -475,18 +466,8 @@ def parameterized_function_runner():
                     1.100,
                     1.250]
 
-    file_list = ['data/concatenated/ttbar_mx_0.750.dat',
-                    'data/concatenated/ttbar_mx_0.900.dat',
-                    'data/concatenated/ttbar_mx_0.950.dat',
-                    'data/concatenated/ttbar_mx_0.975.dat',
-                    'data/concatenated/ttbar_mx_1.000.dat',
-                    'data/concatenated/ttbar_mx_1.025.dat',
-                    'data/concatenated/ttbar_mx_1.050.dat',
-                    'data/concatenated/ttbar_mx_1.100.dat',
-                    'data/concatenated/ttbar_mx_1.250.dat']
-
-    for idx, (file, alpha) in enumerate(zip(file_list, alpha_list)):
-        data = np.loadtxt(file)
+    for idx, alpha in enumerate(alpha_list):
+        data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
         size = len(data[:,0])
         print 'processing using: data/pickle/param_%0.3f.pkl' %alpha
         nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %alpha, 'rb'))
@@ -515,20 +496,11 @@ def parameterized_training_plot():
     '''
 
     print 'Entering parameterized_training_plot'
-    file_list = ['data/plot_data/param_0.750.dat',
-                    'data/plot_data/param_0.900.dat',
-                    'data/plot_data/param_0.950.dat',
-                    'data/plot_data/param_0.975.dat',
-                    'data/plot_data/param_1.000.dat',
-                    'data/plot_data/param_1.025.dat',
-                    'data/plot_data/param_1.050.dat',
-                    'data/plot_data/param_1.100.dat',
-                    'data/plot_data/param_1.250.dat']
 
     jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
 
-    for idx, (file, jes) in enumerate(zip(file_list, jes_list)):
-        data = np.loadtxt(file)
+    for idx, jes in enumerate(jes_list):
+        data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
         data.sort(axis=0)
         plt.plot(data[:,0], data[:,2],
                     'o', 
@@ -724,6 +696,7 @@ def parameterized_vs_fixed_ROC_plot():
     plt.savefig('plots/images/parameterized_vs_fixed_ROC_plot.png')
     plt.clf()
 
+
 def fixed_output_plot_heat_map():
     print 'Entering fixed_output_plot_surface'
     jes_list = [0.750, 
@@ -784,10 +757,71 @@ def fixed_output_plot_heat_map():
         plt.xlabel('$m_{WWbb}$')
         plt.ylabel('$m_{jj}$')
         plt.savefig('plots/output_heat_map/fixed_output_plot_surface_%0.3f.pdf' %jes, dpi=400)
-        plt.savefig('plots/output_heat_map/images/fixed_output_plot_surface_%0.3f.png' %jes)
+        plt.savefig('plots/output_heat_map/images/fixed/fixed_output_plot_surface_%0.3f.png' %jes)
         plt.clf()
 
+def parameterized_output_plot_heat_map():
+    print 'Entering fixed_output_plot_surface'
+    jes_list = [0.750, 
+                0.900, 
+                0.950, 
+                0.975, 
+                1.000, 
+                1.025, 
+                1.050, 
+                1.100, 
+                1.250
+                ]
+    
+    for idx, jes in enumerate(jes_list):
+        print 'Plotting jes=%0.3f' %jes
+        data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
+        size = 5000
+        x = data[:,0][:size]
+        y = data[:,1][:size]
+        z = data[:,2][:size]
+        xmin = 0
+        xmax = 3000
+        ymin = 0
+        ymax = 500
+        zmin = 0
+        zmax = 1
+        color_map = 'CMRmap'
+        #xmin = x.min()
+        #xmax = x.max()
+        #ymin = y.min()
+        #ymax = y.max()
+        #zmin = z.min()
+        #zmax = z.max()
 
+        # Set up a regular grid of interpolation points
+        xi, yi = np.linspace(xmin, xmax, 100), np.linspace(ymin, ymax, 100)
+        xi, yi = np.meshgrid(xi, yi)
+
+        # Interpolate
+        rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
+        zi = rbf(xi, yi)
+        plt.imshow(zi, 
+                    vmin=zmin, 
+                    vmax=zmax, 
+                    origin='lower',
+                    extent=[xmin, xmax, ymin, ymax], 
+                    aspect='auto',
+                    #cmap=color_map
+                    )
+        plt.scatter(x, y, c=z, 
+                    #cmap=color_map
+                    )
+        plt.xlim([xmin, xmax])
+        plt.ylim([ymin, ymax])
+        plt.title('jes=%0.3f' %jes)
+        plt.clim(0,1)
+        plt.colorbar()
+        plt.xlabel('$m_{WWbb}$')
+        plt.ylabel('$m_{jj}$')
+        plt.savefig('plots/output_heat_map/param_output_plot_surface_%0.3f.pdf' %jes, dpi=400)
+        plt.savefig('plots/output_heat_map/images/parameterized/param_output_plot_surface_%0.3f.png' %jes)
+        plt.clf()
 '''
 Histograms 
 '''
@@ -799,107 +833,54 @@ def plot_histogram():
     the root files in the root_export directory
     '''
 
-    print 'Entering plt_histogram'
+    print 'Entering plot_histogram'
     bin_size   = 50
-    #sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
-    #bkg_dat = glob.iglob('data/root_export/bkg_mx_*.dat')
-    plt_color=['black', # background
-        'blue', # mu=500
-        'green', # mu=750
-        'red', # mu=1000
-        'cyan', # mu=1250
-        'magenta' # mu=1500
-        ]
-    data_list = ['data/root_export/bkg_mx_500.dat',
-                'data/root_export/sig_mx_500.dat',
-                'data/root_export/sig_mx_750.dat',
-                'data/root_export/sig_mx_1000.dat',
-                'data/root_export/sig_mx_1250.dat',
-                'data/root_export/sig_mx_1500.dat']
+    sig_dat = glob.iglob('data/root_export/sig_*.dat')
+    bkg_dat = glob.iglob('data/root_export/bkg_*.dat')
 
-    histtype_list = ['stepfilled',
-                        'step',
-                        'step',
-                        'step',
-                        'step',
-                        'step']
-
-    label_count = 0
-    for i in range(len(data_list)):
-        data = np.loadtxt(data_list[i])
-        label = ['Background', 
-                    '$\mu=500\,$ GeV',
-                    '$\mu=750\,$ GeV', 
-                    '$\mu=1000\,$ GeV', 
-                    '$\mu=1250\,$ GeV',
-                    '$\mu=1500\,$ GeV']
-        n, bins, patches = plt.hist([data[:,0] ],
+    for idx, (signal, background) in enumerate(zip(sig_dat, bkg_dat)):
+        sig = np.loadtxt(signal)
+        bkg = np.loadtxt(background)
+        print 'Plotting mWWbb at jes=%0.3f' %sig[0,2]
+        n, bins, patches = plt.hist([sig[:,0], bkg[:,0]],
                             bins=range(0,3000, bin_size), normed=True,
-                            histtype=histtype_list[i], alpha=0.75, linewidth=2, 
-                            label=[label[label_count]], color=plt_color[i],
+                            histtype='step', alpha=0.75, linewidth=2, 
+                            label=['Signal', 'Background'],
                             rasterized=True)
-        label_count = label_count + 1
         plt.setp(patches)
-    #plt.title('m$_{WWbb} =$ %s GeV' %sig[0,1])
-    plt.ylabel('Fraction of events$/%0.0f$ GeV' %bin_size)
-    plt.xlabel('m$_{WWbb}$ [GeV]')
-    plt.grid(True)
-    plt.legend(loc='upper right', fontsize=10)
-    plt.xlim([250, 3000])
-    #plt.ylim([0, 35000])
-    plt.savefig('plots/signal_background_histogram.pdf', dpi=400)
-    plt.savefig('plots/images/signal_background_histogram.png')
-    plt.clf()
-
-
-def parameterized_vs_fixed_output_histogram():
-    '''
-    parameterized_vs_fixed_output_histogram plots the outputs of the fixed and 
-    parameterized training outputs to see the distribution of signal/background
-    after trianing.
-    '''
-
-    print 'Entering output_histogram'
-
-    mx = [500, 750, 1000, 1250, 1500]
-    fixed_files = ['data/plot_data/fixed_500.dat',
-                    'data/plot_data/fixed_750.dat',
-                    'data/plot_data/fixed_1000.dat',
-                    'data/plot_data/fixed_1250.dat',
-                    'data/plot_data/fixed_1500.dat']
-
-    param_files = ['data/plot_data/param_500.dat',
-                    'data/plot_data/param_750.dat',
-                    'data/plot_data/param_1000.dat',
-                    'data/plot_data/fixed_1250.dat',
-                    'data/plot_data/fixed_1500.dat']
-    for idx, file in enumerate(fixed_files):
-        data = np.loadtxt(file)
-        n, bins, patches = plt.hist([data[:,1]],
-                    bins=50, 
-                    normed=True,
-                    histtype='step', 
-                    color=colors[idx],
-                    label='$\mu_f=$%s' %mx[idx],
-                    alpha=0.5, 
-                    rasterized=True)
-
-    for idx, file in enumerate(param_files):
-        data = np.loadtxt(file)
-        n, bins, patches = plt.hist([data[:,1]],
-                    bins=50, 
-                    normed=True,
-                    histtype='stepfilled', 
-                    color=colors[idx],
-                    label='$\mu_p=$%s' %mx[idx],
-                    alpha=0.3, 
-                    rasterized=True)
-    plt.setp(patches)
-    plt.xlim([0,1])
-    plt.legend(loc='upper left', bbox_to_anchor=(0.02, 1), fontsize=10)
-    plt.savefig('plots/parameterized_vs_fixed_output_histogram.pdf', dpi=400)
-    plt.savefig('plots/images/parameterized_vs_fixed_output_histogram.png')
-    plt.clf()
+        plt.ylabel('Fraction of events$/%0.0f$ GeV' %bin_size)
+        plt.xlabel('m$_{WWbb}$ [GeV]')
+        plt.grid(True)
+        plt.legend(loc='upper right', fontsize=10)
+        plt.xlim([0, 3000])
+        #plt.ylim([0, 35000])
+        plt.title('jes=%0.3f' %sig[0,2])
+        plt.savefig('plots/histograms/mWWbb_histogram_%0.3f.pdf' %sig[0,2], dpi=400)
+        plt.savefig('plots/histograms/images/mWWbb_histogram_%0.3f.png' %sig[0,2])
+        plt.clf()
+    sig_dat = glob.iglob('data/root_export/sig_*.dat')
+    bkg_dat = glob.iglob('data/root_export/bkg_*.dat')
+    bin_size   = 15
+    for idx, (signal, background) in enumerate(zip(sig_dat, bkg_dat)):
+        sig = np.loadtxt(signal)
+        bkg = np.loadtxt(background)
+        print 'Plotting mjj at jes=%0.3f' %sig[0,2]
+        n, bins, patches = plt.hist([sig[:,1], bkg[:,1]],
+                            bins=range(0,500, bin_size), normed=True,
+                            histtype='step', alpha=0.75, linewidth=2, 
+                            label=['Signal', 'Background'],
+                            rasterized=True)
+        plt.setp(patches)
+        plt.ylabel('Fraction of events$/%0.0f$ GeV' %bin_size)
+        plt.xlabel('m$_{jj}$ [GeV]')
+        plt.grid(True)
+        plt.title('jes=%0.3f' %sig[0,2])
+        plt.legend(loc='upper right', fontsize=10)
+        plt.xlim([0, 500])
+        #plt.ylim([0, 35000])
+        plt.savefig('plots/histograms/mjj_histogram_%0.3f.pdf' %sig[0,2], dpi=400)
+        plt.savefig('plots/histograms/images/mjj_histogram_%0.3f.png' %sig[0,2])
+        plt.clf()
 
 if __name__ == '__main__':
     '''
@@ -907,31 +888,32 @@ if __name__ == '__main__':
     '''
     #file_runner()
     #flat_bkg(10000,0,5000)
-    file_concatenater()
+    #file_concatenater()
     
     '''
     Fixed Training and Plots
     '''
-    fixed_training()
-    fixed_training_plot()
-    fixed_ROC_plot()
-    fixed_output_plot_heat_map()
+    #fixed_training()
+    #fixed_training_plot()
+    #fixed_ROC_plot()
+    #fixed_output_plot_heat_map()
+    
     '''
     Parameterized Training and Plots 
     '''
     #parameterized_training()
     #parameterized_function_runner()
-    parameterized_training_plot()    
-    parameterized_ROC_plot()
+    #parameterized_training_plot()    
+    #parameterized_ROC_plot()
+    parameterized_output_plot_heat_map()
     
     '''
     Comparison Training and Plots
     '''
-    parameterized_vs_fixed_output_plot()
-    parameterized_vs_fixed_ROC_plot()
+    #parameterized_vs_fixed_output_plot()
+    #parameterized_vs_fixed_ROC_plot()
     
     '''
     Output Histograms
     '''
     #plot_histogram()
-    #parameterized_vs_fixed_output_histogram()
