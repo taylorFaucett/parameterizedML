@@ -130,7 +130,7 @@ def fixed_training():
                 learning_rate=0.01,
                 #n_stable=1,
                 #f_stable=100,
-                n_iter=20,
+                n_iter=50,
                 #learning_momentum=0.1,
                 batch_size=10,
                 learning_rule="nesterov",
@@ -409,7 +409,7 @@ def parameterized_training():
                 Regressor(
                     layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                     learning_rate=0.01,
-                    n_iter=20,
+                    n_iter=50,
                     #n_stable=1,
                     #f_stable=0.001,
                     #learning_momentum=0.1,
@@ -521,8 +521,8 @@ def parameterized_training_plot():
     plt.savefig('plots/images/parameterized_training_mwwbb_plot.png')
     plt.clf()
 
-    for idx, (file, jes) in enumerate(zip(file_list, jes_list)):
-        data = np.loadtxt(file)
+    for idx, jes in enumerate(jes_list):
+        data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
         data.sort(axis=0)
         plt.plot(data[:,1], data[:,2], 
                     'o',
@@ -698,7 +698,7 @@ def parameterized_vs_fixed_ROC_plot():
 
 
 def fixed_output_plot_heat_map():
-    print 'Entering fixed_output_plot_surface'
+    print 'Entering fixed_output_plot_heat_map'
     jes_list = [0.750, 
                 0.900, 
                 0.950, 
@@ -753,15 +753,15 @@ def fixed_output_plot_heat_map():
         plt.ylim([ymin, ymax])
         plt.title('jes=%0.3f' %jes)
         plt.clim(0,1)
-        plt.colorbar()
+        plt.colorbar(label='NN output')
         plt.xlabel('$m_{WWbb}$')
         plt.ylabel('$m_{jj}$')
-        plt.savefig('plots/output_heat_map/fixed_output_plot_surface_%0.3f.pdf' %jes, dpi=400)
-        plt.savefig('plots/output_heat_map/images/fixed/fixed_output_plot_surface_%0.3f.png' %jes)
+        plt.savefig('plots/output_heat_map/fixed_output_plot_heat_map_%0.3f.pdf' %jes, dpi=400)
+        plt.savefig('plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_%0.3f.png' %jes)
         plt.clf()
 
 def parameterized_output_plot_heat_map():
-    print 'Entering fixed_output_plot_surface'
+    print 'Entering parameterized_output_plot_heat_map'
     jes_list = [0.750, 
                 0.900, 
                 0.950, 
@@ -816,11 +816,11 @@ def parameterized_output_plot_heat_map():
         plt.ylim([ymin, ymax])
         plt.title('jes=%0.3f' %jes)
         plt.clim(0,1)
-        plt.colorbar()
+        plt.colorbar(label='NN output')
         plt.xlabel('$m_{WWbb}$')
         plt.ylabel('$m_{jj}$')
-        plt.savefig('plots/output_heat_map/param_output_plot_surface_%0.3f.pdf' %jes, dpi=400)
-        plt.savefig('plots/output_heat_map/images/parameterized/param_output_plot_surface_%0.3f.png' %jes)
+        plt.savefig('plots/output_heat_map/parameterized_output_plot_heat_map_%0.3f.pdf' %jes, dpi=400)
+        plt.savefig('plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_%0.3f.png' %jes)
         plt.clf()
 '''
 Histograms 
@@ -896,7 +896,7 @@ if __name__ == '__main__':
     #fixed_training()
     #fixed_training_plot()
     #fixed_ROC_plot()
-    #fixed_output_plot_heat_map()
+    fixed_output_plot_heat_map()
     
     '''
     Parameterized Training and Plots 
@@ -910,8 +910,8 @@ if __name__ == '__main__':
     '''
     Comparison Training and Plots
     '''
-    #parameterized_vs_fixed_output_plot()
-    #parameterized_vs_fixed_ROC_plot()
+    parameterized_vs_fixed_output_plot()
+    parameterized_vs_fixed_ROC_plot()
     
     '''
     Output Histograms
