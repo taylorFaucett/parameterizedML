@@ -119,31 +119,6 @@ Changes in the output as a function of the jet energy scale is subtle but can be
 
 <img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_animation.gif">
 
-### Fixed Training Output
-With 2 input mass values, plotting the NN output requires a 3D plot. This is done using a color-coded heatmap.
-
-<table style="width:100%">
-  <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_0.750.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_0.900.png"></td>		
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_0.950.png"></td>
-  </tr>
-  <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_0.975.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_1.000.png"></td>		
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_1.025.png"></td>
-  </tr>
-  <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_1.050.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_1.100.png"></td>		
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_surface_1.250.png"></td>
-  </tr>
-</table>
-
-Changes in the output as a function of the jet energy scale is subtle but can be easier seen when animated
-
-<img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_animation.gif">
-
 ### Parameterized Training Output
 The same inputs, but interpolated through the parameterized method, yield similar results
 
