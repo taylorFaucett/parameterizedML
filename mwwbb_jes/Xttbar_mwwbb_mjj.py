@@ -894,8 +894,8 @@ if __name__ == '__main__':
     Fixed Training and Plots
     '''
     #fixed_training()
-    fixed_training_plot()
-    fixed_ROC_plot()
+    #fixed_training_plot()
+    #fixed_ROC_plot()
     fixed_output_plot_heat_map()
     
     '''
@@ -903,15 +903,15 @@ if __name__ == '__main__':
     '''
     #parameterized_training()
     #parameterized_function_runner()
-    parameterized_training_plot()    
-    parameterized_ROC_plot()
+    #parameterized_training_plot()    
+    #parameterized_ROC_plot()
     parameterized_output_plot_heat_map()
     
     '''
     Comparison Training and Plots
     '''
-    parameterized_vs_fixed_output_plot()
-    parameterized_vs_fixed_ROC_plot()
+    #parameterized_vs_fixed_output_plot()
+    #parameterized_vs_fixed_ROC_plot()
     
     '''
     Output Histograms
