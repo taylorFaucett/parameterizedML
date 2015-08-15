@@ -130,7 +130,7 @@ def fixed_training():
                 learning_rate=0.01,
                 #n_stable=1,
                 #f_stable=100,
-                n_iter=50,
+                n_iter=5,
                 #learning_momentum=0.1,
                 batch_size=10,
                 learning_rule="nesterov",
@@ -409,7 +409,7 @@ def parameterized_training():
                 Regressor(
                     layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                     learning_rate=0.01,
-                    n_iter=50,
+                    n_iter=5,
                     #n_stable=1,
                     #f_stable=0.001,
                     #learning_momentum=0.1,
@@ -882,6 +882,170 @@ def plot_histogram():
         plt.savefig('plots/histograms/images/mjj_histogram_%0.3f.png' %sig[0,2])
         plt.clf()
 
+def grid_heat_map(scatter_plot):
+    print 'Entering fixed_output_plot_heat_map'
+
+    jes_list = [0.750, 
+                0.900, 
+                0.950, 
+                0.975, 
+                1.000, 
+                1.025, 
+                1.050, 
+                1.100, 
+                1.250
+                ]
+    grid_size = 60
+    print 'Predictions on a %s x %s grid' %(grid_size, grid_size)
+    for idx, jes in enumerate(jes_list):
+        print 'Plotting jes=%0.3f' %jes
+        grid = np.zeros((grid_size*grid_size,3))
+        for x in range(grid_size):
+            for y in range(grid_size):
+                grid[y+(x*grid_size),0] = x*(3000/grid_size)
+                grid[y+(x*grid_size),1] = y*(3000/grid_size)
+                grid[y+(x*grid_size),2] = jes
+        nn = pickle.load(open('data/pickle/fixed_%0.3f.pkl' %jes, 'rb'))
+        output = nn.predict(grid)
+
+
+        x = grid[:,0]
+        y = grid[:,1]
+        z = output
+        fixed_output = output
+        xmin = x.min()
+        xmax = x.max()
+        ymin = y.min()
+        ymax = y.max()
+        zmin = z.min()
+        zmax = z.max()
+
+        # Set up a regular grid of interpolation points
+        xi, yi = np.linspace(xmin, xmax, 100), np.linspace(ymin, ymax, 100)
+        xi, yi = np.meshgrid(xi, yi)
+
+        # Interpolate
+        rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
+        zi = rbf(xi, yi)
+        plt.imshow(zi, 
+                    vmin=zmin, 
+                    vmax=zmax, 
+                    origin='lower',
+                    extent=[xmin, xmax, ymin, ymax], 
+                    aspect='auto',
+                    #cmap=color_map
+                    )
+        if scatter_plot=='yes':
+            plt.scatter(x, y, c=z, 
+                    #cmap=color_map
+                    )
+        plt.xlim([xmin, xmax])
+        plt.ylim([ymin, ymax])
+        plt.title('jes=%0.3f' %jes)
+        plt.clim(0,1)
+        plt.colorbar(label='NN output')
+        plt.xlabel('$m_{WWbb}$')
+        plt.ylabel('$m_{jj}$')
+        plt.savefig('plots/output_heat_map/grid_map/fixed_grid_heat_map_%0.3f.pdf' %jes, dpi=400)
+        plt.savefig('plots/output_heat_map/images/fixed_grid/fixed_grid_heat_map_%0.3f.png' %jes)
+        plt.clf()
+
+        grid = np.zeros((grid_size*grid_size,3))
+        for x in range(grid_size):
+            for y in range(grid_size):
+                grid[y+(x*grid_size),0] = x*(3000/grid_size)
+                grid[y+(x*grid_size),1] = y*(3000/grid_size)
+                grid[y+(x*grid_size),2] = jes
+        nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %jes, 'rb'))
+        output = nn.predict(grid)
+
+
+        x = grid[:,0]
+        y = grid[:,1]
+        z = output
+        param_output = output
+        fixed_param_dif = fixed_output - param_output
+        xmin = x.min()
+        xmax = x.max()
+        ymin = y.min()
+        ymax = y.max()
+        zmin = z.min()
+        zmax = z.max()
+
+        # Set up a regular grid of interpolation points
+        xi, yi = np.linspace(xmin, xmax, 100), np.linspace(ymin, ymax, 100)
+        xi, yi = np.meshgrid(xi, yi)
+
+        # Interpolate
+        rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
+        zi = rbf(xi, yi)
+        plt.imshow(zi, 
+                    vmin=zmin, 
+                    vmax=zmax, 
+                    origin='lower',
+                    extent=[xmin, xmax, ymin, ymax], 
+                    aspect='auto',
+                    #cmap=color_map
+                    )
+        if scatter_plot=='yes':
+            plt.scatter(x, y, c=z, 
+                    #cmap=color_map
+                    )
+        plt.xlim([xmin, xmax])
+        plt.ylim([ymin, ymax])
+        plt.title('jes=%0.3f' %jes)
+        plt.clim(0,1)
+        plt.colorbar(label='NN output')
+        plt.xlabel('$m_{WWbb}$')
+        plt.ylabel('$m_{jj}$')
+        plt.savefig('plots/output_heat_map/grid_map/parameterized_grid_heat_map_%0.3f.pdf' %jes, dpi=400)
+        plt.savefig('plots/output_heat_map/images/parameterized_grid/parameterized_grid_heat_map_%0.3f.png' %jes)
+        plt.clf()
+
+        dif_matrix = np.column_stack((x, y, fixed_param_dif))
+
+        x = dif_matrix[:,0]
+        y = dif_matrix[:,1]
+        z = dif_matrix[:,2]
+        xmin = x.min()
+        xmax = x.max()
+        ymin = y.min()
+        ymax = y.max()
+        zmin = -1
+        zmax = 1
+
+        # Set up a regular grid of interpolation points
+        xi, yi = np.linspace(xmin, xmax, 100), np.linspace(ymin, ymax, 100)
+        xi, yi = np.meshgrid(xi, yi)
+
+        # Interpolate
+        rbf = scipy.interpolate.Rbf(x, y, z, function='linear')
+        zi = rbf(xi, yi)
+        plt.imshow(zi, 
+                    vmin=zmin, 
+                    vmax=zmax, 
+                    origin='lower',
+                    extent=[xmin, xmax, ymin, ymax], 
+                    aspect='auto',
+                    #cmap=color_map
+                    )
+        if scatter_plot=='yes':
+            plt.scatter(x, y, c=z, 
+                    #cmap=color_map
+                    )
+        plt.xlim([xmin, xmax])
+        plt.ylim([ymin, ymax])
+        plt.clim(zmin,zmax)
+        plt.title('jes=%0.3f' %jes)
+        plt.colorbar(label='NN output difference (fixed - parameterized)')
+        plt.xlabel('$m_{WWbb}$')
+        plt.ylabel('$m_{jj}$')
+        plt.savefig('plots/output_heat_map/dif_matrix/dif_matrix_%0.3f.pdf' %jes, dpi=400)
+        plt.savefig('plots/output_heat_map/images/dif_matrix/dif_matrix_%0.3f.png' %jes)
+        plt.clf()
+
+
+
 if __name__ == '__main__':
     '''
     File Runners
@@ -896,7 +1060,7 @@ if __name__ == '__main__':
     #fixed_training()
     #fixed_training_plot()
     #fixed_ROC_plot()
-    fixed_output_plot_heat_map()
+    #fixed_output_plot_heat_map()
     
     '''
     Parameterized Training and Plots 
@@ -905,14 +1069,16 @@ if __name__ == '__main__':
     #parameterized_function_runner()
     #parameterized_training_plot()    
     #parameterized_ROC_plot()
-    parameterized_output_plot_heat_map()
+    #parameterized_output_plot_heat_map()
     
     '''
     Comparison Training and Plots
     '''
     #parameterized_vs_fixed_output_plot()
     #parameterized_vs_fixed_ROC_plot()
-    
+    grid_heat_map('no')
+
+
     '''
     Output Histograms
     '''
