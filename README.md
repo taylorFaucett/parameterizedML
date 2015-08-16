@@ -99,49 +99,73 @@ With 2 input mass values, plotting the NN output requires a 3D plot. This is don
 
 <table style="width:100%">
   <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_0.750.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_0.900.png"></td>   
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_0.950.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_0.750.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_0.900.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_0.950.png"></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_0.975.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_1.000.png"></td>   
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_1.025.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_0.975.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_1.000.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_1.025.png"></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_1.050.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_1.100.png"></td>   
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_1.250.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_1.050.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_1.100.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_1.250.png"></td>
   </tr>
 </table>
 
 Changes in the output as a function of the jet energy scale is subtle but can be easier seen when animated
 
-<img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed/fixed_output_animation.gif">
+<img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_grid_animation.gif">
 
 ### Parameterized Training Output
 The same inputs, but interpolated through the parameterized method, yield similar results
 
 <table style="width:100%">
   <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_0.750.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_0.900.png"></td>   
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_0.950.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_0.750.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_0.900.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_0.950.png"></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_0.975.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_1.000.png"></td>   
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_1.025.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_0.975.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_1.000.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_1.025.png"></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_1.050.png"></td>
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_1.100.png"></td>   
-    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_1.250.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_1.050.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_1.100.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_1.250.png"></td>
   </tr>
 </table>
 
 
-<img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized/parameterized_output_animation.gif">
+<img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_grid_animation.gif">
+
+
+### Difference heat map (i.e. Fixed Output - Parameterized Output)
+We can track the differences between fixed training and parameterized training method by taking the difference of the two plots
+
+<table style="width:100%">
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_0.750.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_0.900.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_0.950.png"></td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_0.975.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_1.000.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_1.025.png"></td>
+  </tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_1.050.png"></td>
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_1.100.png"></td>   
+    <td><img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_1.250.png"></td>
+  </tr>
+</table>
+
+<img src="https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/dif_matrix/dif_matrix_animation.gif">
 
 ### Fixed and parameterized ROC/AUC plots
 The Receiver Operating Characteristic can be plotted for both the fixed training and interpolated/parameterized training method
