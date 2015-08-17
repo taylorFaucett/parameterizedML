@@ -1,5 +1,20 @@
 # parameterizedML
 
+## Prerequisites 
+
+The python scripts here utilize 4 python packages all available through PYPI:
+
+1. Numpy
+2. Scipy
+3. Matplotlib
+4. Scikit-neuralnetwork
+
+These can all be installed through the pip command in the terminal
+
+```
+> pip install numpy scipy matplotlib scikit-neuralnetwork
+```
+
 ## Toy Model - Gaussian signals on a flat background
 
 ### Histogram for 5 gaussian signals and a flat background
@@ -145,7 +160,7 @@ The same inputs, but interpolated through the parameterized method, yield simila
 
 
 ### Difference heat map (i.e. Fixed Output - Parameterized Output)
-We can track the differences between fixed training and parameterized training method by taking the difference of the two plots
+We can track the differences between fixed training and parameterized training method by taking the difference of the two plots.
 
 <table style="width:100%">
   <tr>

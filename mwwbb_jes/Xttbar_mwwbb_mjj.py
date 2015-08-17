@@ -130,7 +130,7 @@ def fixed_training():
                 learning_rate=0.01,
                 #n_stable=1,
                 #f_stable=100,
-                n_iter=5,
+                n_iter=50,
                 #learning_momentum=0.1,
                 batch_size=10,
                 learning_rule="nesterov",
@@ -409,7 +409,7 @@ def parameterized_training():
                 Regressor(
                     layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
                     learning_rate=0.01,
-                    n_iter=5,
+                    n_iter=50,
                     #n_stable=1,
                     #f_stable=0.001,
                     #learning_momentum=0.1,
@@ -1057,25 +1057,25 @@ if __name__ == '__main__':
     '''
     Fixed Training and Plots
     '''
-    #fixed_training()
-    #fixed_training_plot()
-    #fixed_ROC_plot()
-    #fixed_output_plot_heat_map()
+    fixed_training()
+    fixed_training_plot()
+    fixed_ROC_plot()
+    fixed_output_plot_heat_map()
     
     '''
     Parameterized Training and Plots 
     '''
-    #parameterized_training()
-    #parameterized_function_runner()
-    #parameterized_training_plot()    
-    #parameterized_ROC_plot()
-    #parameterized_output_plot_heat_map()
+    parameterized_training()
+    parameterized_function_runner()
+    parameterized_training_plot()    
+    parameterized_ROC_plot()
+    parameterized_output_plot_heat_map()
     
     '''
     Comparison Training and Plots
     '''
-    #parameterized_vs_fixed_output_plot()
-    #parameterized_vs_fixed_ROC_plot()
+    parameterized_vs_fixed_output_plot()
+    parameterized_vs_fixed_ROC_plot()
     grid_heat_map('no')
 
 
