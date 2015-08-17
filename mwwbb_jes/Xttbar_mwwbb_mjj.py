@@ -377,32 +377,40 @@ def parameterized_training():
                         mx_1100),
                         axis=0)  
 
-    training_list = [mwwbb_complete750[:,0:3],
-                        mwwbb_complete900[:,0:3],
-                        mwwbb_complete950[:,0:3],
-                        mwwbb_complete975[:,0:3],
-                        mwwbb_complete1000[:,0:3],
-                        mwwbb_complete1250[:,0:3],
-                        mwwbb_complete1050[:,0:3],
-                        mwwbb_complete1100[:,0:3],
-                        mwwbb_complete1250[:,0:3]
+    mwwbb_triple = np.concatenate((
+                        mx_750,
+                        mx_1000,
+                        mx_1250),
+                        axis=0)
+
+    training_list = [#mwwbb_complete750[:,0:3],
+                     #   mwwbb_complete900[:,0:3],
+                     #   mwwbb_complete950[:,0:3],
+                     #   mwwbb_complete975[:,0:3],
+                     #   mwwbb_complete1000[:,0:3],
+                     #   mwwbb_complete1250[:,0:3],
+                     #   mwwbb_complete1050[:,0:3],
+                     #   mwwbb_complete1100[:,0:3],
+                     #   mwwbb_complete1250[:,0:3],
+                         mwwbb_triple[:,0:3]
                     ]
 
-    target_list = [mwwbb_complete750[:,3],
-                        mwwbb_complete900[:,3],
-                        mwwbb_complete950[:,3],
-                        mwwbb_complete975[:,3],
-                        mwwbb_complete1000[:,3],
-                        mwwbb_complete1250[:,3],
-                        mwwbb_complete1050[:,3],
-                        mwwbb_complete1100[:,3],
-                        mwwbb_complete1250[:,3]
+    target_list = [#mwwbb_complete750[:,3],
+                        #mwwbb_complete900[:,3],
+                        #mwwbb_complete950[:,3],
+                        #mwwbb_complete975[:,3],
+                        #mwwbb_complete1000[:,3],
+                        #mwwbb_complete1250[:,3],
+                        #mwwbb_complete1050[:,3],
+                        #mwwbb_complete1100[:,3],
+                        #mwwbb_complete1250[:,3],
+                        mwwbb_triple[:,3]
                     ]
 
-    jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-
+    #jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+    jes_list = ['triple']
     for idx, (training_data, target_data, jes) in enumerate(zip(training_list, target_list, jes_list)):
-    	print 'Parameterized training on all signals except for jes=%0.3f' %jes
+    	print 'Parameterized training on all signals except for jes=%s' %jes
         nn = Pipeline([
             ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
             ('neural network',
@@ -413,7 +421,7 @@ def parameterized_training():
                     #n_stable=1,
                     #f_stable=0.001,
                     #learning_momentum=0.1,
-                    batch_size=100,
+                    batch_size=10,
                     learning_rule="nesterov",
                     #valid_size=0.05,
                     #verbose=True,
@@ -429,7 +437,7 @@ def parameterized_training():
         #outputs = outputs.reshape((1, len(outputs)))
         #param_plot = np.vstack((training_data[:,0], outputs)).T
         #np.savetxt('data/plot_data/param_%s.dat' %mx[idx], param_plot, fmt='%f')
-        pickle.dump(nn, open('data/pickle/param_%0.3f.pkl' %jes, 'wb'))
+        pickle.dump(nn, open('data/pickle/param_%s.pkl' %jes, 'wb'))
 
 def parameterized_function(mwwbb, mjj, alpha, nn):
     '''
@@ -469,18 +477,19 @@ def parameterized_function_runner():
     for idx, alpha in enumerate(alpha_list):
         data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
         size = len(data[:,0])
-        print 'processing using: data/pickle/param_%0.3f.pkl' %alpha
-        nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %alpha, 'rb'))
+        print 'processing using: data/pickle/param_triple.pkl on jes=%0.3f' %alpha
+        #nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %alpha, 'rb'))
+        nn = pickle.load(open('data/pickle/param_triple.pkl', 'rb'))
         inputs = data[:,0:2]
         actuals = data[:,3]
-        input1 = inputs[:,0]
-        input2 = inputs[:,1]
+        mwwbb = inputs[:,0]
+        mjj = inputs[:,1]
         predictions = []
         for x in range(0,size):
-            outputs = parameterized_function(input1[x]/1., input2[x]/1., alpha, nn)
+            outputs = parameterized_function(mwwbb[x]/1., mjj[x]/1., alpha, nn)
             predictions.append(outputs[0][0])
-            #print '(%s, %s, %s)' %(input1[x], input2[x], predictions[x])
-        data = np.vstack((input1, input2, predictions, actuals)).T
+            #print '(%s, %s, %s)' %(mwwbb[x], mjj[x], predictions[x])
+        data = np.vstack((mwwbb, mjj, predictions, actuals)).T
         np.savetxt('data/plot_data/param_%0.3f.dat' %alpha, data, fmt='%f')
         fpr, tpr, thresholds = roc_curve(actuals, predictions)
         roc_auc = [auc(fpr, tpr)]
@@ -561,7 +570,7 @@ def parameterized_ROC_plot():
                     'o', 
                     markerfacecolor=colors[idx],
                     alpha=0.5, 
-                    markevery=2000, 
+                    markevery=1000, 
                     label='jes$_p$=%0.3f (AUC=%0.3f)' %(jes, AUC),  
                     rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
@@ -570,7 +579,7 @@ def parameterized_ROC_plot():
     plt.xlabel('Signal efficiency')
     plt.xlim([0,1])
     plt.ylim([0,1])
-    plt.legend(loc='lower right', bbox_to_anchor=(1.10, 0))
+    plt.legend(loc='lower right')
     plt.grid(True)
     plt.savefig('plots/parameterized_ROC_plot.pdf', dpi=400)
     plt.savefig('plots/images/parameterized_ROC_plot.png')  
@@ -673,7 +682,7 @@ def parameterized_vs_fixed_ROC_plot():
                     '-',
                     color=colors[idx],
                     markevery=1000,
-                    label='jes$_f$=%0.3f (AUC=%0.2f)' %(jes, fixed_AUC),
+                    label='jes$_f$=%0.3f (AUC=%0.3f)' %(jes, fixed_AUC),
                     rasterized=True
                     )
         plt.plot(param_ROC[:,0], param_ROC[:,1],
@@ -681,7 +690,7 @@ def parameterized_vs_fixed_ROC_plot():
                     color=colors[idx],
                     markevery=10000,
                     alpha=0.3,
-                    label='jes$_p$=%0.3f (AUC=%0.2f)' %(jes, param_AUC),
+                    label='jes$_p$=%0.3f (AUC=%0.3f)' %(jes, param_AUC),
                     rasterized=True
                     )
     plt.legend(loc='lower right', fontsize=10)
@@ -723,7 +732,6 @@ def fixed_output_plot_heat_map():
         ymax = 500
         zmin = 0
         zmax = 1
-        color_map = 'CMRmap'
         #xmin = x.min()
         #xmax = x.max()
         #ymin = y.min()
@@ -956,7 +964,7 @@ def grid_heat_map(scatter_plot):
                 grid[y+(x*grid_size),0] = x*(3000/grid_size)
                 grid[y+(x*grid_size),1] = y*(3000/grid_size)
                 grid[y+(x*grid_size),2] = jes
-        nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %jes, 'rb'))
+        nn = pickle.load(open('data/pickle/param_triple.pkl', 'rb'))
         output = nn.predict(grid)
 
 
@@ -1003,7 +1011,7 @@ def grid_heat_map(scatter_plot):
         plt.clf()
 
         dif_matrix = np.column_stack((x, y, fixed_param_dif))
-
+        color_map = 'seismic'
         x = dif_matrix[:,0]
         y = dif_matrix[:,1]
         z = dif_matrix[:,2]
@@ -1027,11 +1035,11 @@ def grid_heat_map(scatter_plot):
                     origin='lower',
                     extent=[xmin, xmax, ymin, ymax], 
                     aspect='auto',
-                    #cmap=color_map
+                    cmap=color_map
                     )
         if scatter_plot=='yes':
             plt.scatter(x, y, c=z, 
-                    #cmap=color_map
+                    cmap=color_map
                     )
         plt.xlim([xmin, xmax])
         plt.ylim([ymin, ymax])
