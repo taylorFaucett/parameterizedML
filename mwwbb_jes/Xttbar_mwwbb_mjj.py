@@ -112,15 +112,16 @@ def fixed_training():
     print 'Entering fixed_training'
 
     # Training input files
-    file_list = ['data/concatenated/ttbar_mx_0.750.dat',
-                    'data/concatenated/ttbar_mx_0.900.dat',
-                    'data/concatenated/ttbar_mx_0.950.dat',
-                    'data/concatenated/ttbar_mx_0.975.dat',
+    file_list = [#'data/concatenated/ttbar_mx_0.750.dat',
+                 #   'data/concatenated/ttbar_mx_0.900.dat',
+                 #   'data/concatenated/ttbar_mx_0.950.dat',
+                 #   'data/concatenated/ttbar_mx_0.975.dat',
                     'data/concatenated/ttbar_mx_1.000.dat',
-                    'data/concatenated/ttbar_mx_1.025.dat',
-                    'data/concatenated/ttbar_mx_1.050.dat',
-                    'data/concatenated/ttbar_mx_1.100.dat',
-                    'data/concatenated/ttbar_mx_1.250.dat']
+                 #   'data/concatenated/ttbar_mx_1.025.dat',
+                 #   'data/concatenated/ttbar_mx_1.050.dat',
+                 #   'data/concatenated/ttbar_mx_1.100.dat',
+                 #   'data/concatenated/ttbar_mx_1.250.dat'
+                 ]
 
     nn = Pipeline([
         ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
@@ -377,40 +378,40 @@ def parameterized_training():
                         mx_1100),
                         axis=0)  
 
-    mwwbb_triple = np.concatenate((
-                        mx_750,
-                        mx_1000,
-                        mx_1250),
-                        axis=0)
+    #mwwbb_triple = np.concatenate((
+    #                    mx_750,
+    #                    mx_1000,
+    #                    mx_1250),
+    #                    axis=0)
 
-    training_list = [#mwwbb_complete750[:,0:3],
-                     #   mwwbb_complete900[:,0:3],
-                     #   mwwbb_complete950[:,0:3],
-                     #   mwwbb_complete975[:,0:3],
-                     #   mwwbb_complete1000[:,0:3],
-                     #   mwwbb_complete1250[:,0:3],
-                     #   mwwbb_complete1050[:,0:3],
-                     #   mwwbb_complete1100[:,0:3],
-                     #   mwwbb_complete1250[:,0:3],
-                         mwwbb_triple[:,0:3]
+    training_list = [mwwbb_complete750[:,0:3],
+                        mwwbb_complete900[:,0:3],
+                        mwwbb_complete950[:,0:3],
+                        mwwbb_complete975[:,0:3],
+                        mwwbb_complete1000[:,0:3],
+                        mwwbb_complete1250[:,0:3],
+                        mwwbb_complete1050[:,0:3],
+                        mwwbb_complete1100[:,0:3],
+                        mwwbb_complete1250[:,0:3],
+                     #    mwwbb_triple[:,0:3]
                     ]
 
-    target_list = [#mwwbb_complete750[:,3],
-                        #mwwbb_complete900[:,3],
-                        #mwwbb_complete950[:,3],
-                        #mwwbb_complete975[:,3],
-                        #mwwbb_complete1000[:,3],
-                        #mwwbb_complete1250[:,3],
-                        #mwwbb_complete1050[:,3],
-                        #mwwbb_complete1100[:,3],
-                        #mwwbb_complete1250[:,3],
-                        mwwbb_triple[:,3]
+    target_list = [mwwbb_complete750[:,3],
+                        mwwbb_complete900[:,3],
+                        mwwbb_complete950[:,3],
+                        mwwbb_complete975[:,3],
+                        mwwbb_complete1000[:,3],
+                        mwwbb_complete1250[:,3],
+                        mwwbb_complete1050[:,3],
+                        mwwbb_complete1100[:,3],
+                        mwwbb_complete1250[:,3],
+                        #mwwbb_triple[:,3]
                     ]
 
-    #jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-    jes_list = ['triple']
+    jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+    #jes_list = ['triple']
     for idx, (training_data, target_data, jes) in enumerate(zip(training_list, target_list, jes_list)):
-    	print 'Parameterized training on all signals except for jes=%s' %jes
+    	print 'Parameterized training on all signals except for jes=%0.3f' %jes
         nn = Pipeline([
             ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
             ('neural network',
@@ -437,7 +438,7 @@ def parameterized_training():
         #outputs = outputs.reshape((1, len(outputs)))
         #param_plot = np.vstack((training_data[:,0], outputs)).T
         #np.savetxt('data/plot_data/param_%s.dat' %mx[idx], param_plot, fmt='%f')
-        pickle.dump(nn, open('data/pickle/param_%s.pkl' %jes, 'wb'))
+        pickle.dump(nn, open('data/pickle/param_%0.3f.pkl' %jes, 'wb'))
 
 def parameterized_function(mwwbb, mjj, alpha, nn):
     '''
@@ -477,9 +478,9 @@ def parameterized_function_runner():
     for idx, alpha in enumerate(alpha_list):
         data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
         size = len(data[:,0])
-        print 'processing using: data/pickle/param_triple.pkl on jes=%0.3f' %alpha
-        #nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %alpha, 'rb'))
-        nn = pickle.load(open('data/pickle/param_triple.pkl', 'rb'))
+        print 'processing using: data/pickle/param_%0.3f.pkl on jes=%0.3f' %alpha
+        nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %alpha, 'rb'))
+        #nn = pickle.load(open('data/pickle/param_triple.pkl', 'rb'))
         inputs = data[:,0:2]
         actuals = data[:,3]
         mwwbb = inputs[:,0]
@@ -964,7 +965,7 @@ def grid_heat_map(scatter_plot):
                 grid[y+(x*grid_size),0] = x*(3000/grid_size)
                 grid[y+(x*grid_size),1] = y*(3000/grid_size)
                 grid[y+(x*grid_size),2] = jes
-        nn = pickle.load(open('data/pickle/param_triple.pkl', 'rb'))
+        nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %jes, 'rb'))
         output = nn.predict(grid)
 
 
@@ -1052,7 +1053,98 @@ def grid_heat_map(scatter_plot):
         plt.savefig('plots/output_heat_map/images/dif_matrix/dif_matrix_%0.3f.png' %jes)
         plt.clf()
 
+def fixed_data_output():
+    print 'Entering fixed_dat_output'
+    fixed_data = np.loadtxt('data/plot_data/fixed_1.000.dat')
+    fixed_output = np.vstack((fixed_data[:,3], #Label (i.e. 0 or 1) 
+                                fixed_data[:,0], #mWWbb
+                                fixed_data[:,1], #mjj
+                                fixed_data[:,4], #NN_output
+                                fixed_data[:,2], #JES_gen
+                                fixed_data[:,2]  #JES_eval 
+                                )).T
+    fixed_output = fixed_output[fixed_output[:,1].argsort()]
+    np.savetxt('data/final_output/fixed_1.000.csv', fixed_output, fmt='%f', delimiter=',')
 
+def parameterized_data_output():
+    print 'Entering parameterized_dat_output'
+    jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+    jes_cycle = [0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250, 0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+    for idx, jes in enumerate(jes_list):
+        data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
+        size = len(data)
+        gen = np.zeros((1, size))
+        gen.fill(jes)
+        for i in range(len(jes_list)-1):
+            gen_eval = np.zeros((1, size))
+            gen_eval.fill(jes_cycle[i+idx])
+            output = np.vstack((data[:,3], #Label (i.e. 0 or 1) 
+                                    data[:,0], #mWWbb
+                                    data[:,1], #mjj
+                                    data[:,2], #NN_output
+                                    gen, #JES_gen
+                                    gen_eval  #JES_eval 
+                                    )).T
+            np.savetxt('data/temp_output/param_%0.3f_%0.3f.dat' %(jes,jes_cycle[i+idx]), output, fmt='%f')
+    for idx, jes in enumerate(jes_list):
+        files = glob.glob('data/temp_output/param_%0.3f_*.dat' %jes)
+        print 'Concatenating for jes=%0.3f' %jes
+        file0 = np.loadtxt(files[0])
+        file1 = np.loadtxt(files[1])
+        file2 = np.loadtxt(files[2])
+        file3 = np.loadtxt(files[3])
+        file4 = np.loadtxt(files[4])
+        file5 = np.loadtxt(files[5])
+        file6 = np.loadtxt(files[6])
+        file7 = np.loadtxt(files[7])
+        final = np.concatenate((file0, file1, file2, file3, file4, file5, file6, file7), axis=0)
+        final = final[final[:,1].argsort()]
+        np.savetxt('data/final_output/param_%0.3f.csv' %jes, final, fmt='%f', delimiter=',')
+
+
+def fixed_tree_writer():
+    print 'Entering fixed_tree_writer'
+    fixed_data = np.loadtxt('data/plot_data/fixed_1.000.dat')
+    fixed_size = len(fixed_data)
+    f = ROOT.TFile('fixed_data.root', 'recreate')
+    t = ROOT.TTree('xttbar_mwwbb_mjj', 'xttbar_mwwbb_mjj')
+    label = np.zeros(1, dtype=float)
+    mwwbb = np.zeros(1, dtype=float)
+    mjj = np.zeros(1, dtype=float)
+    NN_output = np.zeros(1, dtype=float)
+    JES_gen = np.zeros(1, dtype=float)
+    JES_eval = np.zeros(1, dtype=float)
+    t.Branch('label', label, 'label/D')
+    for i in xrange(fixed_size):
+        label[0] = fixed_data[i,3]
+        t.Fill()
+    f.Write()
+    t.Branch('mwwbb', label, 'label/D')
+    for i in xrange(fixed_size):
+        mwwbb[0] = fixed_data[i,0]
+        t.Fill()
+    f.Write()
+    t.Branch('mjj', label, 'label/D')
+    for i in xrange(fixed_size):
+        mjj[0] = fixed_data[i,1]
+        t.Fill()
+    f.Write()
+    t.Branch('NN_output', label, 'label/D')
+    for i in xrange(fixed_size):
+        NN_output[0] = fixed_data[i,4]
+        t.Fill()
+    f.Write()
+    t.Branch('JES_gen', label, 'label/D')
+    for i in xrange(fixed_size):
+        JES_gen[0] = fixed_data[i,2]
+        t.Fill()
+    f.Write()
+    t.Branch('JES_eval', label, 'label/D')
+    for i in xrange(fixed_size):
+        JES_eval[0] = fixed_data[i,2]
+        t.Fill()
+    f.Write()
+    f.Close()
 
 if __name__ == '__main__':
     '''
@@ -1084,10 +1176,17 @@ if __name__ == '__main__':
     '''
     #parameterized_vs_fixed_output_plot()
     #parameterized_vs_fixed_ROC_plot()
-    grid_heat_map('no')
+    #grid_heat_map('no')
 
 
     '''
     Output Histograms
     '''
     #plot_histogram()
+
+    '''
+    Outputing data
+    '''
+    fixed_data_output()
+    parameterized_data_output()
+    #fixed_tree_writer()
