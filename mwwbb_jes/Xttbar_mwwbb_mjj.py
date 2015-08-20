@@ -9,6 +9,8 @@ import os
 import glob
 import matplotlib.pyplot as plt
 import scipy.interpolate
+import shutil
+import gzip
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_curve, auc
@@ -1055,19 +1057,28 @@ def grid_heat_map(scatter_plot):
 
 def fixed_data_output():
     print 'Entering fixed_dat_output'
-    fixed_data = np.loadtxt('data/plot_data/fixed_1.000.dat')
-    fixed_output = np.vstack((fixed_data[:,3], #Label (i.e. 0 or 1) 
-                                fixed_data[:,0], #mWWbb
-                                fixed_data[:,1], #mjj
-                                fixed_data[:,4], #NN_output
-                                fixed_data[:,2], #JES_gen
-                                fixed_data[:,2]  #JES_eval 
-                                )).T
-    fixed_output = fixed_output[fixed_output[:,1].argsort()]
-    np.savetxt('data/final_output/fixed_1.000.csv', fixed_output, fmt='%f', delimiter=',')
+    files = glob.iglob('data/plot_data/fixed_*.dat')
+    for idx, file in enumerate(files):
+        print 'Outputing data for file: %s' %file
+        fixed_data = np.loadtxt(file)
+        fixed_output = np.vstack((fixed_data[:,3], #Label (i.e. 0 or 1) 
+                                    fixed_data[:,0], #mWWbb
+                                    fixed_data[:,1], #mjj
+                                    fixed_data[:,4], #NN_output
+                                    fixed_data[:,2], #JES_gen
+                                    fixed_data[:,2]  #JES_eval 
+                                    )).T
+        fixed_output = fixed_output[fixed_output[:,1].argsort()]
+        np.savetxt('data/final_output/fixed_%0.3f.csv' %fixed_data[0,2], fixed_output, fmt='%f', delimiter=',')
 
 def parameterized_data_output():
     print 'Entering parameterized_dat_output'
+    temp_dir = 'data/temp_output'
+    final_dir = 'data/final_output'
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
+    if not os.path.exists(final_dir):
+        os.makedirs(final_dir)
     jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
     jes_cycle = [0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250, 0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
     for idx, jes in enumerate(jes_list):
@@ -1100,51 +1111,16 @@ def parameterized_data_output():
         final = np.concatenate((file0, file1, file2, file3, file4, file5, file6, file7), axis=0)
         final = final[final[:,1].argsort()]
         np.savetxt('data/final_output/param_%0.3f.csv' %jes, final, fmt='%f', delimiter=',')
+    final_files = glob.iglob('data/final_output/*.csv')
+    for idx, file in enumerate(final_files):
+        print 'Zipping file: %s' %file
+        with open(file, 'rb') as f_in, gzip.open(file+'.gz', 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    delete_files = glob.iglob('data/final_output/*.csv')
+    for idx, file in enumerate(delete_files):
+        os.remove(file)
+    shutil.rmtree('data/temp_output')
 
-
-def fixed_tree_writer():
-    print 'Entering fixed_tree_writer'
-    fixed_data = np.loadtxt('data/plot_data/fixed_1.000.dat')
-    fixed_size = len(fixed_data)
-    f = ROOT.TFile('fixed_data.root', 'recreate')
-    t = ROOT.TTree('xttbar_mwwbb_mjj', 'xttbar_mwwbb_mjj')
-    label = np.zeros(1, dtype=float)
-    mwwbb = np.zeros(1, dtype=float)
-    mjj = np.zeros(1, dtype=float)
-    NN_output = np.zeros(1, dtype=float)
-    JES_gen = np.zeros(1, dtype=float)
-    JES_eval = np.zeros(1, dtype=float)
-    t.Branch('label', label, 'label/D')
-    for i in xrange(fixed_size):
-        label[0] = fixed_data[i,3]
-        t.Fill()
-    f.Write()
-    t.Branch('mwwbb', label, 'label/D')
-    for i in xrange(fixed_size):
-        mwwbb[0] = fixed_data[i,0]
-        t.Fill()
-    f.Write()
-    t.Branch('mjj', label, 'label/D')
-    for i in xrange(fixed_size):
-        mjj[0] = fixed_data[i,1]
-        t.Fill()
-    f.Write()
-    t.Branch('NN_output', label, 'label/D')
-    for i in xrange(fixed_size):
-        NN_output[0] = fixed_data[i,4]
-        t.Fill()
-    f.Write()
-    t.Branch('JES_gen', label, 'label/D')
-    for i in xrange(fixed_size):
-        JES_gen[0] = fixed_data[i,2]
-        t.Fill()
-    f.Write()
-    t.Branch('JES_eval', label, 'label/D')
-    for i in xrange(fixed_size):
-        JES_eval[0] = fixed_data[i,2]
-        t.Fill()
-    f.Write()
-    f.Close()
 
 if __name__ == '__main__':
     '''
@@ -1178,7 +1154,6 @@ if __name__ == '__main__':
     #parameterized_vs_fixed_ROC_plot()
     #grid_heat_map('no')
 
-
     '''
     Output Histograms
     '''
@@ -1189,4 +1164,3 @@ if __name__ == '__main__':
     '''
     fixed_data_output()
     parameterized_data_output()
-    #fixed_tree_writer()
