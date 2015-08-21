@@ -145,10 +145,11 @@ def fixed_training():
     for file in file_list:
         input_data = np.loadtxt(file)
 
-        training_data = input_data[:,0:3]
+        training_data = input_data[:,0:2]
+        jes_data = input_data[:,2]
         target_data = input_data[:,3]
         
-        jes = training_data[0,2]
+        jes = jes_data[0]
         
         print 'Processing fixed training on mu=%0.3f' %jes
 
@@ -162,7 +163,7 @@ def fixed_training():
 
     	output_data = np.vstack((training_data[:,0], 
                                     training_data[:,1], 
-                                    training_data[:,2],
+                                    jes_data,
                                     target_data, 
                                     outputs)).T
     	np.savetxt('data/plot_data/fixed_%0.3f.dat' %jes, output_data, fmt='%f')
@@ -380,40 +381,52 @@ def parameterized_training():
                         mx_1100),
                         axis=0)  
 
+    mwwbb_complete = np.concatenate((
+                        mx_750,
+                        mx_900,
+                        mx_950,
+                        mx_975,
+                        mx_1000,
+                        mx_1025,
+                        mx_1050,
+                        mx_1100,
+                        mx_1250),
+                        axis=0)  
+
     #mwwbb_triple = np.concatenate((
     #                    mx_750,
     #                    mx_1000,
     #                    mx_1250),
     #                    axis=0)
 
-    training_list = [mwwbb_complete750[:,0:3],
-                        mwwbb_complete900[:,0:3],
-                        mwwbb_complete950[:,0:3],
-                        mwwbb_complete975[:,0:3],
-                        mwwbb_complete1000[:,0:3],
-                        mwwbb_complete1250[:,0:3],
-                        mwwbb_complete1050[:,0:3],
-                        mwwbb_complete1100[:,0:3],
-                        mwwbb_complete1250[:,0:3],
-                     #    mwwbb_triple[:,0:3]
+    training_list = [#mwwbb_complete750[:,0:3],
+                        #mwwbb_complete900[:,0:3],
+                        #mwwbb_complete950[:,0:3],
+                        #mwwbb_complete975[:,0:3],
+                        #mwwbb_complete1000[:,0:3],
+                        #mwwbb_complete1250[:,0:3],
+                        #mwwbb_complete1050[:,0:3],
+                        #mwwbb_complete1100[:,0:3],
+                        #mwwbb_complete1250[:,0:3],
+                        mwwbb_complete[:,0:3]
                     ]
 
-    target_list = [mwwbb_complete750[:,3],
-                        mwwbb_complete900[:,3],
-                        mwwbb_complete950[:,3],
-                        mwwbb_complete975[:,3],
-                        mwwbb_complete1000[:,3],
-                        mwwbb_complete1250[:,3],
-                        mwwbb_complete1050[:,3],
-                        mwwbb_complete1100[:,3],
-                        mwwbb_complete1250[:,3],
-                        #mwwbb_triple[:,3]
+    target_list = [#mwwbb_complete750[:,3],
+                        #mwwbb_complete900[:,3],
+                        #mwwbb_complete950[:,3],
+                        #mwwbb_complete975[:,3],
+                        #mwwbb_complete1000[:,3],
+                        #mwwbb_complete1250[:,3],
+                        #mwwbb_complete1050[:,3],
+                        #mwwbb_complete1100[:,3],
+                        #mwwbb_complete1250[:,3],
+                        mwwbb_complete[:,3]
                     ]
 
-    jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-    #jes_list = ['triple']
+    #jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+    jes_list = ['complete']
     for idx, (training_data, target_data, jes) in enumerate(zip(training_list, target_list, jes_list)):
-    	print 'Parameterized training on all signals except for jes=%0.3f' %jes
+    	#print 'Parameterized training on all signals except for jes=%0.3f' %jes
         nn = Pipeline([
             ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
             ('neural network',
@@ -440,7 +453,7 @@ def parameterized_training():
         #outputs = outputs.reshape((1, len(outputs)))
         #param_plot = np.vstack((training_data[:,0], outputs)).T
         #np.savetxt('data/plot_data/param_%s.dat' %mx[idx], param_plot, fmt='%f')
-        pickle.dump(nn, open('data/pickle/param_%0.3f.pkl' %jes, 'wb'))
+        pickle.dump(nn, open('data/pickle/param_%s.pkl' %jes, 'wb'))
 
 def parameterized_function(mwwbb, mjj, alpha, nn):
     '''
@@ -1055,8 +1068,8 @@ def grid_heat_map(scatter_plot):
         plt.savefig('plots/output_heat_map/images/dif_matrix/dif_matrix_%0.3f.png' %jes)
         plt.clf()
 
-def fixed_data_output():
-    print 'Entering fixed_dat_output'
+def fixed_analysis_data_alt():
+    print 'Entering fixed_analysis_data'
     files = glob.iglob('data/plot_data/fixed_*.dat')
     for idx, file in enumerate(files):
         print 'Outputing data for file: %s' %file
@@ -1068,58 +1081,190 @@ def fixed_data_output():
                                     fixed_data[:,2], #JES_gen
                                     fixed_data[:,2]  #JES_eval 
                                     )).T
-        fixed_output = fixed_output[fixed_output[:,1].argsort()]
-        np.savetxt('data/final_output/fixed_%0.3f.csv' %fixed_data[0,2], fixed_output, fmt='%f', delimiter=',')
+        #fixed_output = fixed_output[fixed_output[:,1].argsort()]
+        np.savetxt('data/analysis_data/fixed_%0.3f.csv' %fixed_data[0,2], fixed_output, fmt='%f', delimiter=',')
 
-def parameterized_data_output():
-    print 'Entering parameterized_dat_output'
-    temp_dir = 'data/temp_output'
-    final_dir = 'data/final_output'
-    if not os.path.exists(temp_dir):
-        os.makedirs(temp_dir)
-    if not os.path.exists(final_dir):
-        os.makedirs(final_dir)
-    jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-    jes_cycle = [0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250, 0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-    for idx, jes in enumerate(jes_list):
-        data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
-        size = len(data)
-        gen = np.zeros((1, size))
-        gen.fill(jes)
-        for i in range(len(jes_list)-1):
-            gen_eval = np.zeros((1, size))
-            gen_eval.fill(jes_cycle[i+idx])
-            output = np.vstack((data[:,3], #Label (i.e. 0 or 1) 
-                                    data[:,0], #mWWbb
-                                    data[:,1], #mjj
-                                    data[:,2], #NN_output
-                                    gen, #JES_gen
-                                    gen_eval  #JES_eval 
-                                    )).T
-            np.savetxt('data/temp_output/param_%0.3f_%0.3f.dat' %(jes,jes_cycle[i+idx]), output, fmt='%f')
-    for idx, jes in enumerate(jes_list):
-        files = glob.glob('data/temp_output/param_%0.3f_*.dat' %jes)
-        print 'Concatenating for jes=%0.3f' %jes
-        file0 = np.loadtxt(files[0])
-        file1 = np.loadtxt(files[1])
-        file2 = np.loadtxt(files[2])
-        file3 = np.loadtxt(files[3])
-        file4 = np.loadtxt(files[4])
-        file5 = np.loadtxt(files[5])
-        file6 = np.loadtxt(files[6])
-        file7 = np.loadtxt(files[7])
-        final = np.concatenate((file0, file1, file2, file3, file4, file5, file6, file7), axis=0)
-        final = final[final[:,1].argsort()]
-        np.savetxt('data/final_output/param_%0.3f.csv' %jes, final, fmt='%f', delimiter=',')
-    final_files = glob.iglob('data/final_output/*.csv')
-    for idx, file in enumerate(final_files):
-        print 'Zipping file: %s' %file
-        with open(file, 'rb') as f_in, gzip.open(file+'.gz', 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
-    delete_files = glob.iglob('data/final_output/*.csv')
-    for idx, file in enumerate(delete_files):
+def fixed_analysis_data():
+    alpha_list = [0.750, 
+                    0.900, 
+                    0.950, 
+                    0.975, 
+                    1.000,
+                    1.025,
+                    1.050,
+                    1.100,
+                    1.250]
+
+    for idx, alpha in enumerate(alpha_list):
+        print 'processing alpha=%0.3f' %alpha
+        data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
+        nn = pickle.load(open('data/pickle/fixed_1.000.pkl', 'rb'))
+        inputs = data[:,0:2]
+        actuals = data[:,3]
+        mwwbb = inputs[:,0]
+        mjj = inputs[:,1]
+        outputs = nn.predict(inputs)
+        predictions = outputs.reshape((1, len(mjj)))
+        JES_gen = np.zeros([1, len(mjj)])
+        JES_eval = np.zeros([1, len(mjj)])
+        JES_gen.fill(alpha)
+        JES_eval.fill(1.000000)
+        data = np.vstack((actuals, mwwbb, mjj, predictions, JES_gen, JES_eval)).T
+        np.savetxt('data/analysis_data/fixed_%0.3f.dat' %alpha, data, fmt='%f')
+
+    output_data = np.concatenate((np.loadtxt('data/analysis_data/fixed_0.750.dat'),
+                                    np.loadtxt('data/analysis_data/fixed_0.900.dat'),
+                                    np.loadtxt('data/analysis_data/fixed_0.950.dat'),
+                                    np.loadtxt('data/analysis_data/fixed_0.975.dat'),
+                                    np.loadtxt('data/analysis_data/fixed_1.000.dat'),
+                                    np.loadtxt('data/analysis_data/fixed_1.025.dat'),
+                                    np.loadtxt('data/analysis_data/fixed_1.050.dat'),
+                                    np.loadtxt('data/analysis_data/fixed_1.100.dat'),
+                                    np.loadtxt('data/analysis_data/fixed_1.250.dat')),
+                                    axis=0)
+    np.savetxt('data/analysis_data/fixed.csv', output_data, fmt='%f', delimiter=',')
+
+    files = glob.glob('data/analysis_data/fixed_*.dat')
+    for idx, file in enumerate(files):
         os.remove(file)
-    shutil.rmtree('data/temp_output')
+    for idx, alpha in enumerate(alpha_list):
+        print 'processing alpha=%0.3f' %alpha
+        data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
+        nn = pickle.load(open('data/pickle/fixed_1.000.pkl', 'rb'))
+        inputs = data[:,0:2]
+        actuals = data[:,3]
+        outputs = nn.predict(inputs)
+        predictions = outputs[:,0]
+        fpr, tpr, thresholds = roc_curve(actuals, predictions)
+        roc_auc = [auc(fpr, tpr)]
+
+        roc_data = np.vstack((fpr, tpr)).T
+        np.savetxt('data/analysis_data/ROC/fixed_ROC_%0.3f.dat' %alpha, roc_data, fmt='%f')
+        np.savetxt('data/analysis_data/AUC/fixed_ROC_AUC_%0.3f.dat' %alpha, roc_auc)
+
+def parameterized_analysis_data():
+    alpha_list = [0.750, 
+                    0.900, 
+                    0.950, 
+                    0.975, 
+                    1.000,
+                    1.025,
+                    1.050,
+                    1.100,
+                    1.250]
+    jes_val_list = []
+    label = []
+    mWWbb = []
+    mJJ = []
+    NN_output = []
+    JES_gen = []
+    JES_eval = []
+    for i in range(50, 160, 10):
+        jes_val_list.append(i/100.)
+    print jes_val_list
+    for idx, alpha in enumerate(alpha_list):
+        print 'processing alpha=%0.3f' %alpha
+        data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
+        size = len(data[:,0])
+        nn = pickle.load(open('data/pickle/param_complete.pkl', 'rb'))
+        inputs = data[:,0:2]
+        actuals = data[:,3]
+        mwwbb = inputs[:,0]
+        mjj = inputs[:,1]
+        for x in range(0,size):
+            for y in range(len(jes_val_list)):
+                outputs = parameterized_function(mwwbb[x]/1., mjj[x]/1., jes_val_list[y], nn)
+                label.append(actuals[x]/1.)
+                mWWbb.append(mwwbb[x]/1.)
+                mJJ.append(mjj[x]/1.)
+                NN_output.append(outputs[0][0])
+                JES_gen.append(alpha)
+                JES_eval.append(jes_val_list[y])
+    data = np.vstack((label, mWWbb, mJJ, NN_output, JES_gen, JES_eval)).T
+    np.savetxt('data/analysis_data/parameterized.csv', data, fmt='%f', delimiter=',')
+    '''
+    for idx, alpha in enumerate(alpha_list):
+        print 'processing alpha=%0.3f' %alpha
+        data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
+        size = len(data[:,0])
+        nn = pickle.load(open('data/pickle/param_complete.pkl', 'rb'))
+        inputs = data[:,0:2]
+        actuals = data[:,3]
+        mwwbb = inputs[:,0]
+        mjj = inputs[:,1]
+        predictions = []
+        label =[]
+        for x in range(0,size):
+            outputs = parameterized_function(mwwbb[x]/1., mjj[x]/1., alpha, nn)
+            predictions.append(outputs[0][0])      
+        fpr, tpr, thresholds = roc_curve(actuals, predictions)
+        roc_auc = [auc(fpr, tpr)]
+
+        roc_data = np.vstack((fpr, tpr)).T
+        np.savetxt('data/analysis_data/ROC/param_ROC_%0.3f.dat' %alpha, roc_data, fmt='%f')
+        np.savetxt('data/analysis_data/AUC/param_ROC_AUC_%0.3f.dat' %alpha, roc_auc)
+    '''
+
+def fixed_analysis_ROC_plot():
+    print 'Entering parameterized_analysis_ROC_plot'
+
+    jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+
+    for idx, jes in enumerate(jes_list):
+        print 'Plotting jes=%0.3f' %jes
+        ROC = np.loadtxt('data/analysis_data/ROC/fixed_ROC_%0.3f.dat' %jes)
+        AUC = np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes)
+        plt.plot(ROC[:,0], ROC[:,1], 
+                    '-', 
+                    markerfacecolor=colors[idx],
+                    alpha=0.5, 
+                    markevery=1000, 
+                    label='jes$_p$=%0.3f (AUC=%0.3f)' %(jes, AUC),  
+                    rasterized=True)
+    plt.plot([0,1], [0,1], 'r--')
+    plt.title('Receiver Operating Characteristic')
+    plt.ylabel('1/Background efficiency')
+    plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/fixed_analysis_ROC_plot.pdf', dpi=400)
+    plt.savefig('plots/images/fixed_analysis_ROC_plot.png')  
+    plt.clf()
+
+def parameterized_analysis_ROC_plot():
+    print 'Entering parameterized_analysis_ROC_plot'
+
+    jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+
+    for idx, jes in enumerate(jes_list):
+        print 'Plotting jes=%0.3f' %jes
+        ROC = np.loadtxt('data/analysis_data/ROC/param_ROC_%0.3f.dat' %jes)
+        AUC = np.loadtxt('data/plot_data/AUC/param_ROC_AUC_%0.3f.dat' %jes)
+        plt.plot(ROC[:,0], ROC[:,1], 
+                    'o', 
+                    markerfacecolor=colors[idx],
+                    alpha=0.5, 
+                    markevery=1000, 
+                    label='jes$_p$=%0.3f (AUC=%0.3f)' %(jes, AUC),  
+                    rasterized=True)
+    plt.plot([0,1], [0,1], 'r--')
+    plt.title('Receiver Operating Characteristic')
+    plt.ylabel('1/Background efficiency')
+    plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    plt.savefig('plots/parameterized_analysis_ROC_plot.pdf', dpi=400)
+    plt.savefig('plots/images/parameterized_analysis_ROC_plot.png')  
+    plt.clf()
+
+def CSV_reader():
+    reader = csv.reader(open('parameterized.csv'))
+    for row in reader:
+        print row
 
 
 if __name__ == '__main__':
@@ -1162,5 +1307,7 @@ if __name__ == '__main__':
     '''
     Outputing data
     '''
-    fixed_data_output()
-    parameterized_data_output()
+    #fixed_analysis_data()
+    #fixed_analysis_ROC_plot()
+    parameterized_analysis_data()
+    #parameterized_analysis_ROC_plot()
