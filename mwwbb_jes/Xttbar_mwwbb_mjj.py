@@ -1034,10 +1034,10 @@ def fixed_output_plot_heat_map():
                     origin='lower',
                     extent=[xmin, xmax, ymin, ymax], 
                     aspect='auto',
-                    #cmap=color_map
+                    cmap=test_cm
                     )
         plt.scatter(x, y, c=z, 
-                    #cmap=color_map
+                    cmap=test_cm
                     )
         plt.xlim([xmin, xmax])
         plt.ylim([ymin, ymax])
@@ -1097,10 +1097,10 @@ def parameterized_output_plot_heat_map():
                     origin='lower',
                     extent=[xmin, xmax, ymin, ymax], 
                     aspect='auto',
-                    #cmap=color_map
+                    cmap=test_cm
                     )
         plt.scatter(x, y, c=z, 
-                    #cmap=color_map
+                    cmap=test_cm
                     )
         plt.xlim([xmin, xmax])
         plt.ylim([ymin, ymax])
@@ -1550,7 +1550,7 @@ if __name__ == '__main__':
     #fixed_training()
     #fixed_training_plot()
     #fixed_ROC_plot()
-    #fixed_output_plot_heat_map()
+    fixed_output_plot_heat_map()
     
     '''
     Parameterized Training and Plots 
@@ -1559,7 +1559,7 @@ if __name__ == '__main__':
     #parameterized_function_runner()
     #parameterized_training_plot()    
     #parameterized_ROC_plot()
-    #parameterized_output_plot_heat_map()
+    parameterized_output_plot_heat_map()
     
     '''
     Comparison Training and Plots
@@ -1576,9 +1576,9 @@ if __name__ == '__main__':
     '''
     Outputing data
     '''
-    fixed_analysis_data()
+    #fixed_analysis_data()
     #fixed_analysis_ROC_plot()
-    parameterized_analysis_data()
+    #parameterized_analysis_data()
     #parameterized_analysis_ROC_plot()
-    CSV2ROOT('fixed')
-    CSV2ROOT('parameterized')
+    #CSV2ROOT('fixed')
+    #CSV2ROOT('parameterized')
