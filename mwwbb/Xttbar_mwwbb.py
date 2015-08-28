@@ -229,10 +229,10 @@ def fixed_training_plot():
                 ]
     mx = [500, 750, 1000, 1250, 1500]
     for idx, file in enumerate(file_list):
-        file.sort(axis=0)
-        plt.plot(file[:,0], file[:,1], 
-                    colors[idx], 
-                    linewidth = 2,
+        plt.plot(file[:,0], file[:,1],
+                    '.',
+                    color=colors[idx], 
+                    #linewidth = 2,
                     #alpha=1, 
                     #markevery = 1, 
                     #markersize = 1,
@@ -772,11 +772,11 @@ if __name__ == '__main__':
     '''
     Comparison Training and Plots
     '''
-    #parameterized_vs_fixed_output_plot()
-    #parameterized_vs_fixed_ROC_plot()
+    parameterized_vs_fixed_output_plot()
+    parameterized_vs_fixed_ROC_plot()
     
     '''
     Output Histograms
     '''
     #plot_histogram()
-    parameterized_vs_fixed_output_histogram()
+    #parameterized_vs_fixed_output_histogram()

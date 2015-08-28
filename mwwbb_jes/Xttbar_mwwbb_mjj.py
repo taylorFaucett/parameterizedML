@@ -288,7 +288,12 @@ cm_data = [[ 0.26700401,  0.00487433,  0.32941519],
        [ 0.98386829,  0.90486726,  0.13689671],
        [ 0.99324789,  0.90615657,  0.1439362 ]]
 
+cm_data_bin = [[ 0.26700401,  0.00487433,  0.32941519],
+       [1.0, 1.0, 1.0],
+       [ 0.99324789,  0.90615657,  0.1439362 ]]
+
 test_cm = LinearSegmentedColormap.from_list(__file__, cm_data)
+test_cm_bin = LinearSegmentedColormap.from_list(__file__, cm_data_bin)
 
 
 def file_runner(directory):
@@ -458,10 +463,9 @@ def fixed_training_plot():
     jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
     for idx, jes in enumerate(jes_list):
         data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
-        data.sort(axis=0)
         plt.plot(data[:,0], data[:,4], 
+                    '.',
                     color=colors[idx], 
-                    linewidth = 1,
                     #alpha=1, 
                     markevery = 100, 
                     #markersize = 1,
@@ -479,10 +483,9 @@ def fixed_training_plot():
 
     for idx, jes in enumerate(jes_list):
         data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
-        data.sort(axis=0)
         plt.plot(data[:,1], data[:,4], 
+                    '.',
                     color=colors[idx], 
-                    linewidth = 1,
                     #alpha=1, 
                     markevery = 100, 
                     #markersize = 1,
@@ -792,11 +795,9 @@ def parameterized_training_plot():
 
     for idx, jes in enumerate(jes_list):
         data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
-        data.sort(axis=0)
         plt.plot(data[:,0], data[:,2],
                     'o', 
                     color=colors[idx], 
-                    linewidth = 1,
                     alpha=0.3, 
                     markevery = 10000, 
                     #markersize = 1,
@@ -814,7 +815,6 @@ def parameterized_training_plot():
 
     for idx, jes in enumerate(jes_list):
         data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
-        data.sort(axis=0)
         plt.plot(data[:,1], data[:,2], 
                     'o',
                     color=colors[idx], 
@@ -886,11 +886,9 @@ def parameterized_vs_fixed_output_plot():
     for idx, jes in enumerate(jes_list):
         print 'Plotting mass mwwbb, jes=%0.3f' %jes
         fixed = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
-        fixed.sort(axis=0)
         param = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
-        param.sort(axis=0)
         plt.plot(fixed[:,0], fixed[:,4],
-                    '-',
+                    '.',
                     color=colors[idx],
                     markevery=1000,
                     label='jes$_f$=%0.3f' %jes,
@@ -917,11 +915,9 @@ def parameterized_vs_fixed_output_plot():
     for idx, jes in enumerate(jes_list):
         print 'Plotting mass mjj, jes=%0.3f' %jes
         fixed = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
-        fixed.sort(axis=0)
         param = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
-        param.sort(axis=0)
         plt.plot(fixed[:,1], fixed[:,4],
-                    '-',
+                    '.',
                     color=colors[idx],
                     markevery=1000,
                     label='jes$_f$=%0.3f' %jes,
@@ -956,12 +952,10 @@ def parameterized_vs_fixed_ROC_plot():
         print 'Plotting ROC for jes=%0.3f' %jes
         fixed_ROC = np.loadtxt('data/plot_data/ROC/fixed_ROC_%0.3f.dat' %jes)
         fixed_AUC = np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes)
-        fixed_ROC.sort(axis=0)
         param_ROC = np.loadtxt('data/plot_data/ROC/param_ROC_%0.3f.dat' %jes)
         param_AUC = np.loadtxt('data/plot_data/AUC/param_ROC_AUC_%0.3f.dat' %jes)
-        param_ROC.sort(axis=0)
         plt.plot(fixed_ROC[:,0], fixed_ROC[:,1],
-                    '-',
+                    '.',
                     color=colors[idx],
                     markevery=1000,
                     label='jes$_f$=%0.3f (AUC=%0.3f)' %(jes, fixed_AUC),
@@ -1046,7 +1040,7 @@ def fixed_output_plot_heat_map():
         plt.colorbar(label='NN output')
         plt.xlabel('$m_{WWbb}$')
         plt.ylabel('$m_{jj}$')
-        plt.savefig('plots/output_heat_map/fixed_output_plot_heat_map_%0.3f.pdf' %jes, dpi=400)
+        plt.savefig('plots/output_heat_map/fixed/fixed_output_plot_heat_map_%0.3f.pdf' %jes, dpi=400)
         plt.savefig('plots/output_heat_map/images/fixed/fixed_output_plot_heat_map_%0.3f.png' %jes)
         plt.clf()
 
@@ -1109,7 +1103,7 @@ def parameterized_output_plot_heat_map():
         plt.colorbar(label='NN output')
         plt.xlabel('$m_{WWbb}$')
         plt.ylabel('$m_{jj}$')
-        plt.savefig('plots/output_heat_map/parameterized_output_plot_heat_map_%0.3f.pdf' %jes, dpi=400)
+        plt.savefig('plots/output_heat_map/parameterized/parameterized_output_plot_heat_map_%0.3f.pdf' %jes, dpi=400)
         plt.savefig('plots/output_heat_map/images/parameterized/parameterized_output_plot_heat_map_%0.3f.png' %jes)
         plt.clf()
 '''
@@ -1226,7 +1220,7 @@ def grid_heat_map(scatter_plot):
                     )
         if scatter_plot=='yes':
             plt.scatter(x, y, c=z, 
-                    #cmap=color_map
+                    cmap=test_cm
                     )
         plt.xlim([xmin, xmax])
         plt.ylim([ymin, ymax])
@@ -1278,7 +1272,7 @@ def grid_heat_map(scatter_plot):
                     )
         if scatter_plot=='yes':
             plt.scatter(x, y, c=z, 
-                    #cmap=color_map
+                    cmap=test_cm
                     )
         plt.xlim([xmin, xmax])
         plt.ylim([ymin, ymax])
@@ -1316,11 +1310,11 @@ def grid_heat_map(scatter_plot):
                     origin='lower',
                     extent=[xmin, xmax, ymin, ymax], 
                     aspect='auto',
-                    cmap=color_map
+                    cmap=test_cm_bin
                     )
         if scatter_plot=='yes':
             plt.scatter(x, y, c=z, 
-                    cmap=color_map
+                    cmap=test_cm_bin
                     )
         plt.xlim([xmin, xmax])
         plt.ylim([ymin, ymax])
@@ -1346,7 +1340,6 @@ def fixed_analysis_data_alt():
                                     fixed_data[:,2], #JES_gen
                                     fixed_data[:,2]  #JES_eval 
                                     )).T
-        #fixed_output = fixed_output[fixed_output[:,1].argsort()]
         np.savetxt('data/analysis_data/fixed_%0.3f.csv' %fixed_data[0,2], fixed_output, fmt='%f', delimiter=',')
 
 def fixed_analysis_data():
@@ -1480,7 +1473,7 @@ def fixed_analysis_ROC_plot():
         ROC = np.loadtxt('data/analysis_data/ROC/fixed_ROC_%0.3f.dat' %jes)
         AUC = np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes)
         plt.plot(ROC[:,0], ROC[:,1], 
-                    '-', 
+                    '.', 
                     markerfacecolor=colors[idx],
                     alpha=0.5, 
                     markevery=1000, 
@@ -1548,8 +1541,8 @@ if __name__ == '__main__':
     Fixed Training and Plots
     '''
     #fixed_training()
-    #fixed_training_plot()
-    #fixed_ROC_plot()
+    fixed_training_plot()
+    fixed_ROC_plot()
     fixed_output_plot_heat_map()
     
     '''
@@ -1557,21 +1550,21 @@ if __name__ == '__main__':
     '''
     #parameterized_training()
     #parameterized_function_runner()
-    #parameterized_training_plot()    
-    #parameterized_ROC_plot()
+    parameterized_training_plot()    
+    parameterized_ROC_plot()
     parameterized_output_plot_heat_map()
     
     '''
     Comparison Training and Plots
     '''
-    #parameterized_vs_fixed_output_plot()
-    #parameterized_vs_fixed_ROC_plot()
-    #grid_heat_map('no')
+    parameterized_vs_fixed_output_plot()
+    parameterized_vs_fixed_ROC_plot()
+    grid_heat_map('no')
 
     '''
     Output Histograms
     '''
-    #plot_histogram()
+    plot_histogram()
 
     '''
     Outputing data

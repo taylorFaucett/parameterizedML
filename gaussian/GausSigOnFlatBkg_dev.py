@@ -242,7 +242,7 @@ def trainFixed(iterations):
 
         outputs2= nn.predict(reducedtrain.reshape((len(reducedtrain), 1)))
         fig1 = plt.figure(1)
-        plt.plot(testdata[:, 0], outputs, 'o', alpha=0.5, label='$\mu=$%s' % muPoints[i], rasterized=True)
+        plt.plot(testdata[:, 0], outputs, '.', alpha=0.5, label='$\mu=$%s' % muPoints[i], rasterized=True)
         output_reshape = outputs2.reshape((1,len(outputs2)))
         actual = reducedtarget
         predictions = output_reshape[0]
@@ -367,7 +367,7 @@ def parameterizedRunner():
     muPoints = np.unique(traindata[:, 1])
     chunk    = len(traindata) / len(muPoints) / 2
     shift    = len(traindata) / 2
-    shrink = chunk #chunk = 50,000    
+    shrink = 2500 #chunk = 50,000    
 
     mu_n20 = np.concatenate((traindata[0*chunk:1*chunk,0],traindata[9*chunk:10*chunk,0]))
     mu_n15 = np.concatenate((traindata[1*chunk:2*chunk,0],traindata[10*chunk:11*chunk,0]))
@@ -409,24 +409,16 @@ def parameterizedRunner():
     Tmu_p15 = np.concatenate((Tmu_p15[0:shrink], Tmu_p15[chunk:chunk+shrink]))
     Tmu_p20 = np.concatenate((Tmu_p20[0:shrink], Tmu_p20[chunk:chunk+shrink]))
 
-    print mu_n20
-    print mu_zero
-    print mu_p20
+    #print len(mu_n20)
+    #print len(Tmu_n20)
 
-    print Tmu_n20
-    print Tmu_zero
-    print Tmu_p20
-
-    print len(mu_n20)
-    print len(Tmu_n20)
-
-    plt_marker=['^', # mu=-1.5
+    plt_marker=['.', # mu=-1.5
                 'o', # mu=-1.0
-                '^', # mu=-0.5
+                '.', # mu=-0.5
                 'o', # mu=0.0
-                '^', # mu=0.5
+                '.', # mu=0.5
                 'o', # mu=1.0
-                '^', # mu=1.5
+                '.', # mu=1.5
                 ]
 
 
@@ -467,9 +459,9 @@ def parameterizedRunner():
         predictions = []
         input = input_list[a]
         for x in range(0, 2*shrink, 1):
-            print x/(2.*shrink)
+            #print x/(2.*shrink)
             outputs = scikitlearnFunc(input[x]/1., alpha[a])
-            print outputs
+            #print outputs
             predictions.append(outputs[0])
             fig1 = plt.figure(1)
             plt.plot(input[x]/1., outputs[0], marker=plt_marker[a], color=plt_color[a], alpha=0.5, rasterized=True)
@@ -481,7 +473,7 @@ def parameterizedRunner():
         fig2.savefig('plots/ROC_parameterized.pdf', dpi=400)
     for i in range(len(alpha)):
         fig1 = plt.figure(1)
-        plt.plot(-1000,0, marker=plt_marker[i], alpha=0.5, color=plt_color[i], label="$\mu=$%s" %alpha[i], rasterized=True)
+        plt.plot(-1000,0, marker=plt_marker[i], color=plt_color[i], label="$\mu=$%s" %alpha[i], rasterized=True)
     fig1 = plt.figure(1)
     plt.legend(loc='upper right', bbox_to_anchor=(1.10, 1))
     plt.ylabel('NN output')
@@ -514,11 +506,11 @@ def ROC_plot(mu, fpr, tpr, roc_auc):
 def ROC_plot_param(mu, fpr, tpr, roc_auc, plt_color):
     print "Plotting ROC curve for mu=%s" %mu
     plt.title('Receiver Operating Characteristic')
-    plt.plot(fpr, tpr, label='mu=%s (AUC=%0.2f)' %(mu, roc_auc), color=plt_color, linewidth=2, alpha=0.5, rasterized=True)
+    plt.plot(fpr, tpr, 'o', label='mu=%s (AUC=%0.2f)' %(mu, roc_auc), color=plt_color, linewidth=2, rasterized=True)
     plt.legend(loc='lower right')
     plt.plot([0,1],[0,1],'k--')
     plt.xlim([0.0,1.0])
-    plt.ylim([0.0,1.05])
+    plt.ylim([0.0,1.0])
     plt.ylabel('Background rejection')
     plt.xlabel('Signal efficiency')
     plt.grid(True)
@@ -527,6 +519,5 @@ if __name__ == '__main__':
     #makeData()
     #plt_histogram()
     #trainFixed(50)
-    #trainParam(50)
+    #trainParam(5)
     parameterizedRunner()
-    #ROC_plot()
