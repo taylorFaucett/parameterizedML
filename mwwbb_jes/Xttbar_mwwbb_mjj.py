@@ -387,49 +387,52 @@ def fixed_training():
 	nn = Pipeline([('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
 					('neural network',
 						Regressor(
-								layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
-								learning_rate=0.01,
-								n_iter=50,
-								#n_stable=1,
-								#f_stable=0.001,
-								#learning_momentum=0.1,
-								batch_size=10,
-								learning_rule="nesterov",
-								#valid_size=0.05,
-								#verbose=True,
-								#debug=True
-								))])
+							layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
+							learning_rate=0.01,
+							n_iter=50,
+							#n_stable=1,
+							#f_stable=0.001,
+							#learning_momentum=0.1,
+							batch_size=10,
+							learning_rule="nesterov",
+							#valid_size=0.05,
+							#verbose=True,
+							#debug=True
+							))])
 
-	input_data = np.loadtxt('data/concatenated/ttbar_mx_1.000.dat')
-	training_data = input_data[:,0:2]
-	jes_data = input_data[:,2]
-	target_data = input_data[:,3]
-	jes = jes_data[0]
+	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
 
-	print 'Processing fixed training on mu=%0.3f' %jes
-	nn.fit(training_data, target_data)
+	for idx, jes in enumerate(jes_list):
+		input_data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %jes)
+		training_data = input_data[:,0:2]
+		jes_data = input_data[:,2]
+		target_data = input_data[:,3]
+		jes = jes_data[0]
 
-	fit_score = nn.score(training_data, target_data)
-	print 'score = %s' %fit_score
+		print 'Processing fixed training on mu=%0.3f' %jes
+		nn.fit(training_data, target_data)
 
-	outputs = nn.predict(training_data)
-	outputs = outputs.reshape((1,len(outputs)))
+		fit_score = nn.score(training_data, target_data)
+		print 'score = %s' %fit_score
 
-	output_data = np.vstack((training_data[:,0],
-							training_data[:,1],
-							jes_data,
-							target_data,
-							outputs)).T
-	np.savetxt('data/plot_data/fixed_%0.3f.dat' %jes, output_data, fmt='%f')
+		outputs = nn.predict(training_data)
+		outputs = outputs.reshape((1,len(outputs)))
 
-	actual = target_data
-	predictions = outputs[0]
-	fpr, tpr, thresholds = roc_curve(actual, predictions)
-	ROC_plot = np.vstack((fpr, tpr)).T
-	ROC_AUC = [auc(fpr, tpr)]
-	np.savetxt('data/plot_data/ROC/fixed_ROC_%0.3f.dat' %jes, ROC_plot, fmt='%f')
-	np.savetxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes, ROC_AUC)
-	pickle.dump(nn, open('data/pickle/fixed_%0.3f.pkl' %jes, 'wb'))
+		output_data = np.vstack((training_data[:,0],
+								training_data[:,1],
+								jes_data,
+								target_data,
+								outputs)).T
+		np.savetxt('data/plot_data/fixed_%0.3f.dat' %jes, output_data, fmt='%f')
+
+		actual = target_data
+		predictions = outputs[0]
+		fpr, tpr, thresholds = roc_curve(actual, predictions)
+		ROC_plot = np.vstack((fpr, tpr)).T
+		ROC_AUC = [auc(fpr, tpr)]
+		np.savetxt('data/plot_data/ROC/fixed_ROC_%0.3f.dat' %jes, ROC_plot, fmt='%f')
+		np.savetxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes, ROC_AUC)
+		pickle.dump(nn, open('data/pickle/fixed_%0.3f.pkl' %jes, 'wb'))
 
 def fixed_training_plot():
 	'''
@@ -441,7 +444,7 @@ def fixed_training_plot():
 	'''
 
 	print 'Entering fixed_training_plot'
-	jes_list = [1.000]
+	jes_list = [0.900, 1.000, 1.100]
 	for idx, jes in enumerate(jes_list):
 		data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
 		plt.plot(data[:,0], data[:,4],
@@ -492,7 +495,7 @@ def fixed_ROC_plot():
 
 	print "Entering fixed_ROC_plot"
 	#jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-	jes_list = [1.000]
+	jes_list = [0.900, 1.000, 1.100]
 	for idx, jes in enumerate(jes_list):
 		data = np.loadtxt('data/plot_data/ROC/fixed_ROC_%0.3f.dat' %jes)
 		AUC  = np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes)
@@ -529,9 +532,15 @@ def parameterized_training():
 
 	print 'Entering parameterized_training'
 
-	mwwbb = np.concatenate((np.loadtxt('data/concatenated/ttbar_mx_0.900.dat'),
+	mwwbb = np.concatenate((np.loadtxt('data/concatenated/ttbar_mx_0.750.dat'),
+							np.loadtxt('data/concatenated/ttbar_mx_0.900.dat'),
+							np.loadtxt('data/concatenated/ttbar_mx_0.950.dat'),
+							np.loadtxt('data/concatenated/ttbar_mx_0.975.dat'),
 							np.loadtxt('data/concatenated/ttbar_mx_1.000.dat'),
-							np.loadtxt('data/concatenated/ttbar_mx_1.100.dat')),
+							np.loadtxt('data/concatenated/ttbar_mx_1.025.dat'),
+							np.loadtxt('data/concatenated/ttbar_mx_1.050.dat'),
+							np.loadtxt('data/concatenated/ttbar_mx_1.100.dat'),
+							np.loadtxt('data/concatenated/ttbar_mx_1.250.dat'),),
 							axis=0)
 
 	training_data = mwwbb[:,0:3]
@@ -563,7 +572,7 @@ def parameterized_training():
 	#param_plot = np.vstack((training_data[:,0], outputs)).T
 	#np.savetxt('data/plot_data/param_%s.dat' %mx[idx], param_plot, fmt='%f')
 
-	pickle.dump(nn, open('data/pickle/param_triple.pkl', 'wb'))
+	pickle.dump(nn, open('data/pickle/param_complete.pkl', 'wb'))
 
 def parameterized_function(mwwbb, mjj, alpha, nn):
 	'''
@@ -605,7 +614,7 @@ def parameterized_function_runner():
 		size = len(data[:,0])
 		#print 'processing using: data/pickle/param_%0.3f.pkl on jes=%0.3f' %alpha
 		#nn = pickle.load(open('data/pickle/param_%0.3f.pkl' %alpha, 'rb'))
-		nn = pickle.load(open('data/pickle/param_triple.pkl', 'rb'))
+		nn = pickle.load(open('data/pickle/param_complete.pkl', 'rb'))
 		inputs = data[:,0:2]
 		actuals = data[:,3]
 		mwwbb = inputs[:,0]
@@ -632,8 +641,8 @@ def parameterized_training_plot():
 
 	print 'Entering parameterized_training_plot'
 
-	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-
+	#jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+	jes_list = [0.900, 1.000, 1.100]
 	for idx, jes in enumerate(jes_list):
 		data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
 		plt.plot(data[:,0], data[:,2],
@@ -684,8 +693,8 @@ def parameterized_ROC_plot():
 
 	print 'Entering parameterized_ROC_plot'
 
-	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-
+	#jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+	jes_list = [0.900, 1.000, 1.100]
 	for idx, jes in enumerate(jes_list):
 		ROC = np.loadtxt('data/plot_data/ROC/param_ROC_%0.3f.dat' %jes)
 		AUC = np.loadtxt('data/plot_data/AUC/param_ROC_AUC_%0.3f.dat' %jes)
@@ -722,8 +731,8 @@ def parameterized_vs_fixed_output_plot():
 	'''
 
 	print 'Entering parameterized_vs_fixed_output_plot'
-	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-	#mwwbb plot
+	#jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+	jes_list = [0.900, 1.000, 1.100]
 	for idx, jes in enumerate(jes_list):
 		print 'Plotting mass mwwbb, jes=%0.3f' %jes
 		fixed = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
@@ -738,7 +747,7 @@ def parameterized_vs_fixed_output_plot():
 		plt.plot(param[:,0], param[:,2],
 					'o',
 					color=colors[idx],
-					markevery=10000,
+					markevery=2000,
 					alpha=0.3,
 					label='jes$_p$=%0.3f' %jes,
 					rasterized=True
@@ -767,7 +776,7 @@ def parameterized_vs_fixed_output_plot():
 		plt.plot(param[:,1], param[:,2],
 						'o',
 						color=colors[idx],
-						markevery=10000,
+						markevery=2000,
 						alpha=0.3,
 						label='jes$_p$=%0.3f' %jes,
 						rasterized=True
@@ -787,8 +796,9 @@ def parameterized_vs_fixed_ROC_plot():
 	parameterized_vs_fixed_ROC_plot pulls the ROC/AUC data for both fixed
 	and parameterized training to plot both on the same canvas.
 	'''
-	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-	#mwwbb plot
+	#jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+	jes_list = [0.900, 1.000, 1.100]
+
 	for idx, jes in enumerate(jes_list):
 		print 'Plotting ROC for jes=%0.3f' %jes
 		fixed_ROC = np.loadtxt('data/plot_data/ROC/fixed_ROC_%0.3f.dat' %jes)
@@ -825,7 +835,7 @@ def parameterized_vs_fixed_ROC_plot():
 
 def fixed_output_plot_heat_map():
 	print 'Entering fixed_output_plot_heat_map'
-	jes_list = [1.000]
+	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
 
 	for idx, jes in enumerate(jes_list):
 		print 'Plotting jes=%0.3f' %jes
@@ -1371,24 +1381,24 @@ if __name__ == '__main__':
 	Fixed Training and Plots
 	'''
 	#fixed_training()
-	#fixed_training_plot()
-	#fixed_ROC_plot()
+	fixed_training_plot()
+	fixed_ROC_plot()
 	#fixed_output_plot_heat_map()
 
 	'''
 	Parameterized Training and Plots
 	'''
-	#parameterized_training()
-	#parameterized_function_runner()
-	#parameterized_training_plot()
-	#parameterized_ROC_plot()
-	#parameterized_output_plot_heat_map()
+	parameterized_training()
+	parameterized_function_runner()
+	parameterized_training_plot()
+	parameterized_ROC_plot()
+	parameterized_output_plot_heat_map()
 
 	'''
 	Comparison Training and Plots
 	'''
-	#parameterized_vs_fixed_output_plot()
-	#parameterized_vs_fixed_ROC_plot()
+	parameterized_vs_fixed_output_plot()
+	parameterized_vs_fixed_ROC_plot()
 	#grid_heat_map('no')
 
 	'''
