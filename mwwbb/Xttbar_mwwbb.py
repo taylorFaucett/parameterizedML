@@ -13,14 +13,13 @@ parameter by a secondary input (alpha).
 import ROOT
 import numpy as np
 import pickle
-import os
 import glob
 import matplotlib.pyplot as plt
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.externals import joblib
-from sknn.mlp import Regressor, Classifier, Layer
+from sknn.mlp import Regressor, Layer
 
 ''' 
 The standard set of matplotlib colors are used in multiple functions so they
