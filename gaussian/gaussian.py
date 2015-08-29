@@ -13,21 +13,24 @@ parameter by a secondary input (alpha).
 
 import ROOT
 import numpy as np
-import glob
-from sklearn import svm
 from array import *
-from sklearn.externals import joblib
 from sklearn.metrics import roc_curve, auc
-from sknn.mlp import Regressor, Classifier, Layer, Convolution
+from sknn.mlp import Regressor, Layer
 import pickle
-import smtplib
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
-
-
 import matplotlib.pyplot as plt
 
-def gaussianData(MU, SIG, numTrain):
+param_colors = ['yellow', 'green', 'brown', 'red', 'orange', 'cyan', 'black']
+fixed_colors = ['blue', 'green', 'red', 'cyan', 'magenta']
+
+def generate_data(MU, SIG, numTrain):
+    '''
+    generate_data uses a RooWorkspace to generate data points with a gaussian and 
+    flat distribution. Data is put into .dat files for training purposes.
+    '''
+
+    print 'Entering generate_data'
     # Initialize ROOTs RooWorkspace
     w = ROOT.RooWorkspace('w')
 
@@ -72,6 +75,12 @@ def gaussianData(MU, SIG, numTrain):
     np.savetxt("data/training_data/traindata_mu_%0.3f.dat" %MU, np.column_stack((traindata, targetdata)), fmt='%f')
 
 def plt_histogram():
+    '''
+    plt_histogram uses matplotlib's histogram plot to plot signal/background values
+    generated from generate_data.
+    '''
+
+    print 'Entering plt_histogram'
     mu_values = [-2.000, -1.000, 0.000, 1.000, 2.000]
     plt_color=['blue', 'green', 'red', 'cyan', 'magenta','black']
     for idx, mu in enumerate(mu_values):
@@ -80,10 +89,10 @@ def plt_histogram():
         bin_width = 10.0/bin_size
         n, bins, patches = plt.hist(data[:,0],
                             bins=bin_size, histtype='stepfilled',
-                            alpha=0.5, label='mu=%0.3f' %mu, color=plt_color[idx],
+                            alpha=0.5, label='$\mu=$%0.1f' %mu, color=plt_color[idx],
                             rasterized=True)
         plt.setp(patches)
-    plt.ylabel('Number of events$/%0.2f x$' %bin_width)
+    plt.ylabel('Number of events$/%0.3f x$' %bin_width)
     plt.xlabel('x')
     plt.grid(True)
     plt.legend(loc='upper right', bbox_to_anchor=(1.10, 1))
@@ -95,6 +104,11 @@ def plt_histogram():
     plt.clf()
 
 def fixed_training(iterations):
+    '''
+    fixed_training uses SKLearn-NeuralNetwork and SciKit's Pipeline and min/max scaler
+    to train a NN with training data generated from generate_data.
+    '''
+
     print 'Entering fixed_training'
     mu_values = [-2.000, -1.000, 0.000, 1.000, 2.000]
 
@@ -106,7 +120,7 @@ def fixed_training(iterations):
             #learning_rate=0.01,
             n_iter=iterations,
             #learning_momentum=0.1,
-            batch_size=100,
+            #batch_size=10,
             learning_rule="nesterov",
             #valid_size=0.05,
             verbose=True,
@@ -137,6 +151,12 @@ def fixed_training(iterations):
         pickle.dump(nn, open('data/fixed_%0.3f.pkl' %mu, 'wb'))
 
 def fixed_output_plot():
+    '''
+    fixed_output_plot plots the input and output data from the NN trained in fixed_training.
+    Plotting is handled separately so that minor changes to the plot don't require re-running 
+    intensive NN training. 
+    '''
+
     print 'Entering fixed_output_plot'
     mu_values = [-2.000, -1.000, 0.000, 1.000, 2.000]
 
@@ -144,18 +164,25 @@ def fixed_output_plot():
         data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %mu)
         inputs = data[:,0]
         outputs = data[:,2]
-        plt.plot(inputs, outputs, '.', rasterized=True)
+        plt.plot(inputs, outputs, '.', label='$\mu_f=$%0.1f' %mu, rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('input')
     plt.xlim([-5, 5])
     plt.ylim([-0.1, 1.1])
     plt.grid(True)
+    plt.legend(loc='upper right', fontsize=10)
     plt.savefig('plots/fixed_output_plot.pdf', dpi=400)
     plt.savefig('plots/images/fixed_output_plot.png')
     #plt.show()
     plt.clf()
 
 def fixed_ROC_plot():
+    '''
+    fixed_ROC_plot plots the ROC data from the NN trained in fixed_training.
+    Plotting is handled separately so that minor changes to the plot don't require re-running 
+    intensive NN training. 
+    '''
+
     print 'Entering fixed_ROC_plot'
     mu_values = [-2.000, -1.000, 0.000, 1.000, 2.000]
 
@@ -165,8 +192,8 @@ def fixed_ROC_plot():
         xval = ROC[:,0]
         yval = ROC[:,1]
         plt.plot(xval, yval,
-                    '.', 
-                    label='$\mu_p=$%s (AUC=%0.2f)' %(mu, AUC),  
+                    '-', 
+                    label='$\mu_f=$%0.1f (AUC=%0.3f)' %(mu, AUC),  
                     rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
@@ -181,6 +208,12 @@ def fixed_ROC_plot():
     plt.clf()
 
 def parameterized_training(iterations):
+    '''
+    parameterized_training combines data produced from generate_data into one dataset. A NN
+    is then trained with the data points and mean value (mu) as a secondary input which will
+    later be used as a parameter during predictions. 
+    '''
+
     print 'Entering parameterized_training'
     mu_complete = np.concatenate((np.loadtxt('data/training_data/traindata_mu_-1.000.dat'),
                                     np.loadtxt('data/training_data/traindata_mu_-1.000.dat'),
@@ -196,10 +229,10 @@ def parameterized_training(iterations):
             #learning_rate=0.01,
             n_iter=iterations,
             #learning_momentum=0.1,
-            batch_size=10,
+            #batch_size=10,
             learning_rule="nesterov",
             #valid_size=0.05,
-            verbose=True,
+            #verbose=True,
             #debug=True
             ))])
 
@@ -217,49 +250,177 @@ def parameterized_training(iterations):
 
 
 def parameterized_function(x, alpha, nn):
+    '''
+    parameterized_function is a 2 variable function for making predictions with the 
+    mean value as a parameter. Given an input value and a mean value to interpolate 
+    with, parameterized_function will make a prediction of the score based on the 
+    parameterized NN generated in parameterized_training. 
+
+    Note: The pickled NN is initialized outside of the function for the purposes of
+    processing speed.
+    '''
     traindata = np.array((x, alpha), ndmin=2)
     outputs   = nn.predict(traindata)
     return outputs[[0]]
 
 
 def parameterized_runner():
+    '''
+    parameterized_runner takes values from generate_data and plugs them into 
+    parameterized_function for both given mean values (mu=-1, 0, 1) and 
+    interpolations on values (mu=-1.5, -0.5, +0.5, +1.5). Input, output and
+    ROC/AUC data is calculated using the sample input data and the predictions
+    from parameterized_function.
+    '''
+
+    print 'Entering parameterized_runner'
     alpha_list = [-1.5, -1.0, -0.5, 0.0, +0.5, +1.0, +1.5]
     nn = pickle.load(open('data/param.pkl','rb'))
+
     for idx, alpha in enumerate(alpha_list):
+        actual_data = np.loadtxt('data/training_data/traindata_mu_%0.3f.dat' %alpha)
+        actual_input = actual_data[:,0]
+        actual_target = actual_data[:,2]
         inputs = []
         predictions = []
-        for idy in range(-500, 500, 1):
-            outputs = parameterized_function(idy/100., alpha, nn)
-            inputs.append(idy/100.)
-            predictions.append(outputs[0])
-        plt.plot(inputs, predictions, 'o')
-    plt.xlabel('input')
+        for idy in range(len(actual_input)):
+            outputs = parameterized_function(actual_input[idy]/1., alpha, nn)
+            inputs.append(actual_input[idy]/1.)
+            predictions.append(outputs[0][0])
+        output_data = np.vstack((inputs, predictions)).T
+        np.savetxt('data/plot_data/param_%0.3f.dat' %alpha, output_data, fmt='%f')
+
+        actual = actual_target
+        fpr, tpr, thresholds = roc_curve(actual, predictions)
+        ROC_plot = np.vstack((fpr, tpr)).T
+        ROC_AUC = [auc(fpr, tpr)]
+        np.savetxt('data/plot_data/ROC/param_ROC_%0.3f.dat' %alpha, ROC_plot, fmt='%f')
+        np.savetxt('data/plot_data/AUC/param_ROC_AUC_%0.3f.dat' %alpha, ROC_AUC)
+
+def parameterized_output_plot():
+    '''
+    parameterized_output_plot plots the input and output data from the NN trained in parameterized_training.
+    Plotting is handled separately so that minor changes to the plot don't require re-running 
+    intensive NN training. 
+    '''
+
+    print 'Entering parameterized_output_plot'
+    mu_values = [-1.500, -1.000, -0.5000, 0.000, 0.5000, 1.000, 1.500]
+
+    for idx, mu in enumerate(mu_values):
+        data = np.loadtxt('data/plot_data/param_%0.3f.dat' %mu)
+        inputs = data[:,0]
+        outputs = data[:,1]
+        plt.plot(inputs, outputs, 'o', color=param_colors[idx], label='$\mu_p=$%0.1f' %mu, rasterized=True)
     plt.ylabel('NN output')
-    plt.xlim([-5,5])
+    plt.xlabel('input')
+    plt.xlim([-5, 5])
     plt.ylim([-0.1, 1.1])
     plt.grid(True)
-    plt.savefig('plots/interpolated_output.pdf', dpi=400)
-    plt.savefig('plots/images/interpolated_output.png')
+    plt.legend(loc='upper right', fontsize=10)
+    plt.savefig('plots/parameterized_output_plot.pdf', dpi=400)
+    plt.savefig('plots/images/parameterized_output_plot.png')
+    #plt.show()
+    plt.clf()
 
+def parameterized_ROC_plot():
+    '''
+    parameterized_ROC_plot plots the ROC data from the NN trained in parameterized_training.
+    Plotting is handled separately so that minor changes to the plot don't require re-running 
+    intensive NN training. 
+    '''
 
-def ROC_plot_param(mu, fpr, tpr, roc_auc, plt_color):
-    print "Plotting ROC curve for mu=%s" %mu
+    print 'Entering parameterized_ROC_plot'
+    mu_values = [-1.500, -1.000, -0.500, 0.000, 0.500, 1.000, 1.500]
+
+    for idx, mu in enumerate(mu_values):
+        ROC = np.loadtxt('data/plot_data/ROC/param_ROC_%0.3f.dat' %mu)
+        AUC = np.loadtxt('data/plot_data/AUC/param_ROC_AUC_%0.3f.dat' %mu)
+        xval = ROC[:,0]
+        yval = ROC[:,1]
+        plt.plot(xval, yval,
+                    '-', 
+                    color=param_colors[idx],
+                    label='$\mu_p=$%0.1f (AUC=%0.3f)' %(mu, AUC),  
+                    rasterized=True)
+    plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
-    plt.plot(fpr, tpr, 'o', label='mu=%s (AUC=%0.2f)' %(mu, roc_auc), color=plt_color, linewidth=2, rasterized=True)
-    plt.legend(loc='lower right')
-    plt.plot([0,1],[0,1],'k--')
-    plt.xlim([0.0,1.0])
-    plt.ylim([0.0,1.0])
-    plt.ylabel('Background rejection')
+    plt.ylabel('1/Background efficiency')
     plt.xlabel('Signal efficiency')
+    plt.xlim([0,1])
+    plt.ylim([0,1])
+    plt.legend(loc='lower right', fontsize=10)
     plt.grid(True)
+    plt.savefig('plots/param_ROC_plot.pdf', dpi=400)
+    plt.savefig('plots/images/param_ROC_plot.png') 
+    plt.clf()
+
+def fixed_vs_param_output_plot():
+    '''
+    fixed_vs_param_output_plot takes plot data for both fixed and parameterized training
+    for comparison purposes.
+    '''
+
+    print 'Entering fixed_vs_param_output_plot'
+    fixed_mu = [-2.000, -1.000, 0.000, 1.000, 2.000]
+    param_mu = [-1.500, -1.000, -0.500, 0.000, 0.500, 1.000, 1.500]
+    
+    for idx, mu in enumerate(fixed_mu):
+        data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %mu)
+        inputs = data[:,0]
+        outputs = data[:,2]
+        plt.plot(inputs, outputs, 
+                    '.', 
+                    markevery= 1,
+                    color=fixed_colors[idx], 
+                    label='$\mu_f=$%0.1f' %mu, 
+                    rasterized=True)
+    for idx, mu in enumerate(param_mu):
+        data = np.loadtxt('data/plot_data/param_%0.3f.dat' %mu)
+        inputs = data[:,0]
+        outputs = data[:,1]
+        plt.plot(inputs, outputs, 
+                    'o',
+                    alpha=0.5,
+                    markevery=50, 
+                    color=param_colors[idx], 
+                    label='$\mu_p=$%0.1f' %mu, 
+                    rasterized=True)
+    plt.ylabel('NN output')
+    plt.xlabel('input')
+    plt.xlim([-4, 4])
+    plt.ylim([-0.1, 1.1])
+    plt.grid(True)
+    plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1), fontsize=10)
+    plt.savefig('plots/fixed_vs_parameterized_output_plot.pdf', dpi=400)
+    plt.savefig('plots/images/fixed_vs_parameterized_output_plot.png')
+    #plt.show()
+    plt.clf()
 
 if __name__ == '__main__':
-    #for i in range(-20,30,10):
-    #    gaussianData(i/10., 0.25, 50000)
+    '''
+    Generate data
+    '''
+    #for i in range(-20,25,5):
+    #    generate_data(i/10., 0.25, 100000)
     #plt_histogram()
-    #fixed_training(20)
-    #fixed_output_plot()
-    #fixed_ROC_plot()
-    #parameterized_training(20)
-    #parameterized_runner()
+
+    '''
+    Fixed training and plots
+    '''
+    fixed_training(20)
+    fixed_output_plot()
+    fixed_ROC_plot()
+
+    '''
+    Parameterized training and plots
+    '''
+    parameterized_training(20)
+    parameterized_runner()
+    parameterized_output_plot()
+    parameterized_ROC_plot()
+
+    '''
+    Fixed vs parameterized plots
+    '''
+    fixed_vs_param_output_plot()

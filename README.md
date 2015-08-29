@@ -29,17 +29,17 @@ These can all be installed through the pip command in the terminal
 ### Fixed Training
 Each gaussian (i.e. mu=-2, -1, 0, 1, 2) is trained with a seperate NN and then prediction outputs are plotted vs input values between [-5, 5].
 
-![Fixed Training](https://raw.githubusercontent.com/tfaucett/parameterizedML/master/gaussian/plots/images/fixedTraining.png)
+![Fixed Training](https://raw.githubusercontent.com/tfaucett/parameterizedML/master/gaussian/plots/images/fixed_output_plot.png)
 
 ### Parameterized Training
 A NN is trained for gaussians at mu=-2, -1, 0, 1, 2 and predictions are made at mu=-1.5, -1, -0.5, 0, 0.5, 1, 1.5. Thus, predictions at half-odd integer values (i.e. mu=-1.5, -0.5, 0.5, 1.5) are interpolations based on training at integer values. 
 
-![Parameterized Training](https://raw.githubusercontent.com/tfaucett/parameterizedML/master/gaussian/plots/images/paramTraining_complete.png)
+![Parameterized Training](https://raw.githubusercontent.com/tfaucett/parameterizedML/master/gaussian/plots/images/parameterized_output_plot.png)
 
 ### Parameterized Training
 ROC curves and AUC values for the same set of predictions made in the parameterized training set (i.e. training at mu=-2, -1, 0, 1, 2 with predictions at mu=-1.5, -1, -0.5, 0, 0.5, 1, 1.5)
 
-![Parameterized ROC Curve](https://raw.githubusercontent.com/tfaucett/parameterizedML/master/gaussian/plots/images/ROC_parameterized.png)
+![Parameterized ROC Curve](https://raw.githubusercontent.com/tfaucett/parameterizedML/master/gaussian/plots/images/param_ROC_plot.png)
 
 ---
 
