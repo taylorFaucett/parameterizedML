@@ -388,15 +388,15 @@ def fixed_training():
 					('neural network',
 						Regressor(
 							layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
-							learning_rate=0.01,
-							n_iter=50,
+							learning_rate=0.1,
+							n_iter=25,
 							#n_stable=1,
 							#f_stable=0.001,
 							#learning_momentum=0.1,
-							batch_size=10,
-							learning_rule="nesterov",
+							batch_size=1,
+							#learning_rule="nesterov",
 							#valid_size=0.05,
-							#verbose=True,
+							verbose=True,
 							#debug=True
 							))])
 
@@ -404,9 +404,11 @@ def fixed_training():
 
 	for idx, jes in enumerate(jes_list):
 		input_data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %jes)
+		data1 = np.loadtxt('data/concatenated/ttbar_mx_1.000.dat')
 		training_data = input_data[:,0:2]
 		jes_data = input_data[:,2]
 		target_data = input_data[:,3]
+		target_data1 = data1[:,3]
 		jes = jes_data[0]
 
 		print 'Processing fixed training on mu=%0.3f' %jes
@@ -425,7 +427,7 @@ def fixed_training():
 								outputs)).T
 		np.savetxt('data/plot_data/fixed_%0.3f.dat' %jes, output_data, fmt='%f')
 
-		actual = target_data
+		actual = target_data1
 		predictions = outputs[0]
 		fpr, tpr, thresholds = roc_curve(actual, predictions)
 		ROC_plot = np.vstack((fpr, tpr)).T
@@ -444,7 +446,7 @@ def fixed_training_plot():
 	'''
 
 	print 'Entering fixed_training_plot'
-	jes_list = [0.900, 1.000, 1.100]
+	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
 	for idx, jes in enumerate(jes_list):
 		data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
 		plt.plot(data[:,0], data[:,4],
@@ -494,15 +496,15 @@ def fixed_ROC_plot():
 	'''
 
 	print "Entering fixed_ROC_plot"
-	#jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-	jes_list = [0.900, 1.000, 1.100]
+	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+	#jes_list = [0.900, 1.000, 1.100]
 	for idx, jes in enumerate(jes_list):
 		data = np.loadtxt('data/plot_data/ROC/fixed_ROC_%0.3f.dat' %jes)
 		AUC  = np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes)
 		plt.plot(data[:,0], data[:,1],
 					'-',
 					color=colors[idx],
-					label='jes$_f$=%0.3f (AUC=%0.3f)' %(jes, AUC),
+					label='jes$_{f_{1.000}}$=%0.3f (AUC=%0.3f)' %(jes, AUC),
 					rasterized=True)
 	plt.plot([0,1],[0,1], 'r--')
 	plt.title('Receiver Operating Characteristic')
@@ -841,9 +843,9 @@ def fixed_output_plot_heat_map():
 		print 'Plotting jes=%0.3f' %jes
 		data = np.loadtxt('data/plot_data/fixed_%0.3f.dat' %jes)
 		size = 5000
-		x = data[:,0][:size]
-		y = data[:,1][:size]
-		z = data[:,4][:size]
+		x = np.concatenate((data[:,0][:size], data[:,0][-size:]), axis=0)
+		y = np.concatenate((data[:,1][:size], data[:,1][-size:]), axis=0)
+		z = np.concatenate((data[:,4][:size], data[:,4][-size:]), axis=0)
 		xmin = 0
 		xmax = 3000
 		ymin = 0
@@ -903,9 +905,9 @@ def parameterized_output_plot_heat_map():
 		print 'Plotting jes=%0.3f' %jes
 		data = np.loadtxt('data/plot_data/param_%0.3f.dat' %jes)
 		size = 5000
-		x = data[:,0][:size]
-		y = data[:,1][:size]
-		z = data[:,2][:size]
+		x = np.concatenate((data[:,0][:size], data[:,0][-size:]), axis=0)
+		y = np.concatenate((data[:,1][:size], data[:,1][-size:]), axis=0)
+		z = np.concatenate((data[:,2][:size], data[:,2][-size:]), axis=0)
 		xmin = 0
 		xmax = 3000
 		ymin = 0
@@ -1381,24 +1383,24 @@ if __name__ == '__main__':
 	Fixed Training and Plots
 	'''
 	#fixed_training()
-	fixed_training_plot()
-	fixed_ROC_plot()
+	#fixed_training_plot()
+	#fixed_ROC_plot()
 	#fixed_output_plot_heat_map()
 
 	'''
 	Parameterized Training and Plots
 	'''
-	parameterized_training()
-	parameterized_function_runner()
-	parameterized_training_plot()
-	parameterized_ROC_plot()
+	#parameterized_training()
+	#parameterized_function_runner()
+	#parameterized_training_plot()
+	#parameterized_ROC_plot()
 	parameterized_output_plot_heat_map()
 
 	'''
 	Comparison Training and Plots
 	'''
-	parameterized_vs_fixed_output_plot()
-	parameterized_vs_fixed_ROC_plot()
+	#parameterized_vs_fixed_output_plot()
+	#parameterized_vs_fixed_ROC_plot()
 	#grid_heat_map('no')
 
 	'''

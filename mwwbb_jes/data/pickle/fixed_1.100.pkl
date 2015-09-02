@@ -136,7 +136,8 @@ NsS'dropout_rate'
 p60
 NsS'verbose'
 p61
-NsS'valid_set'
+I01
+sS'valid_set'
 p62
 NsS'loss_type'
 p63
@@ -144,10 +145,10 @@ Vmse
 p64
 sS'learning_rate'
 p65
-F0.01
+F0.1
 sS'batch_size'
 p66
-I10
+I1
 sS'valid_size'
 p67
 F0.0
@@ -158,7 +159,7 @@ p69
 F0.9
 sS'learning_rule'
 p70
-S'nesterov'
+Vsgd
 p71
 sS'unit_counts'
 p72
@@ -213,7 +214,7 @@ Nsg86
 g87
 sbasS'n_iter'
 p92
-I50
+I25
 sS'f_stable'
 p93
 F0.001
@@ -238,7 +239,7 @@ I3
 tp101
 g26
 I00
-S"\x9a\xd2\x86*\xf6u\x0f\xc0\xe8\x95\xd3M\xfa\xdfQ\xc0AKw\xfc\xac\x04\xcf\xbf\xdf\xc4\x06\xb7#\x8d'\xc0_1\xff\x8e!$1@\xfe\xc1\xe0\xe6HZ\x01\xc0"
+S'\xe4tA>\xddJW\xc0\x1a\x88VN\xb0\xb7\\\xc0B\xf8-uAd"\xc0\x91\x0b@\x16|\xa8-@aO\xc8KQ\xabB@\xf2\x13\x07A)\xa5C\xc0'
 p102
 tp103
 bg16
@@ -253,7 +254,7 @@ Rp106
 tp107
 g26
 I00
-S'T5.-\x03\x9a\xf6\xbf1\x8a8\x8e\x10{\r@<\x8d\x1eTn8\x14\xc0'
+S'\xe8\x82\xb1\xf5m\xfd\n@\r\xc6\x9f\x1a\x92\xf8\x1e@\x8fN`{n\xd2\xde?'
 p108
 tp109
 btp110
@@ -270,7 +271,7 @@ I1
 tp114
 g26
 I00
-S'\xf6\xf7\xc4\xb9\xc8\r\x15\xc0\xf4\x96\xf4\x9f\xbdv!\xc0\xb4\x1aq\x08\xbb\xb1\x04\xc0'
+S'\xde\xb8\x9e\x94B\xfb\x17\xc0\xc7;\xc5\x05_\xba\n\xc0\xb6\xf8+fC\xb5\x03\xc0'
 p115
 tp116
 bg16
@@ -285,7 +286,7 @@ Rp119
 tp120
 g26
 I00
-S'\xd3c\xea)s\xb4\x0c@'
+S'f\x83\xc6{dE\x08@'
 p121
 tp122
 btp123
