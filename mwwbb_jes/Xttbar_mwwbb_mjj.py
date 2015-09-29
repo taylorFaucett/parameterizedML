@@ -12,6 +12,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import scipy.interpolate
 import shutil
 import gzip
+import csv
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_curve, auc
@@ -394,14 +395,14 @@ def fixed_training():
 							#f_stable=0.001,
 							#learning_momentum=0.1,
 							batch_size=1,
-							#learning_rule="nesterov",
+							learning_rule="nesterov",
 							#valid_size=0.05,
 							verbose=True,
 							#debug=True
 							))])
 
 	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-
+	#jes_list = [1.000]
 	for idx, jes in enumerate(jes_list):
 		input_data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %jes)
 		data1 = np.loadtxt('data/concatenated/ttbar_mx_1.000.dat')
@@ -435,6 +436,150 @@ def fixed_training():
 		np.savetxt('data/plot_data/ROC/fixed_ROC_%0.3f.dat' %jes, ROC_plot, fmt='%f')
 		np.savetxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes, ROC_AUC)
 		pickle.dump(nn, open('data/pickle/fixed_%0.3f.pkl' %jes, 'wb'))
+
+def fixed_sigbkg_and_output():
+	jes_list = [0.900, 1.000, 1.100]
+	colors = ['blue', 'green', 'red']
+	for idx, jes in enumerate(jes_list):
+		print 'loading data for jes=%0.3f' %jes
+		input_data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %jes)
+		nn = pickle.load(open('data/pickle/fixed_%0.3f.pkl' %jes, 'rb'))
+		training_data = input_data[:,0:2]
+		mwwbb = training_data[:,0]
+		#actual = input_data[:,3]
+		actual = input_data[:,3] + idx*0.05
+		outputs = nn.predict(training_data)
+		#outputs = outputs.reshape((1,len(outputs)))
+		plt.plot(mwwbb, actual,
+					'.',
+					color=colors[idx],
+					label='jes$_{raw}$=%0.3f' %jes,
+					markevery=100,
+					rasterized=True)
+		plt.plot(mwwbb, outputs,
+					'o',
+					color=colors[idx],
+					label='jes$_{trained}$=%0.3f' %jes,
+					markevery=100,
+					rasterized=True )
+	plt.xlabel('m$_{WWbb}$')
+	plt.ylabel('Actual/Output')
+	plt.legend(loc='lower right', bbox_to_anchor=(1, 0.25))
+	plt.ylim([-0.1, 1.2])
+	plt.xlim([250,2000])
+	plt.savefig('plots/fixed_sigbkg_and_output.pdf', dpi=400)
+	plt.savefig('plots/images/fixed_sigbkg_and_output.png')
+	plt.clf()
+
+def fixed_sigbkg_histogram():
+	jes_list = [0.900, 1.000, 1.100]
+	bin_size = 25
+	colors = ['blue', 'green', 'red']
+	dark_colors = ['DarkBlue', 'DarkGreen', 'DarkRed']
+	for idx, jes in enumerate(jes_list):
+		print 'loading data for jes=%0.3f' %jes
+		sig = np.loadtxt('data/root_export/sig_mx_1000_jes_%0.3f.dat' %jes)
+		bkg = np.loadtxt('data/root_export/bkg_mx_1000_jes_%0.3f.dat' %jes)
+		n, bins, patches = plt.hist([sig[:,0], bkg[:,0]],
+									bins=range(250,2000, bin_size), normed=True,
+									histtype='step', color=[colors[idx], dark_colors[idx]], 
+									alpha=1, linewidth=1.5,
+									label=['JES$_{sig}$=%0.3f' %jes, 'JES$_{bkg}$=%0.3f' %jes],
+									rasterized=True)
+	plt.xlabel('m$_{WWbb}$ [GeV]')
+	plt.ylabel('Fraction of events$/%0.0f$ GeV' %bin_size)
+	plt.legend(loc='upper right')
+	plt.savefig('plots/sigbkg_histogram.pdf', dpi=400)
+	plt.savefig('plots/images/sigbkg_histogram.png')
+	plt.clf()
+
+def fixed_output_histogram():
+	jes_list = [0.900, 1.000, 1.100]
+	colors = ['blue', 'green', 'red']
+	bin_number = 40
+	for idx, jes in enumerate(jes_list):
+		print 'loading data for jes=%0.3f' %jes
+		nn_val = jes
+		nn = pickle.load(open('data/pickle/fixed_%0.3f.pkl' %jes, 'rb'))
+		input_data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %jes)
+		training_data = input_data[:,0:2]
+		actual = input_data[:,3]
+		outputs = nn.predict(training_data)
+		outputs = outputs[:,0]		
+		n, bins, patches = plt.hist(outputs,
+									bins=bin_number,
+									histtype='step', alpha=0.75, linewidth=1.5, color=colors[idx],
+									label='JES$_{NN_{%0.3f}}$=%0.3f' %(nn_val, jes),
+									rasterized=True)
+	plt.xlabel('NN output')
+	plt.ylabel('Number of events$/%0.3f$' %(1.0/bin_number))
+	plt.legend(loc='upper left')
+	plt.savefig('plots/fixed_output_histogram.pdf', dpi=400)
+	plt.savefig('plots/images/fixed_output_histogram.png')
+	plt.clf()
+
+
+def fixed_comparison_ROC():
+	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+	nn = pickle.load(open('data/pickle/fixed_1.250.pkl', 'rb'))
+	
+	for idx, jes in enumerate(jes_list):
+		print 'loading data for jes=%0.3f' %jes
+		input_data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %jes)
+		training_data = input_data[:,0:2]
+		actual = input_data[:,3]
+		outputs = nn.predict(training_data)
+		outputs = outputs.reshape((1,len(outputs)))
+		predictions = outputs[0]
+		fpr, tpr, thresholds = roc_curve(actual, predictions)
+		AUC = auc(fpr, tpr)
+		plt.plot(fpr, tpr, 
+					'-', 
+					label='jes$_{f_{1.250}}$=%0.3f (AUC=%0.6f)' %(jes, AUC), 
+					markevery=100,
+					rasterized=True)
+	plt.plot([0,1],[0,1], 'r--')
+	plt.title('Receiver Operating Characteristic')
+	plt.ylabel('1/Background efficiency')
+	plt.xlabel('Signal efficiency')
+	plt.xlim([0,1])
+	plt.ylim([0,1])
+	plt.legend(loc='lower right')
+	plt.grid(True)
+	plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
+	plt.savefig('plots/images/fixed_ROC_plot.png')
+	plt.clf()
+
+def parameterized_comparison_ROC():
+	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
+	nn = pickle.load(open('data/pickle/param_complete.pkl', 'rb'))
+	
+	for idx, jes in enumerate(jes_list):
+		print 'loading data for jes=%0.3f' %jes
+		input_data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %jes)
+		training_data = input_data[:,0:3]
+		actual = input_data[:,3]
+		outputs = nn.predict(training_data)
+		outputs = outputs.reshape((1,len(outputs)))
+		predictions = outputs[0]
+		fpr, tpr, thresholds = roc_curve(actual, predictions)
+		AUC = auc(fpr, tpr)
+		plt.plot(fpr, tpr, 
+					'-', 
+					label='jes$_{p_{comp}}$=%0.3f (AUC=%0.3f)' %(jes, AUC), 
+					rasterized=True)
+	plt.plot([0,1],[0,1], 'r--')
+	plt.title('Receiver Operating Characteristic')
+	plt.ylabel('1/Background efficiency')
+	plt.xlabel('Signal efficiency')
+	plt.xlim([0,1])
+	plt.ylim([0,1])
+	plt.legend(loc='lower right')
+	plt.grid(True)
+	plt.savefig('plots/param_ROC_plot.pdf', dpi=400)
+	plt.savefig('plots/images/param_ROC_plot.png')
+	plt.clf()
+
 
 def fixed_training_plot():
 	'''
@@ -487,38 +632,6 @@ def fixed_training_plot():
 	plt.savefig('plots/images/fixed_training_mjj_plot.png')
 	plt.clf()
 
-def fixed_ROC_plot():
-	'''
-	fixed_ROC_plot takes in ROC and AUC values processed during training in fixed_training
-	and plots the ROC curve. This will be deprecated in the future, for the same reason as
-	fixed_training_plot, so that AUC and ROC values will be calculated and plotted separately
-	from the training time.
-	'''
-
-	print "Entering fixed_ROC_plot"
-	jes_list = [0.750, 0.900, 0.950, 0.975, 1.000, 1.025, 1.050, 1.100, 1.250]
-	#jes_list = [0.900, 1.000, 1.100]
-	for idx, jes in enumerate(jes_list):
-		data = np.loadtxt('data/plot_data/ROC/fixed_ROC_%0.3f.dat' %jes)
-		AUC  = np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_%0.3f.dat' %jes)
-		plt.plot(data[:,0], data[:,1],
-					'-',
-					color=colors[idx],
-					label='jes$_{f_{1.000}}$=%0.3f (AUC=%0.3f)' %(jes, AUC),
-					rasterized=True)
-	plt.plot([0,1],[0,1], 'r--')
-	plt.title('Receiver Operating Characteristic')
-	plt.ylabel('1/Background efficiency')
-	plt.xlabel('Signal efficiency')
-	plt.xlim([0,1])
-	plt.ylim([0,1])
-	plt.legend(loc='lower right')
-	plt.grid(True)
-	plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
-	plt.savefig('plots/images/fixed_ROC_plot.png')
-	plt.clf()
-
-
 
 '''
 Parameterized Training and Plots
@@ -553,7 +666,7 @@ def parameterized_training():
 						Regressor(
 								layers =[Layer("Sigmoid", units=3),Layer("Sigmoid")],
 								learning_rate=0.01,
-								n_iter=50,
+								n_iter=25,
 								#n_stable=1,
 								#f_stable=0.001,
 								#learning_momentum=0.1,
@@ -1224,6 +1337,7 @@ def fixed_analysis_data():
 	files = glob.glob('data/analysis_data/fixed_*.dat')
 	for idx, file in enumerate(files):
 		os.remove(file)
+	'''
 	for idx, alpha in enumerate(alpha_list):
 		print 'processing alpha=%0.3f' %alpha
 		data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
@@ -1238,8 +1352,10 @@ def fixed_analysis_data():
 		roc_data = np.vstack((fpr, tpr)).T
 		np.savetxt('data/analysis_data/ROC/fixed_ROC_%0.3f.dat' %alpha, roc_data, fmt='%f')
 		np.savetxt('data/analysis_data/AUC/fixed_ROC_AUC_%0.3f.dat' %alpha, roc_auc)
+	'''
 
-def parameterized_analysis_data():
+
+def parameterized_analysis_data_old():
 	alpha_list = [0.750,
 					0.900,
 					0.950,
@@ -1249,7 +1365,16 @@ def parameterized_analysis_data():
 					1.050,
 					1.100,
 					1.250]
+	'''
+	inc_05 (50, 155, 5)
+	'''
+	#jes_index = [5, 8, 9, 21, 10, 22, 23, 12, 15]
 
+	'''
+	inc_10 (50, 160, 10)
+	'''
+	jes_index = [11, 4, 12, 13, 5, 14, 15, 6, 16]
+	
 	jes_val_list = []
 	label = []
 	mWWbb = []
@@ -1257,8 +1382,13 @@ def parameterized_analysis_data():
 	NN_output = []
 	JES_gen = []
 	JES_eval = []
-	for i in range(50, 170, 20):
+	iJES_list = []
+	iJES_true = []
+	iJES_param = []
+	for i in range(50, 160, 10):
 		jes_val_list.append(i/100.)
+	for i in range(len(jes_val_list)):
+		iJES_list.append(i)
 	print jes_val_list
 	for idx, alpha in enumerate(alpha_list):
 		print 'processing alpha=%0.3f' %alpha
@@ -1278,8 +1408,9 @@ def parameterized_analysis_data():
 				NN_output.append(outputs[0][0])
 				JES_gen.append(alpha)
 				JES_eval.append(jes_val_list[y])
-
-	data = np.vstack((label, mWWbb, mJJ, NN_output, JES_gen, JES_eval)).T
+				iJES_true.append(jes_index[idx])
+				iJES_param.append(iJES_list[y])				
+	data = np.vstack((label, mWWbb, mJJ, NN_output, JES_gen, JES_eval, iJES_true, iJES_param)).T
 	np.savetxt('data/analysis_data/parameterized.csv', data, fmt='%f', delimiter=',')
 
 	'''
@@ -1304,6 +1435,55 @@ def parameterized_analysis_data():
 		np.savetxt('data/analysis_data/ROC/param_ROC_%0.3f.dat' %alpha, roc_data, fmt='%f')
 		np.savetxt('data/analysis_data/AUC/param_ROC_AUC_%0.3f.dat' %alpha, roc_auc)
 	'''
+
+def parameterized_analysis_data():
+	alpha_list = [0.750,
+					0.900,
+					0.950,
+					0.975,
+					1.000,
+					1.025,
+					1.050,
+					1.100,
+					1.250]
+
+	jes_index = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+	
+	jes_val_list = alpha_list
+	label = []
+	mWWbb = []
+	mJJ = []
+	NN_output = []
+	JES_gen = []
+	JES_eval = []
+	iJES_list = []
+	iJES_true = []
+	iJES_param = []
+	for i in range(len(jes_val_list)):
+		iJES_list.append(i)
+	print jes_val_list
+	for idx, alpha in enumerate(alpha_list):
+		print 'processing alpha=%0.3f' %alpha
+		data = np.loadtxt('data/concatenated/ttbar_mx_%0.3f.dat' %alpha)
+		size = len(data[:,0])
+		nn = pickle.load(open('data/pickle/param_complete.pkl', 'rb'))
+		inputs = data[:,0:2]
+		actuals = data[:,3]
+		mwwbb = inputs[:,0]
+		mjj = inputs[:,1]
+		for x in range(0,size):
+			for y in range(len(jes_val_list)):
+				outputs = parameterized_function(mwwbb[x]/1., mjj[x]/1., jes_val_list[y], nn)
+				label.append(actuals[x]/1.)
+				mWWbb.append(mwwbb[x]/1.)
+				mJJ.append(mjj[x]/1.)
+				NN_output.append(outputs[0][0])
+				JES_gen.append(alpha)
+				JES_eval.append(jes_val_list[y])
+				iJES_true.append(jes_index[idx])
+				iJES_param.append(iJES_list[y])				
+	data = np.vstack((label, mWWbb, mJJ, NN_output, JES_gen, JES_eval, iJES_true, iJES_param)).T
+	np.savetxt('data/analysis_data/parameterized.csv', data, fmt='%f', delimiter=',')
 
 def fixed_analysis_ROC_plot():
 	print 'Entering parameterized_analysis_ROC_plot'
@@ -1361,13 +1541,27 @@ def parameterized_analysis_ROC_plot():
 	plt.savefig('plots/images/parameterized_analysis_ROC_plot.png')
 	plt.clf()
 
-def CSV2ROOT(title):
+def CSV2ROOT_fixed(title):
 	ntuple = ROOT.TNtuple(title, title, 'label:mwwbb:mjj:nn:jesTrue:jesParam')
 	ntuple.ReadFile('data/analysis_data/%s.csv' %title)
 	f = ROOT.TFile('data/analysis_data/%s.root' %title, "RECREATE")
 	f.cd()
 	ntuple.Write()
 	f.Close()
+
+def CSV2ROOT_param(title):
+	ntuple = ROOT.TNtuple(title, title, 'label:mwwbb:mjj:nn:jesTrue:jesParam:ijesTrue:ijesParam')
+	ntuple.ReadFile('data/analysis_data/%s.csv' %title)
+	f = ROOT.TFile('data/analysis_data/%s.root' %title, "RECREATE")
+	f.cd()
+	ntuple.Write()
+	f.Close()
+
+def CSV_reader(file):
+	f = open(file)
+	reader = csv.reader(f)
+	for row in reader:
+		print row
 
 
 
@@ -1383,18 +1577,23 @@ if __name__ == '__main__':
 	Fixed Training and Plots
 	'''
 	#fixed_training()
+	#fixed_sigbkg_and_output()
 	#fixed_training_plot()
+	#fixed_comparison_ROC()
 	#fixed_ROC_plot()
 	#fixed_output_plot_heat_map()
+	#fixed_sigbkg_histogram()
+	#fixed_output_histogram()
 
 	'''
 	Parameterized Training and Plots
 	'''
 	#parameterized_training()
+	#parameterized_comparison_ROC()
 	#parameterized_function_runner()
 	#parameterized_training_plot()
 	#parameterized_ROC_plot()
-	parameterized_output_plot_heat_map()
+	#parameterized_output_plot_heat_map()
 
 	'''
 	Comparison Training and Plots
@@ -1415,5 +1614,10 @@ if __name__ == '__main__':
 	#fixed_analysis_ROC_plot()
 	#parameterized_analysis_data()
 	#parameterized_analysis_ROC_plot()
-	#CSV2ROOT('fixed')
-	#CSV2ROOT('parameterized')
+	#CSV2ROOT_fixed('fixed')
+	#CSV2ROOT_param('parameterized')
+
+	'''
+	Other
+	'''
+	CSV_reader('data/analysis_data/parameterized.csv')

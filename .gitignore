@@ -2,3 +2,5 @@ env/
 .DS_Store
 *.sublime-project
 *.sublime-workspace
+mwwbb_4var/
+mwwbb_allvar/
