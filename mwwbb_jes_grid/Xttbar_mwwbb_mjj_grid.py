@@ -593,9 +593,9 @@ def fixed_output_histogram():
 	plt.clf()
 
 
-def fixed_comparison_ROC():
+def fixed_comparison_ROC(fixed):
 	jes_list = [0.750, 0.800, 0.850, 0.900, 0.950, 1.000, 1.050, 1.100, 1.150, 1.200, 1.250]
-	fixed = 0.750
+	#fixed = 0.800
 	nn = pickle.load(open('data/pickle/fixed_%0.3f.pkl' %fixed, 'rb'))
 	for idx, jes in enumerate(jes_list):
 		print 'loading data for jes=%0.3f' %jes
@@ -1611,10 +1611,12 @@ if __name__ == '__main__':
 	#fixed_training()
 	#fixed_sigbkg_and_output()
 	#fixed_training_plot()
-	#fixed_comparison_ROC()
+	fixed_comparison_ROC(0.750)
+	fixed_comparison_ROC(1.000)
+	fixed_comparison_ROC(1.250)
 	#fixed_ROC_plot()
 	#fixed_output_plot_heat_map()
-	mwwbb_sigbkg_histogram()
+	#mwwbb_sigbkg_histogram()
 	#mjj_sigbkg_histogram()
 	#mwwbb_vs_jes_plot()
 	#mjj_vs_jes_plot()
