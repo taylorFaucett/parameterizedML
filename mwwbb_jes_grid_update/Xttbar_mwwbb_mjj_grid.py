@@ -1619,7 +1619,7 @@ if __name__ == '__main__':
 	#mjj_vs_jes_plot()
 	#fixed_output_histogram()
 	#fixed_comparison_ROC(0.750)
-	fixed_comparison_ROC(1.000)
+	#fixed_comparison_ROC(1.000)
 	#fixed_comparison_ROC(1.250)
 
 	'''
@@ -1649,10 +1649,10 @@ if __name__ == '__main__':
 	'''
 	#fixed_analysis_data()
 	#fixed_analysis_ROC_plot()
-	#parameterized_analysis_data()
+	parameterized_analysis_data()
 	#parameterized_analysis_ROC_plot()
 	#CSV2ROOT_fixed('fixed')
-	#CSV2ROOT_param('parameterized')
+	CSV2ROOT_param('parameterized')
 
 	'''
 	Other
