@@ -3,7 +3,7 @@ python:
   - "2.7"
 # command to install dependencies
 install:
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install numpy scipy matplotlib scikit-neuralnetwork; fi
+  - pip install numpy scipy matplotlib scikit-neuralnetwork; fi
 # install: "pip install -r requirements.txt"
 # command to run tests
 script: nosetests
