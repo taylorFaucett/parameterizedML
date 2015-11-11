@@ -1611,9 +1611,9 @@ if __name__ == '__main__':
 	#fixed_training()
 	#fixed_sigbkg_and_output()
 	#fixed_training_plot()
-	fixed_comparison_ROC(0.750)
-	fixed_comparison_ROC(1.000)
-	fixed_comparison_ROC(1.250)
+	#fixed_comparison_ROC(0.750)
+	#fixed_comparison_ROC(1.000)
+	#fixed_comparison_ROC(1.250)
 	#fixed_ROC_plot()
 	#fixed_output_plot_heat_map()
 	#mwwbb_sigbkg_histogram()
@@ -1647,12 +1647,12 @@ if __name__ == '__main__':
 	'''
 	Outputing data
 	'''
-	#fixed_analysis_data()
+	fixed_analysis_data()
 	#fixed_analysis_ROC_plot()
-	#parameterized_analysis_data()
+	parameterized_analysis_data()
 	#parameterized_analysis_ROC_plot()
-	#CSV2ROOT_fixed('fixed')
-	#CSV2ROOT_param('parameterized')
+	CSV2ROOT_fixed('fixed')
+	CSV2ROOT_param('parameterized')
 
 	'''
 	Other
