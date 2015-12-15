@@ -15,11 +15,13 @@ import numpy as np
 import pickle
 import glob
 import matplotlib.pyplot as plt
+import itertools
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.externals import joblib
 from sknn.mlp import Regressor, Layer
+from matplotlib.legend_handler import HandlerLine2D
 
 ''' 
 The standard set of matplotlib colors are used in multiple functions so they
@@ -242,8 +244,8 @@ def fixed_training_plot():
     plt.xlim([0,3000])
     plt.ylim([0,1])
     plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.savefig('plots/fixed_training_plot.pdf', dpi=400)
+    #plt.grid(True)
+    plt.savefig('plots/fixed_training_plot.pdf', dpi=200)
     plt.savefig('plots/images/fixed_training_plot.png')
     plt.clf()
 
@@ -282,8 +284,8 @@ def fixed_ROC_plot():
     plt.xlim([0,1])
     plt.ylim([0,1])
     plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
+    #plt.grid(True)
+    plt.savefig('plots/fixed_ROC_plot.pdf', dpi=200)
     plt.savefig('plots/images/fixed_ROC_plot.png')
     plt.clf()
 
@@ -469,8 +471,8 @@ def parameterized_training_plot():
     plt.xlim([250,3000])
     plt.ylim([0,1])
     plt.legend(loc='lower right')
-    plt.grid(True)
-    plt.savefig('plots/parameterized_training_plot.pdf', dpi=400)
+    #plt.grid(True)
+    plt.savefig('plots/parameterized_training_plot.pdf', dpi=200)
     plt.savefig('plots/images/parameterized_training_plot.png')
     plt.clf()
 
@@ -509,8 +511,8 @@ def parameterized_ROC_plot():
     plt.xlim([0,1])
     plt.ylim([0,1])
     plt.legend(loc='lower right', bbox_to_anchor=(1.10, 0))
-    plt.grid(True)
-    plt.savefig('plots/parameterized_ROC_plot.pdf', dpi=400)
+    #plt.grid(True)
+    plt.savefig('plots/parameterized_ROC_plot.pdf', dpi=200)
     plt.savefig('plots/images/parameterized_ROC_plot.png')  
     plt.clf()
 
@@ -528,8 +530,9 @@ def parameterized_vs_fixed_output_plot():
     '''
 
     print 'Entering parameterized_vs_fixed_output_plot'
-    mx = [500, 750, 1000, 1250, 1500]
-    size = 3000
+    mx = [750, 1000, 1250]
+    size = 5000
+    new_colors= ['black', 'red', 'blue']
     for i in range(len(mx)):
         inputs = np.zeros((size, 2))
         for x in range(size):
@@ -538,10 +541,10 @@ def parameterized_vs_fixed_output_plot():
         nn = pickle.load(open('data/pickle/fixed_%0.0f.pkl' %mx[i], 'rb'))
         outputs = nn.predict(inputs)
         plt.plot(inputs[:,0], outputs,
-                    '-', 
-                    linewidth=2,
-                    color=colors[i], 
-                    label='$\mu_f=$%0.0f' %mx[i], 
+                    '--', 
+                    linewidth=2.5,
+                    color=new_colors[i], 
+                    #label='$\mu_f=$%0.0f' %mx[i], 
                     markevery=20)
     for i in range(len(mx)):
         inputs = np.zeros((size, 2))
@@ -551,18 +554,28 @@ def parameterized_vs_fixed_output_plot():
         nn = pickle.load(open('data/pickle/param_%0.0f.pkl' %mx[i], 'rb'))
         outputs = nn.predict(inputs)
         plt.plot(inputs[:,0], outputs,
-                    'o', 
-                    color=colors[i], 
-                    alpha=0.5,
-                    label='$\mu_p=$%0.0f' %mx[i], 
+                    '-', 
+                    color=new_colors[i], 
+                    linewidth=2.5,
+                    #label='$\mu_p=$%0.0f' %mx[i], 
                     markevery=20)
-    plt.legend(loc='lower right', fontsize=10)
-    plt.grid(True)
+    line1, = plt.plot([-1,-1], label='$m_X=$750', marker='s', color='black', linestyle='None')
+    line2, = plt.plot([-1,-1], label='$m_X=$1000', marker='s', color='red', linestyle='None')
+    line3, = plt.plot([-1,-1], label='$m_X=$1250', marker='s', color='blue', linestyle='None')
+    first_legend = plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, numpoints=1, loc=4, bbox_to_anchor=(1,0.15))
+
+    line4, = plt.plot([-1,-1], '-', label='Parameterized', linewidth=2.5, color='grey')
+    line5, = plt.plot([-1,-1], '--', label='Fixed', linewidth=2.5, color='grey')
+    ax = plt.gca().add_artist(first_legend)
+
+    plt.legend(handles=[line4,line5], loc=4)
+    #plt.legend(loc='lower right', fontsize=10, numpoints=1)
+    #plt.grid(True)
     plt.xlim([0,size])
     plt.ylim([0,1])
-    plt.xlabel('$m_{WWbb}$')
+    plt.xlabel('$m_{WWbb}$ [GeV]')
     plt.ylabel('NN output')
-    plt.savefig('plots/parameterized_vs_fixed_output_plot.pdf', dpi=400)
+    plt.savefig('plots/parameterized_vs_fixed_output_plot.pdf', dpi=200)
     plt.savefig('plots/images/parameterized_vs_fixed_output_plot.png')
     plt.clf()
 
@@ -574,60 +587,61 @@ def parameterized_vs_fixed_ROC_plot():
     '''
 
     print 'Entering parameterized_vs_fixed_ROC_plot'
-    param_files = [np.loadtxt('data/plot_data/ROC/param_ROC_500.dat'),
-                np.loadtxt('data/plot_data/ROC/param_ROC_750.dat'),
+    param_files = [np.loadtxt('data/plot_data/ROC/param_ROC_750.dat'),
                 np.loadtxt('data/plot_data/ROC/param_ROC_1000.dat'),
-                np.loadtxt('data/plot_data/ROC/param_ROC_1250.dat'),
-                np.loadtxt('data/plot_data/ROC/param_ROC_1500.dat')
+                np.loadtxt('data/plot_data/ROC/param_ROC_1250.dat')
                 ]
-    fixed_files = [np.loadtxt('data/plot_data/ROC/fixed_ROC_500.dat'),
-                    np.loadtxt('data/plot_data/ROC/fixed_ROC_750.dat'),
+    fixed_files = [np.loadtxt('data/plot_data/ROC/fixed_ROC_750.dat'),
                     np.loadtxt('data/plot_data/ROC/fixed_ROC_1000.dat'),
-                    np.loadtxt('data/plot_data/ROC/fixed_ROC_1250.dat'),
-                    np.loadtxt('data/plot_data/ROC/fixed_ROC_1500.dat')
+                    np.loadtxt('data/plot_data/ROC/fixed_ROC_1250.dat')
                     ]
-    AUC_param = [np.loadtxt('data/plot_data/AUC/param_ROC_AUC_500.dat'),
-                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_750.dat'),
+    AUC_param = [np.loadtxt('data/plot_data/AUC/param_ROC_AUC_750.dat'),
                     np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1000.dat'),
-                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1250.dat'),
-                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1500.dat')
+                    np.loadtxt('data/plot_data/AUC/param_ROC_AUC_1250.dat')
                     ]
 
-    AUC_fixed = [np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_500.dat'),
-                    np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_750.dat'),
+    AUC_fixed = [np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_750.dat'),
                     np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1000.dat'),
-                    np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1250.dat'),
-                    np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1500.dat')
+                    np.loadtxt('data/plot_data/AUC/fixed_ROC_AUC_1250.dat')
                     ]
-    fixed_markers = ['b-', 'g-', 'r-', 'c-', 'm-']
-    mx = [500, 750, 1000, 1250,1500]
+    new_colors=['black', 'red', 'blue']
 
-    for i in range(len(param_files)):
+    mx = [750, 1000, 1250]
+    markevery = [5000, 10000, 5000]
+    for i in range(len(mx)):
         plt.plot(param_files[i][:,0], param_files[i][:,1], 
-                    'o', 
-                    markerfacecolor=colors[i],
-                    alpha=0.5, 
-                    markevery=5000, 
-                    label='$\mu_p=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
-                    rasterized=True)
-    for i in range(len(fixed_files)):
-        plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], 
                     '-', 
-                    color=colors[i], 
-                    alpha=1, 
-                    markevery=100, 
-                    linewidth=2, 
-                    label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
+                    color=new_colors[i],
+                    linewidth=2.5,
+                    #label='$\mu_p=$%s (AUC=%0.2f)' %(mx[i], AUC_param[i]),  
                     rasterized=True)
-    plt.plot([0,1], [0,1], 'r--')
-    plt.title('Receiver Operating Characteristic')
-    plt.ylabel('1/Background efficiency')
-    plt.xlabel('Signal efficiency')
+    for i in range(len(mx)):
+        plt.plot(fixed_files[i][:,0], fixed_files[i][:,1], 
+                    'o', 
+                    color=new_colors[i], 
+                    markevery=markevery[i],
+                    alpha=0.75, 
+                    #label='$\mu_f=$%s (AUC=%0.2f)' %(mx[i], AUC_fixed[i]),  
+                    rasterized=True)
+    #plt.plot([0,1], [0,1], 'r--')
+    #plt.title('Receiver Operating Characteristic')
+    line1, = plt.plot([-1,-1], label='$m_X=$750', marker='s', color='black', linestyle='None')
+    line2, = plt.plot([-1,-1], label='$m_X=$1000', marker='s', color='red', linestyle='None')
+    line3, = plt.plot([-1,-1], label='$m_X=$1250', marker='s', color='blue', linestyle='None')
+    first_legend = plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, numpoints=1, loc=4, bbox_to_anchor=(1,0.15))
+
+    line4, = plt.plot([-1,-1], '-', label='Parameterized', linewidth=2.5, color='grey')
+    line5, = plt.plot([-1,-1], 'o', label='Fixed', linewidth=2.5, color='grey')
+    ax = plt.gca().add_artist(first_legend)
+
+    plt.legend(handles=[line4,line5], loc=4)
+    plt.xlabel('Background efficiency')
+    plt.ylabel('Signal efficiency')
     plt.xlim([0,1])
     plt.ylim([0,1])
-    plt.legend(loc='lower right', fontsize=10)
-    plt.grid(True)
-    plt.savefig('plots/parameterized_vs_fixed_ROC_plot.pdf', dpi=400)
+    #plt.legend(loc='lower right', fontsize=10)
+    #plt.grid(True)
+    plt.savefig('plots/parameterized_vs_fixed_ROC_plot.pdf', dpi=200)
     plt.savefig('plots/images/parameterized_vs_fixed_ROC_plot.png')  
     plt.clf()
 
@@ -647,7 +661,7 @@ def plot_histogram():
     bin_size   = 50
     #sig_dat = glob.iglob('data/root_export/sig_mx_*.dat')
     #bkg_dat = glob.iglob('data/root_export/bkg_mx_*.dat')
-    plt_color=['black', # background
+    plt_color=['grey', # background
         'blue', # mu=500
         'green', # mu=750
         'red', # mu=1000
@@ -672,14 +686,14 @@ def plot_histogram():
     for i in range(len(data_list)):
         data = np.loadtxt(data_list[i])
         label = ['Background', 
-                    '$\mu=500\,$ GeV',
-                    '$\mu=750\,$ GeV', 
-                    '$\mu=1000\,$ GeV', 
-                    '$\mu=1250\,$ GeV',
-                    '$\mu=1500\,$ GeV']
+                    '$m_X=500$',
+                    '$m_X=750$', 
+                    '$m_X=1000$', 
+                    '$m_X=1250$',
+                    '$m_X=1500$']
         n, bins, patches = plt.hist([data[:,0] ],
                             bins=range(0,3000, bin_size), normed=True,
-                            histtype=histtype_list[i], alpha=0.75, linewidth=2, 
+                            histtype=histtype_list[i], alpha=0.75, linewidth=2.5, 
                             label=[label[label_count]], color=plt_color[i],
                             rasterized=True)
         label_count = label_count + 1
@@ -687,11 +701,12 @@ def plot_histogram():
     #plt.title('m$_{WWbb} =$ %s GeV' %sig[0,1])
     plt.ylabel('Fraction of events$/%0.0f$ GeV' %bin_size)
     plt.xlabel('m$_{WWbb}$ [GeV]')
-    plt.grid(True)
-    plt.legend(loc='upper right', fontsize=10)
-    plt.xlim([250, 3000])
+    #plt.grid(True)
+    plt.legend(loc='upper right')
+    plt.xlim([0, 3000])
+    plt.yticks([0,0.001, 0.0020, 0.0030, 0.0040])
     #plt.ylim([0, 35000])
-    plt.savefig('plots/signal_background_histogram.pdf', dpi=400)
+    plt.savefig('plots/signal_background_histogram.pdf', dpi=200)
     plt.savefig('plots/images/signal_background_histogram.png')
     plt.clf()
 
@@ -740,8 +755,8 @@ def parameterized_vs_fixed_output_histogram():
                     rasterized=True)
     plt.setp(patches)
     plt.xlim([0,1])
-    plt.legend(loc='upper left', bbox_to_anchor=(0.02, 1), fontsize=10)
-    plt.savefig('plots/parameterized_vs_fixed_output_histogram.pdf', dpi=400)
+    plt.legend(loc='upper left', bbox_to_anchor=(0.02, 1))
+    plt.savefig('plots/parameterized_vs_fixed_output_histogram.pdf', dpi=200)
     plt.savefig('plots/images/parameterized_vs_fixed_output_histogram.png')
     plt.clf()
 
@@ -757,16 +772,16 @@ if __name__ == '__main__':
     Fixed Training and Plots
     '''
     #fixed_training()
-    #fixed_training_plot()
-    #fixed_ROC_plot()
+    fixed_training_plot()
+    fixed_ROC_plot()
 
     '''
     Parameterized Training and Plots 
     '''
     #parameterized_training()
     #parameterized_function_runner()
-    #parameterized_training_plot()    
-    #parameterized_ROC_plot()
+    parameterized_training_plot()    
+    parameterized_ROC_plot()
 
     '''
     Comparison Training and Plots
@@ -777,5 +792,5 @@ if __name__ == '__main__':
     '''
     Output Histograms
     '''
-    #plot_histogram()
-    #parameterized_vs_fixed_output_histogram()
+    plot_histogram()
+    parameterized_vs_fixed_output_histogram()

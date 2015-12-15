@@ -36,7 +36,7 @@ def generate_data(MU, SIG, numTrain):
 
     # Generate Gaussian signals
     print "Generating Gaussians PDFs"
-    w.factory('Gaussian::g(x[-10,10],mu[%0.3f,-3,3],sigma[%0.3f, 0, 2])' %(MU, SIG))
+    w.factory('Gaussian::g(x[-4,4],mu[%0.3f,-3,3],sigma[%0.3f, 0, 2])' %(MU, SIG))
 
     # Generate a flat background signal
     print "Generating a flat background PDF"
@@ -85,20 +85,20 @@ def plt_histogram():
     plt_color=['blue', 'green', 'red', 'cyan', 'magenta','black']
     for idx, mu in enumerate(mu_values):
         data = np.loadtxt('data/training_data/traindata_mu_%0.3f.dat' %mu)
-        bin_size   = 200
+        bin_size   = 100
         bin_width = 10.0/bin_size
         n, bins, patches = plt.hist(data[:,0],
                             bins=bin_size, histtype='stepfilled',
-                            alpha=0.5, label='$\mu=$%0.1f' %mu, color=plt_color[idx],
+                            alpha=0.5, label='$\\theta=$%0.1f' %mu, color=plt_color[idx],
                             rasterized=True)
         plt.setp(patches)
     plt.ylabel('Number of events$/%0.3f x$' %bin_width)
     plt.xlabel('x')
-    plt.grid(True)
+    #plt.grid(True)
     plt.legend(loc='upper right', bbox_to_anchor=(1.10, 1))
-    plt.xlim([-5,5])
+    plt.xlim([-4,4])
     #plt.ylim([0,10])
-    plt.savefig('plots/histogram_gaussian.pdf', dpi=400)
+    plt.savefig('plots/histogram_gaussian.pdf', dpi=200)
     plt.savefig('plots/images/histogram_gaussian.png')
     #plt.show()
     plt.clf()
@@ -133,6 +133,8 @@ def fixed_training(iterations):
         data = np.loadtxt('data/training_data/traindata_mu_%0.3f.dat' %mu)
         training = data[:,0:1]
         target = data[:,2:]
+        print training
+        print target
         nn.fit(training, target)
         fit_score = nn.score(training, target)
         print 'score = %s' %fit_score
@@ -167,11 +169,11 @@ def fixed_output_plot():
         plt.plot(inputs, outputs, '.', label='$\mu_f=$%0.1f' %mu, rasterized=True)
     plt.ylabel('NN output')
     plt.xlabel('input')
-    plt.xlim([-5, 5])
+    plt.xlim([-4, 4])
     plt.ylim([-0.1, 1.1])
-    plt.grid(True)
-    plt.legend(loc='upper right', fontsize=10)
-    plt.savefig('plots/fixed_output_plot.pdf', dpi=400)
+    #plt.grid(True)
+    plt.legend(loc='upper right')
+    plt.savefig('plots/fixed_output_plot.pdf', dpi=200)
     plt.savefig('plots/images/fixed_output_plot.png')
     #plt.show()
     plt.clf()
@@ -197,13 +199,13 @@ def fixed_ROC_plot():
                     rasterized=True)
     plt.plot([0,1], [0,1], 'r--')
     plt.title('Receiver Operating Characteristic')
-    plt.ylabel('1/Background efficiency')
-    plt.xlabel('Signal efficiency')
-    plt.xlim([0,1])
-    plt.ylim([0,1])
-    plt.legend(loc='lower right', fontsize=10)
-    plt.grid(True)
-    plt.savefig('plots/fixed_ROC_plot.pdf', dpi=400)
+    plt.ylabel('Signal efficiency')
+    plt.xlabel('Background efficiency')
+    plt.yscale('log')
+    plt.xscale('log')
+    plt.legend(loc='lower right')
+    #plt.grid(True)
+    plt.savefig('plots/fixed_ROC_plot.pdf', dpi=200)
     plt.savefig('plots/images/fixed_ROC_plot.png') 
     plt.clf()
 
@@ -306,19 +308,21 @@ def parameterized_output_plot():
 
     print 'Entering parameterized_output_plot'
     mu_values = [-1.500, -1.000, -0.5000, 0.000, 0.5000, 1.000, 1.500]
+    alt_color = ['red', 'black', 'red', 'black', 'red', 'black', 'red']
+    alt_shape = ['^', 'o', '^', 'o', '^', 'o', '^']
 
     for idx, mu in enumerate(mu_values):
         data = np.loadtxt('data/plot_data/param_%0.3f.dat' %mu)
         inputs = data[:,0]
         outputs = data[:,1]
-        plt.plot(inputs, outputs, 'o', color=param_colors[idx], label='$\mu_p=$%0.1f' %mu, rasterized=True)
+        plt.plot(inputs, outputs, alt_shape[idx], color=alt_color[idx], label='$\mu_p=$%0.1f' %mu, rasterized=True, markevery=75)
     plt.ylabel('NN output')
     plt.xlabel('input')
-    plt.xlim([-5, 5])
+    plt.xlim([-4, 4])
     plt.ylim([-0.1, 1.1])
-    plt.grid(True)
-    plt.legend(loc='upper right', fontsize=10)
-    plt.savefig('plots/parameterized_output_plot.pdf', dpi=400)
+    #plt.grid(True)
+    #plt.legend(loc='upper right', fontsize=10)
+    plt.savefig('plots/parameterized_output_plot.pdf', dpi=200)
     plt.savefig('plots/images/parameterized_output_plot.png')
     #plt.show()
     plt.clf()
@@ -343,15 +347,15 @@ def parameterized_ROC_plot():
                     color=param_colors[idx],
                     label='$\mu_p=$%0.1f (AUC=%0.3f)' %(mu, AUC),  
                     rasterized=True)
-    plt.plot([0,1], [0,1], 'r--')
-    plt.title('Receiver Operating Characteristic')
-    plt.ylabel('1/Background efficiency')
-    plt.xlabel('Signal efficiency')
-    plt.xlim([0,1])
-    plt.ylim([0,1])
-    plt.legend(loc='lower right', fontsize=10)
-    plt.grid(True)
-    plt.savefig('plots/param_ROC_plot.pdf', dpi=400)
+    #plt.plot([0,1], [0,1], 'r--')
+    #plt.title('Receiver Operating Characteristic')
+    plt.ylabel('Signal efficiency')
+    plt.xlabel('Background efficiency')
+    plt.yscale('log')
+    plt.xscale('log')
+    #plt.legend(loc='lower right', fontsize=10)
+    #plt.grid(True)
+    plt.savefig('plots/param_ROC_plot.pdf', dpi=200)
     plt.savefig('plots/images/param_ROC_plot.png') 
     plt.clf()
 
@@ -390,9 +394,9 @@ def fixed_vs_param_output_plot():
     plt.xlabel('input')
     plt.xlim([-4, 4])
     plt.ylim([-0.1, 1.1])
-    plt.grid(True)
-    plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1), fontsize=10)
-    plt.savefig('plots/fixed_vs_parameterized_output_plot.pdf', dpi=400)
+    #plt.grid(True)
+    #plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1), fontsize=10)
+    plt.savefig('plots/fixed_vs_parameterized_output_plot.pdf', dpi=200)
     plt.savefig('plots/images/fixed_vs_parameterized_output_plot.png')
     #plt.show()
     plt.clf()
@@ -402,21 +406,21 @@ if __name__ == '__main__':
     Generate data
     '''
     #for i in range(-20,25,5):
-    #    generate_data(i/10., 0.25, 100000)
-    #plt_histogram()
+    #    generate_data(i/10., 0.25, 50000)
+    plt_histogram()
 
     '''
     Fixed training and plots
     '''
-    fixed_training(20)
+    #fixed_training(50)
     fixed_output_plot()
     fixed_ROC_plot()
 
     '''
     Parameterized training and plots
     '''
-    parameterized_training(20)
-    parameterized_runner()
+    #parameterized_training(50)
+    #parameterized_runner()
     parameterized_output_plot()
     parameterized_ROC_plot()
 
