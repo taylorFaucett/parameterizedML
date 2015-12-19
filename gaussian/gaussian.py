@@ -20,6 +20,7 @@ import pickle
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
+from matplotlib.legend_handler import HandlerLine2D
 
 param_colors = ['yellow', 'green', 'brown', 'red', 'orange', 'cyan', 'black']
 fixed_colors = ['blue', 'green', 'red', 'cyan', 'magenta']
@@ -309,17 +310,22 @@ def parameterized_output_plot():
     print 'Entering parameterized_output_plot'
     mu_values = [-1.500, -1.000, -0.5000, 0.000, 0.5000, 1.000, 1.500]
     alt_color = ['red', 'black', 'red', 'black', 'red', 'black', 'red']
-    alt_shape = ['^', 'o', '^', 'o', '^', 'o', '^']
+    alt_shape = ['--', '-', '--', '-', '--', '-', '--']
 
     for idx, mu in enumerate(mu_values):
         data = np.loadtxt('data/plot_data/param_%0.3f.dat' %mu)
+        data = data[data[:,0].argsort()]
         inputs = data[:,0]
         outputs = data[:,1]
-        plt.plot(inputs, outputs, alt_shape[idx], color=alt_color[idx], label='$\mu_p=$%0.1f' %mu, rasterized=True, markevery=75)
+        plt.plot(inputs, outputs, alt_shape[idx], linewidth=2, color=alt_color[idx], rasterized=True, markevery=75)
+    
+    line1, = plt.plot([-10,-10], '-', label='Trained', color='black', linewidth=2)
+    line2, = plt.plot([-10,-10], '--', label='Interpolated', color='red', linewidth=2)    
+    plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, numpoints=1, loc=1)
     plt.ylabel('NN output')
     plt.xlabel('input')
     plt.xlim([-4, 4])
-    plt.ylim([-0.1, 1.1])
+    plt.ylim([0, 1.15])
     #plt.grid(True)
     #plt.legend(loc='upper right', fontsize=10)
     plt.savefig('plots/parameterized_output_plot.pdf', dpi=200)
@@ -407,14 +413,14 @@ if __name__ == '__main__':
     '''
     #for i in range(-20,25,5):
     #    generate_data(i/10., 0.25, 50000)
-    plt_histogram()
+    #plt_histogram()
 
     '''
     Fixed training and plots
     '''
     #fixed_training(50)
-    fixed_output_plot()
-    fixed_ROC_plot()
+    #fixed_output_plot()
+    #fixed_ROC_plot()
 
     '''
     Parameterized training and plots
@@ -422,9 +428,9 @@ if __name__ == '__main__':
     #parameterized_training(50)
     #parameterized_runner()
     parameterized_output_plot()
-    parameterized_ROC_plot()
+    #parameterized_ROC_plot()
 
     '''
     Fixed vs parameterized plots
     '''
-    fixed_vs_param_output_plot()
+    #fixed_vs_param_output_plot()

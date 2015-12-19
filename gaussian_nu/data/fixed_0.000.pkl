@@ -62,7 +62,7 @@ I-1
 I0
 tp28
 bI00
-S'"a\x08z\xd2\x99\xa9?'
+S'\x9c\xc7\xb3\xefkU\xb5?'
 p29
 tp30
 bsS'data_range'
@@ -79,7 +79,7 @@ Rp34
 tp35
 g26
 I00
-S'^,\x0c\x91\xd3\xff3@'
+S"l\xb0p\x92\xe6\xff'@"
 p36
 tp37
 bsS'data_min'
@@ -96,7 +96,7 @@ Rp41
 tp42
 g26
 I00
-S'\x1d\x940\xd3\xf6\xff#\xc0'
+S'U\xd9wE\xf0\xff\x17\xc0'
 p43
 tp44
 bsS'min_'
@@ -113,7 +113,7 @@ Rp48
 tp49
 g26
 I00
-S'\xa2\x97(5\x1c\x00\xe0?'
+S'%\xf5`w\x06\x00\xe0?'
 p50
 tp51
 bsS'copy'
@@ -148,7 +148,7 @@ p65
 F0.01
 sS'batch_size'
 p66
-I1
+I10
 sS'valid_size'
 p67
 F0.0
@@ -239,7 +239,7 @@ I3
 tp101
 g26
 I00
-S'\xda\xe3MNs\xbf^@y\xd4\xcf\x11\xec/\x08\xc0\xe2\x04\xa6\xabD\xea_@'
+S'\xda\xa4%"\xb9\xc7\x08@#\xd0\x17\xe9\x02\xd1B\xc0\\\xd17\x14\x8f\xb5C@'
 p102
 tp103
 bg16
@@ -254,7 +254,7 @@ Rp106
 tp107
 g26
 I00
-S"{glQ\xe9\x1dP\xc0Y\x8a\x01\xbf\xf0\xee\x00\xc0kG\x98'\x8d\x9eN\xc0"
+S'Xq\x9fOR\xa7\x0f@y\x05\xab\xce?\xd65@\x99\xbek\x01\xa8n0\xc0'
 p108
 tp109
 btp110
@@ -271,7 +271,7 @@ I1
 tp114
 g26
 I00
-S"'X7\x15\x98\xe3H\xc0\xe6~\xf9\xba\x1c\x00\xc1\xbf\xd8\x14.\xfeJ\xedD@"
+S'$$P\x88\xd2\n+\xc0@\t\x1fW\x98\x7f1@]\x06t\x13\xc0\x033@'
 p115
 tp116
 bg16
@@ -286,7 +286,7 @@ Rp119
 tp120
 g26
 I00
-S'\xa4aq\xf9\xe6Z@\xc0'
+S'-k\xe5?!M3\xc0'
 p121
 tp122
 btp123
