@@ -628,13 +628,13 @@ def parameterized_vs_fixed_ROC_plot():
     line1, = plt.plot([-1,-1], label='$m_X=$750', marker='s', color='black', linestyle='None')
     line2, = plt.plot([-1,-1], label='$m_X=$1000', marker='s', color='red', linestyle='None')
     line3, = plt.plot([-1,-1], label='$m_X=$1250', marker='s', color='blue', linestyle='None')
-    first_legend = plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, numpoints=1, loc=4, bbox_to_anchor=(1,0.15))
+    first_legend = plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, numpoints=1, loc=4, bbox_to_anchor=(1,0.65), frameon=False, fontsize=18, markerscale=2)
 
     line4, = plt.plot([-1,-1], '-', label='Parameterized', linewidth=2.5, color='grey')
     line5, = plt.plot([-1,-1], 'o', label='Fixed', linewidth=2.5, color='grey')
     ax = plt.gca().add_artist(first_legend)
 
-    plt.legend(handles=[line4,line5], loc=4)
+    plt.legend(handles=[line4,line5], loc=4, frameon=False, fontsize=18, markerscale=1.5)
     plt.xlabel('Background efficiency')
     plt.ylabel('Signal efficiency')
     plt.xlim([0,1])
@@ -703,6 +703,7 @@ def plot_histogram():
     plt.xlabel('m$_{WWbb}$ [GeV]')
     #plt.grid(True)
     plt.legend(loc='upper right')
+    plt.legend(loc='upper right', frameon=False, fontsize=18)
     plt.xlim([0, 3000])
     plt.yticks([0,0.001, 0.0020, 0.0030, 0.0040])
     #plt.ylim([0, 35000])
@@ -772,25 +773,25 @@ if __name__ == '__main__':
     Fixed Training and Plots
     '''
     #fixed_training()
-    fixed_training_plot()
-    fixed_ROC_plot()
+    #fixed_training_plot()
+    #fixed_ROC_plot()
 
     '''
     Parameterized Training and Plots 
     '''
     #parameterized_training()
     #parameterized_function_runner()
-    parameterized_training_plot()    
-    parameterized_ROC_plot()
+    #parameterized_training_plot()    
+    #parameterized_ROC_plot()
 
     '''
     Comparison Training and Plots
     '''
-    parameterized_vs_fixed_output_plot()
+    #parameterized_vs_fixed_output_plot()
     parameterized_vs_fixed_ROC_plot()
     
     '''
     Output Histograms
     '''
-    plot_histogram()
-    parameterized_vs_fixed_output_histogram()
+    #plot_histogram()
+    #parameterized_vs_fixed_output_histogram()

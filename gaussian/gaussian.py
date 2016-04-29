@@ -11,7 +11,7 @@ parameter by a secondary input (alpha).
 '''
 
 
-import ROOT
+
 import numpy as np
 from array import *
 from sklearn.metrics import roc_curve, auc
@@ -277,7 +277,7 @@ def parameterized_runner():
     '''
 
     print 'Entering parameterized_runner'
-    alpha_list = [-1.5, -1.0, -0.5, 0.0, +0.5, +1.0, +1.5]
+    alpha_list = [-2.0, -1.5, -1.0, -0.5, 0.0, +0.5, +1.0, +1.5, +2.0]
     nn = pickle.load(open('data/param.pkl','rb'))
 
     for idx, alpha in enumerate(alpha_list):
@@ -308,9 +308,9 @@ def parameterized_output_plot():
     '''
 
     print 'Entering parameterized_output_plot'
-    mu_values = [-1.500, -1.000, -0.5000, 0.000, 0.5000, 1.000, 1.500]
-    alt_color = ['red', 'black', 'red', 'black', 'red', 'black', 'red']
-    alt_shape = ['--', '-', '--', '-', '--', '-', '--']
+    mu_values = [ -2.000, -1.500, -1.000, -0.500, 0.000, 0.500, 1.000, 1.500, 2.000]
+    alt_color = [  'black', 'red', 'black', 'red', 'black', 'red', 'black', 'red', 'black']
+    alt_shape = [  '-', '--', '-', '--', '-', '--', '-', '--', '-']
 
     for idx, mu in enumerate(mu_values):
         data = np.loadtxt('data/plot_data/param_%0.3f.dat' %mu)
@@ -318,14 +318,23 @@ def parameterized_output_plot():
         inputs = data[:,0]
         outputs = data[:,1]
         plt.plot(inputs, outputs, alt_shape[idx], linewidth=2, color=alt_color[idx], rasterized=True, markevery=75)
-    
+    #plt.annotate('$\\theta=0$', xy=(0, 0.95), xytext=(0, 1.05), arrowprops=dict(facecolor='black', shrink=0.05), ha='center')
+    plt.annotate('$\\theta=-2.0$', xy=(-2.0, 0.95), ha="center", color='black')
+    plt.annotate('$\\theta=-1.5$', xy=(-1.5, 1.00), ha="center", color='red')
+    plt.annotate('$\\theta=-1.0$', xy=(-1.0, 0.95), ha="center", color='black')
+    plt.annotate('$\\theta=-0.5$', xy=(-0.5, 1.00), ha="center", color='red')
+    plt.annotate('$\\theta=0$', xy=(0, 0.95), ha="center", color='black')
+    plt.annotate('$\\theta=0.5$', xy=(0.5, 1.00), ha="center", color='red')
+    plt.annotate('$\\theta=1.0$', xy=(1.0, 0.95), ha="center", color='black')
+    plt.annotate('$\\theta=1.5$', xy=(1.5, 1.00), ha="center", color='red')
+    plt.annotate('$\\theta=2.0$', xy=(2.0, 0.95), ha="center", color='black')
     line1, = plt.plot([-10,-10], '-', label='Trained', color='black', linewidth=2)
-    line2, = plt.plot([-10,-10], '--', label='Interpolated', color='red', linewidth=2)    
+    line2, = plt.plot([-10,-10], '--', label='Interpolated', color='red', linewidth=2)   
     plt.legend(handler_map={line1: HandlerLine2D(numpoints=1)}, numpoints=1, loc=1)
     plt.ylabel('NN output')
     plt.xlabel('input')
     plt.xlim([-4, 4])
-    plt.ylim([0, 1.15])
+    plt.ylim([0, 1.25])
     #plt.grid(True)
     #plt.legend(loc='upper right', fontsize=10)
     plt.savefig('plots/parameterized_output_plot.pdf', dpi=200)
