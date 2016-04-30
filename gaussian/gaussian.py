@@ -11,7 +11,7 @@ parameter by a secondary input (alpha).
 '''
 
 
-
+import ROOT
 import numpy as np
 from array import *
 from sklearn.metrics import roc_curve, auc

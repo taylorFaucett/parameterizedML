@@ -1,0 +1,433 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"parameteri",
+				"parameterized_function"
+			],
+			[
+				"gener",
+				"generate_data"
+			],
+			[
+				"param",
+				"parameterized_runner"
+			],
+			[
+				"analysis",
+				"analysis_data"
+			],
+			[
+				"predictions",
+				"predictions"
+			],
+			[
+				"analysi",
+				"analysis_output"
+			],
+			[
+				"temp_",
+				"temp_output"
+			],
+			[
+				"rewrite",
+				"rewrite_size"
+			],
+			[
+				"tree",
+				"tree_writer"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "mwwbb_jes_grid/Xttbar_mwwbb_mjj_grid.py",
+			"settings":
+			{
+				"buffer_size": 58319,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 203.0,
+		"last_filter": "remo",
+		"selected_items":
+		[
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"git co",
+				"Git: Commit"
+			],
+			[
+				"git pus",
+				"Git: Push"
+			],
+			[
+				"git",
+				"Git: Commit"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			]
+		],
+		"width": 601.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/Taylor/parameterizedML",
+		"/Users/Taylor/parameterizedML/mwwbb_jes",
+		"/Users/Taylor/parameterizedML/mwwbb_jes_grid",
+		"/Users/Taylor/parameterizedML/mwwbb_jes_grid/data",
+		"/Users/Taylor/parameterizedML/mwwbb_jes_grid/data/root_export"
+	],
+	"file_history":
+	[
+		"/Users/Taylor/parameterizedML/mwwbb_jes_grid/Xttbar_mwwbb_mjj_grid.py",
+		"/Users/Taylor/parameterizedML/mwwbb_jes/Xttbar_mwwbb_mjj_dev.py",
+		"/Users/Taylor/parameterizedML/mwwbb_jes/Xttbar_mwwbb_mjj.py",
+		"/Users/Taylor/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/Users/Taylor/parameterizedML/gaussian/gaussian.py",
+		"/Users/Taylor/parameterizedML/README.md",
+		"/Users/Taylor/parameterizedML/mwwbb/Xttbar_mwwbb.py",
+		"/Users/Taylor/parameterizedML/gaussian/GausSigOnFlatBkg_dev.py",
+		"/Users/Taylor/parameterizedML/gaussian/data/training_data/traindata_mu_-1.000.dat",
+		"/Users/Taylor/parameterizedML/gaussian/data/plot_data/fixed_-1.000.dat",
+		"/Users/Taylor/parameterizedML/gaussian/data/plot_data/fixed_0.000.dat",
+		"/Users/Taylor/parameterizedML/gaussian/data/training_data/traindata_mu_0.000.dat",
+		"/Users/Taylor/parameterizedML/gaussian/GausSigOnFlatBkg.py",
+		"/Users/Taylor/Dropbox/Research_Shared/fixed.csv",
+		"/Users/Taylor/parameterizedML/mwwbb_jes/data/plot_data/AUC/param_ROC_AUC_0.975.dat",
+		"/Users/Taylor/parameterizedML/mwwbb_jes/data/plot_data/AUC/param_ROC_AUC_0.750.dat",
+		"/Users/Taylor/parameterizedML/.gitignore",
+		"/Users/Taylor/parameterizedML/mwwbb_jes/data/plot_data/grid.dat"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 106.0,
+		"where_history":
+		[
+			"<current file>",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"sigbkg",
+			"mjj_si",
+			"mjj",
+			"marker",
+			"mjj_sig",
+			"0.13",
+			"mwwbb_sig",
+			"fixed_sigbkg_histogram",
+			"histogram",
+			"fixed_comparison_ROC",
+			"1/B",
+			"fixed_comparison_ROC()",
+			"ROC",
+			"fixed_sigbkg_",
+			"histo",
+			"parameterized_training_mwwbb_plot",
+			"fixed_training",
+			"jes",
+			"os.",
+			"smtplib",
+			"joblib",
+			"array",
+			"svm",
+			"glob",
+			"gaussian",
+			"fixed_color",
+			"param_colo",
+			"fixed_output_plot",
+			"1.25",
+			"fixed_output_plot",
+			"label",
+			"parameterized_output_plot",
+			"fixed_output_plot",
+			"0.2f",
+			"ROC_plot",
+			"verbose=",
+			"fixed",
+			"label=",
+			"labe=",
+			"fixed_output_plot",
+			"label",
+			"NN input",
+			"fixed_output_p",
+			"fpr",
+			"stack",
+			"parameterized_vs_fixed_ROT_plot.png",
+			"sort",
+			"func",
+			"runner",
+			"fill",
+			"input_list",
+			"fixed_training",
+			"ROC_pl",
+			"sort",
+			"-",
+			"sort",
+			"pkl",
+			"fixed_output",
+			"plt_color",
+			"nn.fit",
+			"P.",
+			"plt_histo",
+			"numTest",
+			"numTestnum",
+			"testdata",
+			"plt_marker",
+			"sctack",
+			"savefig",
+			"alpha=",
+			"'1/",
+			"color_map",
+			"difference",
+			"cmap",
+			"grid_heat_",
+			"grid",
+			"test_cm",
+			"cm_data",
+			"cma",
+			"grid_heat",
+			"remove",
+			"fpr",
+			"concatenate",
+			"outputs",
+			"reshape",
+			"nn.predict",
+			"glob.glo",
+			"fixed_training()",
+			"fixed_training",
+			"param",
+			"fill",
+			"nn.predict",
+			"training_data",
+			"outputs = nn.",
+			"ROC_plot",
+			"ROC()",
+			"reshape",
+			"predictions = [",
+			"jes_val",
+			"runner",
+			"parameterized_runner",
+			"np.vstack",
+			"grid",
+			"stack",
+			"temp",
+			"temp_final",
+			"glob.iglo",
+			"TLeaf",
+			"concaten",
+			"range",
+			"glob",
+			"output_data",
+			"jen",
+			"triple",
+			"grid",
+			"stack",
+			"color_map",
+			"parameter",
+			"function_runner()",
+			"parameterized_function_runner",
+			"roc_auc_score",
+			"roc_auc",
+			"parameterized_ROC_plot",
+			"parameterized_training",
+			"parameterized_function",
+			"cmap",
+			"color_map",
+			"scatter",
+			"parameterized_output_plot_heat_map_"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"parameterized_grid_heat_map_",
+			"fixed_grid_heat_map_",
+			"dif_matrix/dif_matrix_",
+			"https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/parameterized_grid/parameterized_output_plot_heat_map_",
+			"https://raw.githubusercontent.com/tfaucett/parameterizedML/master/mwwbb_jes/plots/output_heat_map/images/fixed_grid/fixed_output_plot_heat_map_"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "mwwbb_jes_grid/Xttbar_mwwbb_mjj_grid.py",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 58319,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 7,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 23551.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.git":
+	{
+		"height": 98.0
+	},
+	"pinned_build_system": "",
+	"project": "parameterizedML.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 400.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 619.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 262.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

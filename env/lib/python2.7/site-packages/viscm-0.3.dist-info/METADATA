@@ -1,0 +1,49 @@
+Metadata-Version: 2.0
+Name: viscm
+Version: 0.3
+Summary: A colormap tool
+Home-page: https://github.com/bids/viscm
+Author: Nathaniel J. Smith, Stefan van der Walt
+Author-email: njs@pobox.com, stefanv@berkeley.edu
+License: MIT
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: colorspacious
+
+viscm
+=====
+
+This is a little tool for analyzing colormaps and creating new colormaps.
+
+Try::
+
+  $ pip install viscm
+  $ python -m viscm view jet
+  $ python -m viscm edit
+
+Downloads:
+  https://pypi.python.org/pypi/viscm/
+
+Code and bug tracker:
+  https://github.com/bids/viscm
+
+Contact:
+  Nathaniel J. Smith <njs@pobox.com> and Stefan van der Walt <stefanv@berkeley.edu>
+
+Dependencies:
+  * Python 2.6+, or 3.3+
+  * `colorspacious <https://pypi.python.org/pypi/colorspacious>`_
+  * Matplotlib
+  * NumPy
+
+License:
+  MIT, see LICENSE.txt for details.
+
+
