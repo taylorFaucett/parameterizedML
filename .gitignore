@@ -2,5 +2,7 @@ env/
 .DS_Store
 *.sublime-project
 *.sublime-workspace
-mwwbb_4var/
-mwwbb_allvar/
+mwwbb_4var/data/concatenated
+mwwbb_4var/data/root_export
+mwwbb_allvar/data/concatenated
+mwwbb_allvar/data/root_export
