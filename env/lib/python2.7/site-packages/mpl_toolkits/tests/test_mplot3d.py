@@ -1,6 +1,9 @@
+import sys
+import nose
+from nose.tools import assert_raises
 from mpl_toolkits.mplot3d import Axes3D, axes3d
 from matplotlib import cm
-from matplotlib.testing.decorators import image_comparison
+from matplotlib.testing.decorators import image_comparison, cleanup
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -41,6 +44,21 @@ def test_contourf3d():
     ax.set_xlim(-40, 40)
     ax.set_ylim(-40, 40)
     ax.set_zlim(-100, 100)
+
+
+@image_comparison(baseline_images=['contourf3d_fill'], remove_text=True)
+def test_contourf3d_fill():
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    X, Y = np.meshgrid(np.arange(-2, 2, 0.25), np.arange(-2, 2, 0.25))
+    Z = X.clip(0, 0)
+    # This produces holes in the z=0 surface that causes rendering errors if
+    # the Poly3DCollection is not aware of path code information (issue #4784)
+    Z[::5, ::5] = 0.1
+    cset = ax.contourf(X, Y, Z, offset=0, levels=[-0.1, 0], cmap=cm.coolwarm)
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(-2, 2)
+    ax.set_zlim(-1, 1)
 
 
 @image_comparison(baseline_images=['lines3d'], remove_text=True)
@@ -157,6 +175,34 @@ def test_wireframe3d():
     ax.plot_wireframe(X, Y, Z, rstride=10, cstride=10)
 
 
+@image_comparison(baseline_images=['wireframe3dzerocstride'], remove_text=True,
+                  extensions=['png'])
+def test_wireframe3dzerocstride():
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    X, Y, Z = axes3d.get_test_data(0.05)
+    ax.plot_wireframe(X, Y, Z, rstride=10, cstride=0)
+
+
+@image_comparison(baseline_images=['wireframe3dzerorstride'], remove_text=True,
+                  extensions=['png'])
+def test_wireframe3dzerorstride():
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    X, Y, Z = axes3d.get_test_data(0.05)
+    ax.plot_wireframe(X, Y, Z, rstride=0, cstride=10)
+
+@cleanup
+def test_wireframe3dzerostrideraises():
+    if sys.version_info[:2] < (2, 7):
+        raise nose.SkipTest("assert_raises as context manager "
+                            "not supported with Python < 2.7")
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    X, Y, Z = axes3d.get_test_data(0.05)
+    with assert_raises(ValueError):
+        ax.plot_wireframe(X, Y, Z, rstride=0, cstride=0)
+
 @image_comparison(baseline_images=['quiver3d'], remove_text=True)
 def test_quiver3d():
     fig = plt.figure()
@@ -202,6 +248,68 @@ def test_quiver3d_masked():
     v = np.ma.masked_where((0.1 < y) & (y < 0.7), v, copy=False)
 
     ax.quiver(x, y, z, u, v, w, length=0.1)
+
+@image_comparison(baseline_images=['quiver3d_pivot_middle'], remove_text=True,
+                  extensions=['png'])
+def test_quiver3d_pivot_middle():
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    x, y, z = np.ogrid[-1:0.8:10j, -1:0.8:10j, -1:0.6:3j]
+
+    u = np.sin(np.pi * x) * np.cos(np.pi * y) * np.cos(np.pi * z)
+    v = -np.cos(np.pi * x) * np.sin(np.pi * y) * np.cos(np.pi * z)
+    w = (np.sqrt(2.0 / 3.0) * np.cos(np.pi * x) * np.cos(np.pi * y) *
+            np.sin(np.pi * z))
+
+    ax.quiver(x, y, z, u, v, w, length=0.1, pivot='middle')
+
+@image_comparison(baseline_images=['quiver3d_pivot_tail'], remove_text=True,
+                  extensions=['png'])
+def test_quiver3d_pivot_tail():
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    x, y, z = np.ogrid[-1:0.8:10j, -1:0.8:10j, -1:0.6:3j]
+
+    u = np.sin(np.pi * x) * np.cos(np.pi * y) * np.cos(np.pi * z)
+    v = -np.cos(np.pi * x) * np.sin(np.pi * y) * np.cos(np.pi * z)
+    w = (np.sqrt(2.0 / 3.0) * np.cos(np.pi * x) * np.cos(np.pi * y) *
+            np.sin(np.pi * z))
+
+    ax.quiver(x, y, z, u, v, w, length=0.1, pivot='tail')
+
+
+@image_comparison(baseline_images=['axes3d_labelpad'], extensions=['png'])
+def test_axes3d_labelpad():
+    from nose.tools import assert_equal
+    from matplotlib import rcParams
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    # labelpad respects rcParams
+    assert_equal(ax.xaxis.labelpad, rcParams['axes.labelpad'])
+    # labelpad can be set in set_label
+    ax.set_xlabel('X LABEL', labelpad=10)
+    assert_equal(ax.xaxis.labelpad, 10)
+    ax.set_ylabel('Y LABEL')
+    ax.set_zlabel('Z LABEL')
+    # or manually
+    ax.yaxis.labelpad = 20
+    ax.zaxis.labelpad = -40
+
+    # Tick labels also respect tick.pad (also from rcParams)
+    for i, tick in enumerate(ax.yaxis.get_major_ticks()):
+        tick.set_pad(tick.get_pad() - i * 5)
+
+
+@image_comparison(baseline_images=['axes3d_cla'], extensions=['png'])
+def test_axes3d_cla():
+    # fixed in pull request 4553
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1, projection='3d')
+    ax.set_axis_off()
+    ax.cla()  # make sure the axis displayed is 3D (not 2D)
 
 
 if __name__ == '__main__':

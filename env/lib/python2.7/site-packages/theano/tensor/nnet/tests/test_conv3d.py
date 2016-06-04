@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest
 import theano
 import theano.tensor as T
@@ -6,17 +7,18 @@ from theano.tests import unittest_tools as utt
 from theano.tensor.nnet.ConvTransp3D import convTransp3D, ConvTransp3D
 from theano.tensor.nnet.ConvGrad3D import convGrad3D, ConvGrad3D
 from theano.tensor.nnet.Conv3D import conv3D, Conv3D
+from theano.tests.unittest_tools import attr
 import numpy as N
+from six.moves import xrange
 import copy
 import theano.sparse
 if theano.sparse.enable_sparse:
     from scipy import sparse
 from nose.plugins.skip import SkipTest
-from nose.plugins.attrib import attr
 
 floatX = theano.config.floatX
 
-#TODO: each individual test method should seed rng with utt.fetch_seed()
+# TODO: each individual test method should seed rng with utt.fetch_seed()
 #      as it is right now, setUp does the seeding, so if you run just
 #      a subset of the tests they will do different things than if you
 #      run all of them
@@ -283,12 +285,12 @@ class TestConv3D(utt.InferShapeTester):
             tol = 1e-4
 
         if N.abs(H_mat - Hv_mat).max() > tol and not N.allclose(H_mat, Hv_mat):
-            print H_mat
-            print Hv_mat
-            print 'max error: ' + str(N.abs(H_mat - Hv_mat).max())
+            print(H_mat)
+            print(Hv_mat)
+            print('max error: ' + str(N.abs(H_mat - Hv_mat).max()))
             W.get_value(borrow=True)[W.get_value(borrow=True) != 0] += 1.0
-            print 'min non-zero kernel mag: ' + \
-                str(N.abs(W.get_value(borrow=True)).min())
+            print('min non-zero kernel mag: ' + \
+                str(N.abs(W.get_value(borrow=True)).min()))
             assert False
 
     def test_c_against_mat_transp_mul(self):
@@ -351,14 +353,14 @@ class TestConv3D(utt.InferShapeTester):
                  rbv).transpose()
 
         if N.abs(V_mat - Vv_mat).max() > 1e-5:
-            print V_mat
-            print Vv_mat
+            print(V_mat)
+            print(Vv_mat)
 
             for qq in xrange(V_mat.shape[0]):
                 for qqq in xrange(Vv_mat.shape[1]):
                     if abs(V_mat[qq, qqq] - Vv_mat[qq, qqq]) > 1e-5:
-                        print ('wrong at ' + str((qq, qqq)) + ': ' +
-                        str(V_mat[qq, qqq], Vv_mat[qq, qqq]))
+                        print(('wrong at ' + str((qq, qqq)) + ': ' +
+                        str(V_mat[qq, qqq], Vv_mat[qq, qqq])))
                         assert False
 
     def test_c_against_sparse_mat_transp_mul(self):
@@ -402,18 +404,18 @@ class TestConv3D(utt.InferShapeTester):
         self.W.set_value(self.random_tensor(numFilters, filterHeight,
                 filterWidth, filterDur, inputChannels), borrow=True)
         self.b.set_value(self.random_tensor(numFilters), borrow=True)
-        #just needed so H_shape works
+        # just needed so H_shape works
         self.V.set_value(self.random_tensor(batchSize, videoHeight, videoWidth,
                             videoDur, inputChannels), borrow=True)
         self.rb.set_value(self.random_tensor(inputChannels), borrow=True)
 
         H_shape = self.H_shape_func()
 
-        #make index maps
-        h = N.zeros(H_shape[1:])
-        r = N.zeros(H_shape[1:])
-        c = N.zeros(H_shape[1:])
-        t = N.zeros(H_shape[1:])
+        # make index maps
+        h = N.zeros(H_shape[1:], dtype='int32')
+        r = N.zeros(H_shape[1:], dtype='int32')
+        c = N.zeros(H_shape[1:], dtype='int32')
+        t = N.zeros(H_shape[1:], dtype='int32')
 
         for qi in xrange(0, H_shape[4]):
             h[:, :, :, qi] = qi
@@ -469,15 +471,15 @@ class TestConv3D(utt.InferShapeTester):
         V_mat = (temp.transpose() + rbv).transpose()
 
         if N.abs(V_mat - Vv_mat).max() > 1e-5:
-            print 'mul'
-            print V_mat
-            print 'conv'
-            print Vv_mat
+            print('mul')
+            print(V_mat)
+            print('conv')
+            print(Vv_mat)
             for i in xrange(0, n):
                 for j in xrange(0, batchSize):
                     if abs(V_mat[i, j] - Vv_mat[i, j]) > 1e-5:
-                        print ('wrong at %d,%d: %f mul versus %f conv'
-                               % (i, j, V_mat[i, j], Vv_mat[i, j]))
+                        print(('wrong at %d,%d: %f mul versus %f conv'
+                               % (i, j, V_mat[i, j], Vv_mat[i, j])))
             assert False
 
     def test_infer_shape(self):
@@ -506,7 +508,7 @@ class TestConv3D(utt.InferShapeTester):
         theano.tests.unittest_tools.verify_grad(DummyConvTransp3D(rng,
                         (W, rb, dCdH), d, V.get_value(borrow=True).shape[1:4]),
                                         [0.0], n_tests=testsPerDir)
-        theano.tests.unittest_tools.verify_grad(DummyConvGrad3D(rng, (V,dCdH),
+        theano.tests.unittest_tools.verify_grad(DummyConvGrad3D(rng, (V, dCdH),
                         d, W.get_value(borrow=True).shape),
                                         [0.0], n_tests=testsPerDir)
 

@@ -219,10 +219,10 @@ def parameterized_training(iterations):
 
     print 'Entering parameterized_training'
     mu_complete = np.concatenate((np.loadtxt('data/training_data/traindata_mu_-1.000.dat'),
-                                    np.loadtxt('data/training_data/traindata_mu_-1.000.dat'),
-                                    np.loadtxt('data/training_data/traindata_mu_0.000.dat'),
-                                    np.loadtxt('data/training_data/traindata_mu_1.000.dat'),
-                                    np.loadtxt('data/training_data/traindata_mu_2.000.dat'),
+                                    np.loadtxt('data/training_data/traindata_mu_-1.000.dat')
+                                    #np.loadtxt('data/training_data/traindata_mu_0.000.dat'),
+                                    #np.loadtxt('data/training_data/traindata_mu_1.000.dat'),
+                                    #np.loadtxt('data/training_data/traindata_mu_2.000.dat'),
                                     ))
     nn = Pipeline([
     ('min/max scaler', MinMaxScaler(feature_range=(0.0, 1.0))),
@@ -235,13 +235,15 @@ def parameterized_training(iterations):
             #batch_size=10,
             learning_rule="nesterov",
             #valid_size=0.05,
-            #verbose=True,
+            verbose=True,
             #debug=True
             ))])
 
     data = mu_complete
     training = data[:,0:2]
     target = data[:,2:]
+    print training
+    print target
     nn.fit(training, target)
     fit_score = nn.score(training, target)
     print 'score = %s' %fit_score
@@ -434,9 +436,9 @@ if __name__ == '__main__':
     '''
     Parameterized training and plots
     '''
-    #parameterized_training(50)
+    parameterized_training(50)
     #parameterized_runner()
-    parameterized_output_plot()
+    #parameterized_output_plot()
     #parameterized_ROC_plot()
 
     '''

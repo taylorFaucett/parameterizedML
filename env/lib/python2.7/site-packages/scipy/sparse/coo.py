@@ -12,7 +12,7 @@ import numpy as np
 from scipy._lib.six import xrange, zip as izip
 
 from ._sparsetools import coo_tocsr, coo_todense, coo_matvec
-from .base import isspmatrix
+from .base import isspmatrix, SparseEfficiencyWarning
 from .data import _data_matrix, _minmax_mixin
 from .sputils import (upcast, upcast_char, to_native, isshape, getdtype,
         isintlike, get_index_dtype, downcast_intp_index)
@@ -127,26 +127,16 @@ class coo_matrix(_data_matrix, _minmax_mixin):
                 self.has_canonical_format = True
             else:
                 try:
-                    obj, ij = arg1
-                except:
+                    obj, (row, col) = arg1
+                except (TypeError, ValueError):
                     raise TypeError('invalid input format')
-
-                try:
-                    if len(ij) != 2:
-                        raise TypeError
-                except TypeError:
-                    raise TypeError('invalid input format')
-
-                self.row = np.array(ij[0], copy=copy)
-                self.col = np.array(ij[1], copy=copy)
-                self.data = np.array(obj, copy=copy)
 
                 if shape is None:
-                    if len(self.row) == 0 or len(self.col) == 0:
+                    if len(row) == 0 or len(col) == 0:
                         raise ValueError('cannot infer dimensions from zero '
                                          'sized index arrays')
-                    M = self.row.max() + 1
-                    N = self.col.max() + 1
+                    M = np.max(row) + 1
+                    N = np.max(col) + 1
                     self.shape = (M, N)
                 else:
                     # Use 2 steps to ensure shape has length 2.
@@ -154,22 +144,11 @@ class coo_matrix(_data_matrix, _minmax_mixin):
                     self.shape = (M, N)
 
                 idx_dtype = get_index_dtype(maxval=max(self.shape))
-                self.row = self.row.astype(idx_dtype)
-                self.col = self.col.astype(idx_dtype)
+                self.row = np.array(row, copy=copy, dtype=idx_dtype)
+                self.col = np.array(col, copy=copy, dtype=idx_dtype)
+                self.data = np.array(obj, copy=copy)
                 self.has_canonical_format = False
 
-        elif arg1 is None:
-            # Initialize an empty matrix.
-            if not isinstance(shape, tuple) or not isintlike(shape[0]):
-                raise TypeError('dimensions not understood')
-            warn('coo_matrix(None, shape=(M,N)) is deprecated, '
-                    'use coo_matrix( (M,N) ) instead', DeprecationWarning)
-            idx_dtype = get_index_dtype(maxval=max(M, N))
-            self.shape = shape
-            self.data = np.array([], getdtype(dtype, default=float))
-            self.row = np.array([], dtype=idx_dtype)
-            self.col = np.array([], dtype=idx_dtype)
-            self.has_canonical_format = True
         else:
             if isspmatrix(arg1):
                 if isspmatrix_coo(arg1) and copy:
@@ -186,10 +165,7 @@ class coo_matrix(_data_matrix, _minmax_mixin):
                 self.has_canonical_format = False
             else:
                 #dense argument
-                try:
-                    M = np.atleast_2d(np.asarray(arg1))
-                except:
-                    raise TypeError('invalid input format')
+                M = np.atleast_2d(np.asarray(arg1))
 
                 if M.ndim != 2:
                     raise TypeError('expected dimension <= 2 array or matrix')
@@ -376,19 +352,19 @@ class coo_matrix(_data_matrix, _minmax_mixin):
         from .dia import dia_matrix
 
         ks = self.col - self.row  # the diagonal for each nonzero
-        diags = np.unique(ks)
+        diags, diag_idx = np.unique(ks, return_inverse=True)
 
         if len(diags) > 100:
-            #probably undesired, should we do something?
-            #should todia() have a maxdiags parameter?
-            pass
+            # probably undesired, should todia() have a maxdiags parameter?
+            warn("Constructing a DIA matrix with %d diagonals "
+                 "is inefficient" % len(diags), SparseEfficiencyWarning)
 
         #initialize and fill in data array
         if self.data.size == 0:
             data = np.zeros((0, 0), dtype=self.dtype)
         else:
             data = np.zeros((len(diags), self.col.max()+1), dtype=self.dtype)
-            data[np.searchsorted(diags,ks), self.col] = self.data
+            data[diag_idx, self.col] = self.data
 
         return dia_matrix((data,diags), shape=self.shape)
 

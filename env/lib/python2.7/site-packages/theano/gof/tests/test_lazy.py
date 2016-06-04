@@ -1,11 +1,11 @@
+from __future__ import print_function
 from copy import deepcopy
 
 import numpy
 
 import theano
 from theano.gof.op import PureOp
-from theano.gof import Apply, generic, Container
-from theano.gof.link import LocalLinker, map_storage, add_clear_storage
+from theano.gof import Apply, generic
 from theano import function, Mode
 from theano.ifelse import ifelse
 import theano.tensor as T
@@ -16,7 +16,7 @@ class IfElseIfElseIf(PureOp):
     def __init__(self, inplace=False):
         # check destroyhandler and others to ensure that a view_map with
         self.inplace = inplace
-        #multiple inputs can work
+        # multiple inputs can work
         assert not self.inplace
 
     def make_node(self, c1, t1, c2, t2, c3, t3, f3):
@@ -120,17 +120,17 @@ def test_ifelse():
                          mode=Mode(linker=linker, optimizer='fast_run'))
 
             try:
-                #print "case 1"
+                # print "case 1"
                 f(1, 'a', 'b')
                 assert False
             except NotImplementedOp.E:
                 pass
-            #print "... passed"
+            # print "... passed"
 
-            #print "case 2"
-            #print f(0, 'a', 'b')
+            # print "case 2"
+            # print f(0, 'a', 'b')
             assert f(0, 'a', 'b') == 'b'
-            #print "... passed"
+            # print "... passed"
 
 
 def more_complex_test():
@@ -159,9 +159,9 @@ def more_complex_test():
         except NotImplementedOp.E:
             pass
     else:
-        print f(1, 0, numpy.array(10, dtype=x1.dtype), 0)
+        print(f(1, 0, numpy.array(10, dtype=x1.dtype), 0))
         assert f(1, 0, numpy.array(10, dtype=x1.dtype), 0) == 20.5
-    print '... passed'
+    print('... passed')
 
 if __name__ == '__main__':
     more_complex_test()

@@ -185,26 +185,28 @@ class TestLogM(TestCase):
             A_logm, info = logm(A, disp=False)
             assert_(A_logm.dtype.char in complex_dtype_chars)
 
-    def test_logm_type_conversion_mixed_sign_or_complex_spectrum(self):
-        complex_dtype_chars = ('F', 'D', 'G')
-        for matrix_as_list in (
+    def test_complex_spectrum_real_logm(self):
+        # This matrix has complex eigenvalues and real logm.
+        # Its output dtype depends on its input dtype.
+        M = [[1, 1, 2], [2, 1, 1], [1, 2, 1]]
+        for dt in float, complex:
+            X = np.array(M, dtype=dt)
+            w = scipy.linalg.eigvals(X)
+            assert_(1e-2 < np.absolute(w.imag).sum())
+            Y, info = logm(X, disp=False)
+            assert_(np.issubdtype(Y.dtype, dt))
+            assert_allclose(expm(Y), X)
+
+    def test_real_mixed_sign_spectrum(self):
+        # These matrices have real eigenvalues with mixed signs.
+        # The output logm dtype is complex, regardless of input dtype.
+        for M in (
                 [[1, 0], [0, -1]],
-                [[0, 1], [1, 0]],
-                [[0, 1, 0], [0, 0, 1], [1, 0, 0]]):
-
-            # check that the spectrum has the expected properties
-            W = scipy.linalg.eigvals(matrix_as_list)
-            assert_(any(w.imag or w.real < 0 for w in W))
-
-            # check complex->complex
-            A = np.array(matrix_as_list, dtype=complex)
-            A_logm, info = logm(A, disp=False)
-            assert_(A_logm.dtype.char in complex_dtype_chars)
-
-            # check float->complex
-            A = np.array(matrix_as_list, dtype=float)
-            A_logm, info = logm(A, disp=False)
-            assert_(A_logm.dtype.char in complex_dtype_chars)
+                [[0, 1], [1, 0]]):
+            for dt in float, complex:
+                A = np.array(M, dtype=dt)
+                A_logm, info = logm(A, disp=False)
+                assert_(np.issubdtype(A_logm.dtype, complex))
 
     def test_logm_exactly_singular(self):
         A = np.array([[0, 0], [1j, 1j]])
@@ -338,29 +340,31 @@ class TestSqrtM(TestCase):
 
     def test_strict_upper_triangular(self):
         # This matrix has no square root.
-        A = np.array([
-            [0, 3, 0, 0],
-            [0, 0, 3, 0],
-            [0, 0, 0, 3],
-            [0, 0, 0, 0]], dtype=float)
-        A_sqrtm, info = sqrtm(A, disp=False)
-        assert_(np.isnan(A_sqrtm).all())
+        for dt in int, float:
+            A = np.array([
+                [0, 3, 0, 0],
+                [0, 0, 3, 0],
+                [0, 0, 0, 3],
+                [0, 0, 0, 0]], dtype=dt)
+            A_sqrtm, info = sqrtm(A, disp=False)
+            assert_(np.isnan(A_sqrtm).all())
 
     def test_weird_matrix(self):
         # The square root of matrix B exists.
-        A = np.array([
-            [0, 0, 1],
-            [0, 0, 0],
-            [0, 1, 0]], dtype=float)
-        B = np.array([
-            [0, 1, 0],
-            [0, 0, 0],
-            [0, 0, 0]], dtype=float)
-        assert_array_equal(B, A.dot(A))
+        for dt in int, float:
+            A = np.array([
+                [0, 0, 1],
+                [0, 0, 0],
+                [0, 1, 0]], dtype=dt)
+            B = np.array([
+                [0, 1, 0],
+                [0, 0, 0],
+                [0, 0, 0]], dtype=dt)
+            assert_array_equal(B, A.dot(A))
 
-        # But scipy sqrtm is not clever enough to find it.
-        B_sqrtm, info = sqrtm(B, disp=False)
-        assert_(np.isnan(B_sqrtm).all())
+            # But scipy sqrtm is not clever enough to find it.
+            B_sqrtm, info = sqrtm(B, disp=False)
+            assert_(np.isnan(B_sqrtm).all())
 
     def test_disp(self):
         from io import StringIO

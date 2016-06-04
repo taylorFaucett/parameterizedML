@@ -1,16 +1,16 @@
 from unittest import TestCase
 
 import numpy
+from six.moves import xrange
 import theano
 
 from theano.tests import unittest_tools as utt
 import theano.sandbox.rng_mrg
-from theano.sandbox.gpuarray.basic_ops import (
-    gpu_from_host, GpuFromHost, HostFromGpu
-)
-from theano.sandbox.gpuarray.elemwise import GpuElemwise
+from ..basic_ops import GpuFromHost, HostFromGpu
+from ..elemwise import GpuElemwise
 
-from theano.sandbox.gpuarray.tests.test_basic_ops import mode_with_gpu
+from .config import mode_with_gpu, test_ctx_name
+
 
 class T_Scan(TestCase):
     def setUp(self):
@@ -35,7 +35,7 @@ class T_Scan(TestCase):
                                       go_backwards=False,
                                       mode=mode)
 
-        output = gpu_from_host(output)
+        output = GpuFromHost(test_ctx_name)(output)
         f2 = theano.function([u, x0, W_in, W],
                              output,
                              updates=updates,
@@ -88,7 +88,6 @@ class T_Scan(TestCase):
                         for node in scan_node_topo])
         assert not any([isinstance(node.op, GpuFromHost)
                         for node in scan_node_topo])
-
 
     # This second version test the second case in the optimizer to the gpu.
     def test_one_sequence_one_output_weights_gpu2(self):
@@ -211,14 +210,13 @@ class T_Scan(TestCase):
         assert not any([isinstance(node.op, GpuFromHost)
                         for node in scan_node_topo])
 
-
     def test_gpu4_gibbs_chain(self):
         rng = numpy.random.RandomState(utt.fetch_seed())
         v_vsample = numpy.array(rng.binomial(1, .5, size=(3, 20),),
                                 dtype='float32')
         vsample = theano.shared(v_vsample)
         trng = theano.sandbox.rng_mrg.MRG_RandomStreams(
-                                utt.fetch_seed())
+            utt.fetch_seed())
 
         def f(vsample_tm1):
             return trng.binomial(vsample_tm1.shape, n=1, p=0.3,
@@ -240,4 +238,4 @@ class T_Scan(TestCase):
 
         # I leave this to tested by debugmode, this test was anyway
         # more of does the graph compile kind of test
-        t_result = my_f()
+        my_f()

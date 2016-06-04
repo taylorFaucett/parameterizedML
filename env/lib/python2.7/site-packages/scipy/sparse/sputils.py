@@ -47,12 +47,7 @@ def upcast(*args):
     if t is not None:
         return t
 
-    if np.all([np.issubdtype(np.bool, arg) for arg in args]):
-        # numpy 1.5.x compat - it gives int8 for
-        # np.find_common_type([np.bool, np.bool)
-        upcast = np.bool
-    else:
-        upcast = np.find_common_type(args, [])
+    upcast = np.find_common_type(args, [])
 
     for t in supported_dtypes:
         if np.can_cast(upcast, t):
@@ -221,7 +216,7 @@ def issequence(t):
 
 
 def ismatrix(t):
-    return ((issequence(t) and issequence(t[0]) and (len(t[0]) == 0 or np.isscalar(t[0][0])))
+    return ((isinstance(t, (list, tuple)) and len(t) > 0 and issequence(t[0]))
             or (isinstance(t, np.ndarray) and t.ndim == 2))
 
 
@@ -382,9 +377,9 @@ def _compat_unique_impl(ar, return_index=False, return_inverse=False):
 
     if ar.size == 0:
         if return_inverse and return_index:
-            return ar, np.empty(0, np.bool), np.empty(0, np.bool)
+            return ar, np.empty(0, bool), np.empty(0, bool)
         elif return_inverse or return_index:
-            return ar, np.empty(0, np.bool)
+            return ar, np.empty(0, bool)
         else:
             return ar
 

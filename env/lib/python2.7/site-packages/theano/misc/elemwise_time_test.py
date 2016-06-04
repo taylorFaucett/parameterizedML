@@ -1,3 +1,4 @@
+from __future__ import print_function
 from optparse import OptionParser
 import sys
 import time
@@ -6,6 +7,7 @@ import numpy as np
 
 import theano
 import theano.tensor as T
+from six.moves import xrange
 
 parser = OptionParser(usage='%prog <options>\n Compute time for'
                       ' fast and slow elemwise operations')
@@ -25,7 +27,7 @@ def evalTime(f, v, script=False, loops=1000):
         dt = time.time() - t0
         min = dt if dt < min else min
     if not script:
-        print ' run time in %d loops was %2.9f sec' % (loops, min)
+        print(' run time in %d loops was %2.9f sec' % (loops, min))
     return min
 
 
@@ -33,22 +35,22 @@ def ElemwiseOpTime(N, script=False, loops=1000):
     x = T.vector('x')
     np.random.seed(1235)
     v = np.random.random(N).astype(theano.config.floatX)
-    f = theano.function([x], 2*x + x*x)
+    f = theano.function([x], 2 * x + x * x)
     f1 = theano.function([x], T.tanh(x))
     if not script:
         if theano.config.openmp:
-            print "With openmp:"
-        print "Fast op ",
+            print("With openmp:")
+        print("Fast op ", end=' ')
     ceapTime = evalTime(f, v, script=script, loops=loops)
     if not script:
-        print "Slow op ",
+        print("Slow op ", end=' ')
     costlyTime = evalTime(f1, v, script=script, loops=loops)
     return (ceapTime, costlyTime)
 
 if __name__ == '__main__':
     options, arguments = parser.parse_args(sys.argv)
     if hasattr(options, "help"):
-        print options.help
+        print(options.help)
         sys.exit(0)
 
     (cheapTime, costlyTime) = ElemwiseOpTime(N=options.N,

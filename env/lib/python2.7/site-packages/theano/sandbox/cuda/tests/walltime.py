@@ -1,18 +1,22 @@
+from __future__ import print_function
 import sys, time
+from six import iteritems
 from theano.compile.pfunc import pfunc
 from theano import tensor
 
 import numpy
+from six.moves import xrange
 
 import theano.sandbox.cuda as tcn
 
+
 def compare_fns(fns, input, reps=10):
     times = {}
-    for implname, impl in fns.iteritems():
+    for implname, impl in iteritems(fns):
         try:
-            print 'TOPOSORT', implname
+            print('TOPOSORT', implname)
             for i, n in enumerate(impl.maker.fgraph.toposort()):
-                print i, n
+                print(i, n)
         except Exception:
             pass
         t0 = time.time()
@@ -22,9 +26,11 @@ def compare_fns(fns, input, reps=10):
         times[implname] = dt
     return times
 
+
 def showtimes(times):
-    for impl, dt in times.iteritems():
-        print impl, dt
+    for impl, dt in iteritems(times):
+        print(impl, dt)
+
 
 def cmp_sigmoids(shape):
     def numpy_sigmoid(input):
@@ -38,6 +44,8 @@ def cmp_sigmoids(shape):
                 ),
             input=shared_input.value)
     showtimes(times)
+
+
 def cmp_sigmoids_T(shape):
     def numpy_sigmoid(input):
         rval = 1.0 / (1.0 + numpy.exp(-input.T))
@@ -54,7 +62,7 @@ def cmp_sigmoids_T(shape):
 
 if __name__ == '__main__':
     eval(sys.argv[1])
-    #cmp_sigmoids((640, 64*64)) # looks great in profiler
+    # cmp_sigmoids((640, 64*64)) # looks great in profiler
     #cmp_sigmoids((173, 74*49))
     #cmp_sigmoids_T((173, 74*49))
 

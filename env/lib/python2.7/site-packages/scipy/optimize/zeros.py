@@ -42,6 +42,13 @@ class RootResults(object):
         except KeyError:
             self.flag = 'unknown error %d' % (flag,)
 
+    def __repr__(self):
+        attrs = ['converged', 'flag', 'function_calls',
+                 'iterations', 'root']
+        m = max(map(len, attrs)) + 1
+        return '\n'.join([a.rjust(m) + ': ' + repr(getattr(self, a))
+                          for a in attrs])
+
 
 def results_c(full_output, r):
     if full_output:
@@ -119,6 +126,8 @@ def newton(func, x0, fprime=None, args=(), tol=1.48e-8, maxiter=50,
     """
     if tol <= 0:
         raise ValueError("tol too small (%g <= 0)" % tol)
+    if maxiter < 1:
+        raise ValueError("maxiter must be greater than 0")
     if fprime is not None:
         # Newton-Rapheson method
         # Multiply by 1.0 to convert to floating point.  We don't use float(x0)

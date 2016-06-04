@@ -1,10 +1,12 @@
+from datetime import datetime
+from six.moves import xrange
+
 __authors__ = "Ian Goodfellow"
 __credits__ = ["Ian Goodfellow"]
 __license__ = "3-clause BSD"
 __maintainer__ = "Ian Goodfellow"
 __email__ = "goodfeli@iro"
 
-from datetime import datetime
 
 def disturb_mem():
     # Allocate a time-dependent amount of objects to increase
@@ -18,4 +20,4 @@ def disturb_mem():
     ms = int(ms)
     n = ms % 1000
     m = ms // 1000
-    l = [[0]*m for i in xrange(n)]
+    l = [[0] * m for i in xrange(n)]

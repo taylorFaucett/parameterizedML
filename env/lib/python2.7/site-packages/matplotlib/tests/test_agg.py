@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import six
+from matplotlib.externals import six
 
 import io
 import os
@@ -142,6 +142,17 @@ def test_marker_with_nan():
     ax.fill_between(data, data*0.8, data*1.2)
     buf = io.BytesIO()
     fig.savefig(buf, format='png')
+
+
+@cleanup
+def test_long_path():
+    buff = io.BytesIO()
+
+    fig, ax = plt.subplots()
+    np.random.seed(0)
+    points = np.random.rand(70000)
+    ax.plot(points)
+    fig.savefig(buff, format='png')
 
 
 if __name__ == "__main__":

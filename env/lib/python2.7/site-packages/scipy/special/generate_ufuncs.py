@@ -301,6 +301,7 @@ kl_div -- kl_div: dd->d                                    -- _convex_analysis.p
 rel_entr -- rel_entr: dd->d                                -- _convex_analysis.pxd
 huber -- huber: dd->d                                      -- _convex_analysis.pxd
 pseudo_huber -- pseudo_huber: dd->d                        -- _convex_analysis.pxd
+exprel -- exprel: d->d                                     -- _exprel.pxd
 """
 
 #---------------------------------------------------------------------------------
@@ -622,7 +623,14 @@ def iter_variants(inputs, outputs):
     ]
 
     # float32-preserving signatures
-    maps = maps + [(a + 'dD', b + 'fF') for a, b in maps]
+    if not ('i' in inputs or 'l' in inputs):
+        # Don't add float32 versions of ufuncs with integer arguments, as this
+        # can lead to incorrect dtype selection if the integer arguments are
+        # arrays, but float arguments are scalars.
+        # For instance sph_harm(0,[0],0,0).dtype == complex64
+        # This may be a Numpy bug, but we need to work around it.
+        # cf. gh-4895, https://github.com/numpy/numpy/issues/5895
+        maps = maps + [(a + 'dD', b + 'fF') for a, b in maps]
 
     # do the replacements
     for src, dst in maps:
